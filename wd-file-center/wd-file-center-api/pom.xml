@@ -19,6 +19,12 @@
             <groupId>com.wd</groupId>
             <artifactId>wd-common-core</artifactId>
         </dependency>
+
+        <!-- openfeign-core -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-openfeign-core</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

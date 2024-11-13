@@ -1,2 +1,0 @@
-dubboProviderFilter=com.wd.common.dubbo.filter.DubboProviderFilter
-dubboConsumerFilter=com.wd.common.dubbo.filter.DubboConsumerFilter

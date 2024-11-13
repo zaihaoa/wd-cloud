@@ -17,6 +17,8 @@
     <file url="file://$PROJECT_DIR$/wd-common/wd-common-dubbo/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/wd-common/wd-common-excel/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/wd-common/wd-common-excel/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/wd-common/wd-common-feign/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/wd-common/wd-common-feign/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/wd-common/wd-common-job-core/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/wd-common/wd-common-job-core/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/wd-common/wd-common-knife4j/src/main/java" charset="UTF-8" />

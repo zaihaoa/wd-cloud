@@ -2,7 +2,7 @@ package com.wd.file.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wd.common.core.util.CodeDescEnumUtil;
-import com.wd.file.api.dto.DownloadCenterCreateDTO;
+import com.wd.file.feign.dto.DownloadCenterCreateDTO;
 import com.wd.file.entity.Attachment;
 import com.wd.file.entity.DownloadCenter;
 import com.wd.file.enums.DownloadCenterStatusEnum;

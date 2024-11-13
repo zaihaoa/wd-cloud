@@ -1,7 +1,7 @@
 package com.wd.common.core.util;
 
 
-import com.wd.common.core.CommonResponse;
+import com.wd.common.core.R;
 import com.wd.common.core.ResponseCodeEnum;
 import com.wd.common.core.annotions.Nullable;
 
@@ -21,7 +21,7 @@ public class ResponseUtil {
      * @param r 通用返回对象
      * @return 响应是否成功
      */
-    public static boolean isSuccess(@Nullable CommonResponse r) {
+    public static boolean isSuccess(@Nullable R r) {
         return r != null && ResponseCodeEnum.SUCCESS.getCode() == r.getCode();
     }
 
@@ -32,7 +32,7 @@ public class ResponseUtil {
      * @param r 通用返回对象
      * @return 响应是否失败
      */
-    public static boolean isFailure(@Nullable CommonResponse r) {
+    public static boolean isFailure(@Nullable R r) {
         return !isSuccess(r);
     }
 
@@ -42,11 +42,11 @@ public class ResponseUtil {
      * @param r 通用返回对象
      * @return message提示信息
      */
-    public static String safeGetMessage(@Nullable CommonResponse r) {
-        return Optional.ofNullable(r).map(CommonResponse::getMessage).orElse("");
+    public static String safeGetMessage(@Nullable R r) {
+        return Optional.ofNullable(r).map(R::getMessage).orElse("");
     }
 
-    public static void assertSuccess(@Nullable CommonResponse r) {
+    public static void assertSuccess(@Nullable R r) {
         assertSuccess(r, null);
     }
 
@@ -56,7 +56,7 @@ public class ResponseUtil {
      * @param r       通用返回对象
      * @param message 异常信息
      */
-    public static void assertSuccess(@Nullable CommonResponse r, @Nullable String message) {
+    public static void assertSuccess(@Nullable R r, @Nullable String message) {
         if (isFailure(r)) {
             throw new IllegalStateException(message);
         }

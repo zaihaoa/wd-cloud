@@ -32,10 +32,10 @@
             <groupId>com.wd</groupId>
             <artifactId>wd-common-core</artifactId>
         </dependency>
-        <!-- wd-common-dubbo -->
+        <!-- wd-common-feign -->
         <dependency>
             <groupId>com.wd</groupId>
-            <artifactId>wd-common-dubbo</artifactId>
+            <artifactId>wd-common-feign</artifactId>
         </dependency>
         <!-- wd-common-web -->
         <dependency>
@@ -48,22 +48,6 @@
             <artifactId>wd-common-knife4j</artifactId>
         </dependency>
 
-        <!-- dubbo -->
-<!--        <dependency>-->
-<!--            <groupId>org.apache.dubbo</groupId>-->
-<!--            <artifactId>dubbo-spring-boot-starter</artifactId>-->
-<!--        </dependency>-->
-        <!-- dubbo-rpc-triple -->
-<!--        <dependency>-->
-<!--            <groupId>org.apache.dubbo</groupId>-->
-<!--            <artifactId>dubbo-rpc-triple</artifactId>-->
-<!--        </dependency>-->
-
-        <!-- dubbo-registry-nacos -->
-<!--        <dependency>-->
-<!--            <groupId>org.apache.dubbo</groupId>-->
-<!--            <artifactId>dubbo-registry-nacos</artifactId>-->
-<!--        </dependency>-->
         <!-- nacos 配置中心 -->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
@@ -73,19 +57,6 @@
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
-        </dependency>
-        <!-- sentinel -->
-        <!--        <dependency>-->
-        <!--            <groupId>com.alibaba.cloud</groupId>-->
-        <!--            <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>-->
-        <!--        </dependency>-->
-        <dependency>
-            <groupId>com.alibaba.csp</groupId>
-            <artifactId>sentinel-apache-dubbo3-adapter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba.csp</groupId>
-            <artifactId>sentinel-transport-simple-http</artifactId>
         </dependency>
     </dependencies>
 

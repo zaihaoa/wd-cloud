@@ -1,13 +1,10 @@
 package com.wd.common.mybatisplus.config;
 
-import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
-import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
-import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
-import com.wd.common.core.constants.TableConstant;
 import com.wd.common.core.constants.CommonConstant;
+import com.wd.common.core.constants.TableConstant;
 import com.wd.common.core.context.SystemContext;
-import com.wd.common.mybatisplus.MySqlInjector;
+import com.wd.common.mybatisplus.CustomSqlInjector;
 import org.apache.ibatis.reflection.MetaObject;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -39,8 +36,8 @@ public class MybatisPlusConfig {
      */
     @Bean
     @ConditionalOnMissingBean
-    public MySqlInjector getMySqlInjector() {
-        return new MySqlInjector();
+    public CustomSqlInjector getMySqlInjector() {
+        return new CustomSqlInjector();
     }
 
     /**

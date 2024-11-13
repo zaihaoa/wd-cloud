@@ -17,7 +17,7 @@ import java.io.Serializable;
 @ToString
 @SuppressWarnings("all")
 @Schema(description = "通用返回对象")
-public class R<T> implements CommonResponse<T>, Serializable {
+public class R<T> implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 

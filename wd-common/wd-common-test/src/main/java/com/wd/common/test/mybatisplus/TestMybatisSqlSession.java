@@ -7,8 +7,7 @@ import com.baomidou.mybatisplus.core.incrementer.DefaultIdentifierGenerator;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.GlobalConfigUtils;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
-import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
-import com.wd.common.mybatisplus.MySqlInjector;
+import com.wd.common.mybatisplus.CustomSqlInjector;
 import com.wd.common.mybatisplus.config.MybatisPlusConfig;
 import com.wd.common.test.util.YmlUtil;
 import com.zaxxer.hikari.HikariDataSource;
@@ -77,7 +76,7 @@ public class TestMybatisSqlSession {
         //构建mybatis-plus需要的globalconfig
         GlobalConfig globalConfig = new GlobalConfig();
         //此参数会自动生成实现baseMapper的基础方法映射
-        globalConfig.setSqlInjector(new MySqlInjector());
+        globalConfig.setSqlInjector(new CustomSqlInjector());
         //设置id生成器
         globalConfig.setIdentifierGenerator(new DefaultIdentifierGenerator());
         //设置超类mapper
@@ -145,11 +144,11 @@ public class TestMybatisSqlSession {
         //创建mybatis-plus插件对象
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
         //构建分页插件
-        PaginationInnerInterceptor paginationInnerInterceptor = new PaginationInnerInterceptor();
-        paginationInnerInterceptor.setDbType(DbType.MYSQL);
-        paginationInnerInterceptor.setOverflow(true);
-        paginationInnerInterceptor.setMaxLimit(500L);
-        interceptor.addInnerInterceptor(paginationInnerInterceptor);
+//        PaginationInnerInterceptor paginationInnerInterceptor = new PaginationInnerInterceptor();
+//        paginationInnerInterceptor.setDbType(DbType.MYSQL);
+//        paginationInnerInterceptor.setOverflow(true);
+//        paginationInnerInterceptor.setMaxLimit(500L);
+//        interceptor.addInnerInterceptor(paginationInnerInterceptor);
         return interceptor;
     }
 

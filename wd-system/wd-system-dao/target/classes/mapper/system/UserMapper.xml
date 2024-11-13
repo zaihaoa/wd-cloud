@@ -15,22 +15,23 @@
     <select id="pageTotal" resultType="java.lang.Long">
         SELECT count(*)
         FROM sys_user
-        <include refid="PageCondition"/>
+        <include refid="Page_Condition"/>
     </select>
 
     <select id="page" resultType="com.wd.system.system.dto.UserPageDTO">
-        SELECT <include refid="Base_Column_List"/>
+        SELECT
+        <include refid="Base_Column_List"/>
         FROM sys_user
-        <include refid="PageCondition"/>
+        <include refid="Page_Condition"/>
 
         <if test="param.sort != null and param.sort != ''">
-            ORDER BY #{param.sort} #{param.order}
+            ORDER BY ${param.sort} ${param.order}
         </if>
         <bind name="limitStart" value="(param.current lte 1) ? 0 : ((param.current - 1) * param.size)"/>
         LIMIT #{limitStart}, #{param.size}
     </select>
 
-    <sql id="PageCondition">
+    <sql id="Page_Condition">
         <where>
             <if test="param.loginName != null and param.loginName != ''">
                 AND login_name LIKE concat('%', #{param.loginName}, '%')

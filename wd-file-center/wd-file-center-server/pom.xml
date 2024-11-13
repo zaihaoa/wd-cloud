@@ -21,12 +21,6 @@
             <version>${project.version}</version>
         </dependency>
 
-        <!-- wd-common-sentinel -->
-        <dependency>
-            <groupId>com.wd</groupId>
-            <artifactId>wd-common-sentinel</artifactId>
-        </dependency>
-
         <!-- mysql-connector-j -->
         <dependency>
             <groupId>com.mysql</groupId>
@@ -46,11 +40,6 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>druid-spring-boot-3-starter</artifactId>
-        </dependency>
-        <!-- dubbo-registry-nacos -->
-        <dependency>
-            <groupId>org.apache.dubbo</groupId>
-            <artifactId>dubbo-registry-nacos</artifactId>
         </dependency>
     </dependencies>
 

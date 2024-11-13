@@ -2,6 +2,7 @@ package com.wd.system.system.service;
 
 
 import com.wd.common.core.PageInfo;
+import com.wd.common.core.R;
 import com.wd.common.mybatisplus.SuperService;
 import com.wd.system.system.dto.UserAddDTO;
 import com.wd.system.system.dto.UserPageParam;
@@ -59,4 +60,12 @@ public interface IUserService extends SuperService<User> {
      * @return 是否删除成功
      */
     boolean deleteById(Long id);
+
+
+    /**
+     * 获取显示名称
+     * @param userId 用户id
+     * @return 显示名称
+     */
+    String getShowName(Long userId);
 }

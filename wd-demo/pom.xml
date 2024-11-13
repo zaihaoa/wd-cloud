@@ -25,8 +25,8 @@
 
         <!-- wd-common-core -->
         <wd-common-core.version>1.0.0</wd-common-core.version>
-        <!-- wd-common-dubbo -->
-        <wd-common-dubbo.version>1.0.0</wd-common-dubbo.version>
+        <!-- wd-common-feign -->
+        <wd-common-feign.version>1.0.0</wd-common-feign.version>
         <!-- wd-common-web -->
         <wd-common-web.version>1.0.0</wd-common-web.version>
         <!-- wd-common-knife4j -->
@@ -48,11 +48,11 @@
                 <artifactId>wd-common-core</artifactId>
                 <version>${wd-common-core.version}</version>
             </dependency>
-            <!-- wd-common-dubbo -->
+            <!-- wd-common-feign -->
             <dependency>
                 <groupId>com.wd</groupId>
-                <artifactId>wd-common-dubbo</artifactId>
-                <version>${wd-common-dubbo.version}</version>
+                <artifactId>wd-common-feign</artifactId>
+                <version>${wd-common-feign.version}</version>
             </dependency>
             <!-- wd-common-web -->
             <dependency>

@@ -75,21 +75,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-tomcat</artifactId>
         </dependency>
-        <!-- wd-common-dubbo -->
+        <!-- wd-common-feign -->
         <dependency>
             <groupId>com.wd</groupId>
-            <artifactId>wd-common-dubbo</artifactId>
+            <artifactId>wd-common-feign</artifactId>
         </dependency>
-        <!-- dubbo -->
-<!--        <dependency>-->
-<!--            <groupId>org.apache.dubbo</groupId>-->
-<!--            <artifactId>dubbo-spring-boot-starter</artifactId>-->
-<!--        </dependency>-->
-        <!-- dubbo-rpc-triple -->
-<!--        <dependency>-->
-<!--            <groupId>org.apache.dubbo</groupId>-->
-<!--            <artifactId>dubbo-rpc-triple</artifactId>-->
-<!--        </dependency>-->
+
     </dependencies>
 
 </project>

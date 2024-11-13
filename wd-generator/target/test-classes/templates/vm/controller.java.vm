@@ -35,7 +35,7 @@ public class ${table.controllerName} {
 #end
 
     @Autowired
-    private IUserService userService;
+    private ${table.serviceName} userService;
 
     @Operation(summary = "列表查询")
     @ApiOperationSupport(order = 10)
@@ -51,24 +51,18 @@ public class ${table.controllerName} {
         return R.success(userService.exportPage(pageParam));
     }
 
-    @Operation(summary = "导入")
-    @ApiOperationSupport(order = 30)
-    @PostMapping("/import-excel")
-    public R<Boolean> importExcel(MultipartFile file) {
-        return R.success(true);
-    }
 
     @Operation(summary = "新增用户")
     @ApiOperationSupport(order = 40)
     @PostMapping
-    public R<Boolean> add(@Valid @RequestBody UserAddDTO addUser) {
+    public R<Boolean> add(@RequestBody @Valid UserAddDTO addUser) {
         return R.success(userService.addUser(addUser));
     }
 
     @Operation(summary = "更新用户")
     @ApiOperationSupport(order = 50)
     @PutMapping("/{id}")
-    public R<Boolean> update(@PathVariable("id") Long id, @Valid @RequestBody UserUpdateDTO updateUser) {
+    public R<Boolean> update(@PathVariable("id") Long id, @RequestBody @Valid UserUpdateDTO updateUser) {
         return R.success(userService.updateUser(id, updateUser));
     }
 

@@ -7,16 +7,17 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wd.common.core.ExportTypeEnum;
 import com.wd.common.core.PageInfo;
-import com.wd.common.core.RpcResponse;
+import com.wd.common.core.R;
+import com.wd.common.core.constants.CommonConstant;
 import com.wd.common.core.exception.ExcelExportException;
 import com.wd.common.core.util.CodeDescEnumUtil;
 import com.wd.common.core.util.ExportUtil;
 import com.wd.common.core.util.ResponseUtil;
 import com.wd.common.mybatisplus.PageUtil;
-import com.wd.file.api.AttachmentApi;
-import com.wd.file.api.DownloadCenterApi;
-import com.wd.file.api.dto.AttachmentDTO;
-import com.wd.file.api.dto.DownloadCenterCreateDTO;
+import com.wd.file.feign.AttachmentFeign;
+import com.wd.file.feign.DownloadCenterFeign;
+import com.wd.file.feign.dto.AttachmentDTO;
+import com.wd.file.feign.dto.DownloadCenterCreateDTO;
 import com.wd.system.mapper.system.UserMapper;
 import com.wd.system.system.convert.UserConverter;
 import com.wd.system.system.dto.*;
@@ -28,13 +29,14 @@ import com.wd.system.system.service.IUserService;
 import com.wd.system.system.vo.UserPageVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.dubbo.config.annotation.DubboReference;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -49,10 +51,12 @@ import java.util.concurrent.Executors;
 @Slf4j
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IUserService {
-    @DubboReference
-    private AttachmentApi attachmentApi;
-    @DubboReference
-    private DownloadCenterApi downloadCenterApi;
+
+    @Autowired
+    private AttachmentFeign attachmentApi;
+
+    @Autowired
+    private DownloadCenterFeign downloadCenterApi;
 
     @Override
     public PageInfo<UserPageVO> page(UserPageParam pageParam) {
@@ -76,7 +80,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     public long exportPage(UserPageParam pageParam) {
         ExportUtil.pageExportParamValidAndDefaultValue(pageParam);
 
-        RpcResponse<Long> createResponse = downloadCenterApi.onCreate(new DownloadCenterCreateDTO("用户信息"));
+        R<Long> createResponse = downloadCenterApi.onCreate(new DownloadCenterCreateDTO("用户信息"));
         ResponseUtil.assertSuccess(createResponse, "创建失败");
         Long downloadId = createResponse.getData();
 
@@ -109,7 +113,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
                 } while (current < totalPage && ExportTypeEnum.QUERY_RESULT.getCode().equals(exportType));
                 excelWriter.finish();
 
-                RpcResponse<AttachmentDTO> saveResponse = attachmentApi.save("用户信息.xlsx", new ByteArrayInputStream(out.toByteArray()));
+                R<AttachmentDTO> saveResponse = attachmentApi.save("用户信息.xlsx", new ByteArrayInputStream(out.toByteArray()));
                 ResponseUtil.assertSuccess(saveResponse, "");
                 AttachmentDTO attachmentDTO = saveResponse.getData();
                 log.info("生成文件成功,附件ID:{}", "");
@@ -192,5 +196,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         Assert.isTrue(!UserTypeEnum.SYSTEM_SUPER_ADMIN.getCode().equals(type), "系统超级管理员账号不允许删除");
 
         return baseMapper.deleteById(id) > 0;
+    }
+
+    @Override
+    public String getShowName(Long userId) {
+        if (userId == null) {
+            return null;
+        }
+        if (CommonConstant.SYSTEM_USER_ID.equals(userId)) {
+            return CommonConstant.SYSTEM_USER_REAL_NAME;
+        }
+        return Optional.ofNullable(baseMapper.selectById(userId)).map(User::getRealName).orElse(null);
     }
 }

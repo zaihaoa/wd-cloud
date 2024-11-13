@@ -32,8 +32,6 @@
         <wd-common-web.version>1.0.0</wd-common-web.version>
         <!-- wd-common-knife4j -->
         <wd-common-knife4j.version>1.0.0</wd-common-knife4j.version>
-        <!-- wd-common-sentinel -->
-        <wd-common-sentinel.version>1.0.0</wd-common-sentinel.version>
         <!-- wd-common-excel -->
         <wd-common-excel.version>1.0.0</wd-common-excel.version>
         <!-- wd-common-redis -->
@@ -65,12 +63,6 @@
                 <groupId>com.wd</groupId>
                 <artifactId>wd-common-knife4j</artifactId>
                 <version>${wd-common-knife4j.version}</version>
-            </dependency>
-            <!-- wd-common-sentinel -->
-            <dependency>
-                <groupId>com.wd</groupId>
-                <artifactId>wd-common-sentinel</artifactId>
-                <version>${wd-common-sentinel.version}</version>
             </dependency>
             <!-- wd-common-redis -->
             <dependency>

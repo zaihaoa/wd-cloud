@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
+    <option name="BUILD_PROCESS_HEAP_SIZE" value="2000" />
     <annotationProcessing>
       <profile default="true" name="Default" enabled="true" />
       <profile name="Maven default annotation processors profile" enabled="true">
@@ -9,20 +10,18 @@
         <outputRelativeToContentRoot value="true" />
         <module name="wd-system-domain" />
         <module name="wd-system-api" />
-        <module name="wd-common-sentinel" />
         <module name="wd-file-center-domain" />
         <module name="wd-system-dao" />
         <module name="wd-system-server" />
         <module name="wd-common-excel" />
+        <module name="wd-common-feign" />
         <module name="wd-file-center-server" />
-        <module name="wd-common-dubbo" />
         <module name="wd-file-center-api" />
         <module name="wd-system-service" />
         <module name="wd-common-job-core" />
         <module name="wd-auth-api" />
         <module name="wd-common-mybatis-plus" />
         <module name="wd-common-redis" />
-        <module name="wd-common-operate-log" />
         <module name="wd-common-knife4j" />
         <module name="wd-common-test" />
         <module name="wd-gateway-server" />
@@ -40,6 +39,9 @@
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="untitled" target="17" />
+      <module name="wd-common-dubbo" target="17" />
+      <module name="wd-common-operate-log" target="17" />
+      <module name="wd-common-sentinel" target="17" />
       <module name="wd-id-generator" target="17" />
       <module name="wd-id-generator-api" target="17" />
       <module name="wd-id-generator-server" target="17" />

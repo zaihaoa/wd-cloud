@@ -22,10 +22,8 @@
         <module>wd-common-knife4j</module>
         <module>wd-common-job-core</module>
         <module>wd-common-test</module>
-        <module>wd-common-operate-log</module>
         <module>wd-common-excel</module>
-        <module>wd-common-sentinel</module>
-        <module>wd-common-dubbo</module>
+        <module>wd-common-feign</module>
     </modules>
 
 </project>

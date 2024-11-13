@@ -1,7 +1,7 @@
 package com.wd.file.service;
 
 import com.wd.common.mybatisplus.SuperService;
-import com.wd.file.api.dto.DownloadCenterCreateDTO;
+import com.wd.file.feign.dto.DownloadCenterCreateDTO;
 import com.wd.file.entity.DownloadCenter;
 
 /**
