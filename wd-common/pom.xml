@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.wd</groupId>
+        <artifactId>wd-cloud</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>wd-common</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0.0</version>
+    <description>通用</description>
+
+    <modules>
+        <module>wd-common-core</module>
+        <module>wd-common-mybatis-plus</module>
+        <module>wd-common-web</module>
+        <module>wd-common-redis</module>
+        <module>wd-common-knife4j</module>
+        <module>wd-common-job-core</module>
+        <module>wd-common-test</module>
+        <module>wd-common-operate-log</module>
+        <module>wd-common-excel</module>
+        <module>wd-common-sentinel</module>
+        <module>wd-common-dubbo</module>
+    </modules>
+
+</project>

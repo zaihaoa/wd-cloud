@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.wd</groupId>
+        <artifactId>wd-cloud</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>wd-file-center</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0.0</version>
+    <description>文件中心服务</description>
+
+    <modules>
+        <module>wd-file-center-domain</module>
+        <module>wd-file-center-dao</module>
+        <module>wd-file-center-service</module>
+        <module>wd-file-center-web</module>
+        <module>wd-file-center-server</module>
+        <module>wd-file-center-api</module>
+    </modules>
+
+    <properties>
+        <!-- wd-common-core -->
+        <wd-common-core.version>1.0.0</wd-common-core.version>
+        <!-- wd-common-mybatis-plus -->
+        <wd-common-mybatis-plus.version>1.0.0</wd-common-mybatis-plus.version>
+        <!-- wd-common-web -->
+        <wd-common-web.version>1.0.0</wd-common-web.version>
+        <!-- wd-common-knife4j -->
+        <wd-common-knife4j.version>1.0.0</wd-common-knife4j.version>
+        <!-- wd-common-sentinel -->
+        <wd-common-sentinel.version>1.0.0</wd-common-sentinel.version>
+        <!-- wd-common-excel -->
+        <wd-common-excel.version>1.0.0</wd-common-excel.version>
+        <!-- wd-common-redis -->
+        <wd-common-redis.version>1.0.0</wd-common-redis.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- wd-common-core -->
+            <dependency>
+                <groupId>com.wd</groupId>
+                <artifactId>wd-common-core</artifactId>
+                <version>${wd-common-core.version}</version>
+            </dependency>
+            <!-- wd-common-mybatis-plus -->
+            <dependency>
+                <groupId>com.wd</groupId>
+                <artifactId>wd-common-mybatis-plus</artifactId>
+                <version>${wd-common-mybatis-plus.version}</version>
+            </dependency>
+            <!-- wd-common-web -->
+            <dependency>
+                <groupId>com.wd</groupId>
+                <artifactId>wd-common-web</artifactId>
+                <version>${wd-common-web.version}</version>
+            </dependency>
+            <!-- wd-common-knife4j -->
+            <dependency>
+                <groupId>com.wd</groupId>
+                <artifactId>wd-common-knife4j</artifactId>
+                <version>${wd-common-knife4j.version}</version>
+            </dependency>
+            <!-- wd-common-sentinel -->
+            <dependency>
+                <groupId>com.wd</groupId>
+                <artifactId>wd-common-sentinel</artifactId>
+                <version>${wd-common-sentinel.version}</version>
+            </dependency>
+            <!-- wd-common-redis -->
+            <dependency>
+                <groupId>com.wd</groupId>
+                <artifactId>wd-common-redis</artifactId>
+                <version>${wd-common-redis.version}</version>
+            </dependency>
+            <!-- wd-common-excel -->
+            <dependency>
+                <groupId>com.wd</groupId>
+                <artifactId>wd-common-excel</artifactId>
+                <version>${wd-common-excel.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>

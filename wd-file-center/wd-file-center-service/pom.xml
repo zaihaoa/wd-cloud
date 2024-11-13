@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.wd</groupId>
+        <artifactId>wd-file-center</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>wd-file-center-service</artifactId>
+    <packaging>jar</packaging>
+    <description>文件中心服务service</description>
+
+    <dependencies>
+        <!-- wd-common-redis -->
+        <dependency>
+            <groupId>com.wd</groupId>
+            <artifactId>wd-common-redis</artifactId>
+        </dependency>
+        <!-- wd-common-excel -->
+        <dependency>
+            <groupId>com.wd</groupId>
+            <artifactId>wd-common-excel</artifactId>
+        </dependency>
+
+        <!-- wd-file-center-api -->
+        <dependency>
+            <groupId>com.wd</groupId>
+            <artifactId>wd-file-center-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- wd-file-center-dao -->
+        <dependency>
+            <groupId>com.wd</groupId>
+            <artifactId>wd-file-center-dao</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- guava -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <!-- commons-lang3 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <!-- mapstruct -->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+        </dependency>
+        <!-- mapstruct-processor -->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+        </dependency>
+
+        <!-- spring-boot-starter -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot</artifactId>
+        </dependency>
+        <!-- spring-boot-starter-tomcat -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+        </dependency>
+        <!-- dubbo -->
+        <dependency>
+            <groupId>org.apache.dubbo</groupId>
+            <artifactId>dubbo-spring-boot-starter</artifactId>
+        </dependency>
+        <!-- dubbo-rpc-triple -->
+        <dependency>
+            <groupId>org.apache.dubbo</groupId>
+            <artifactId>dubbo-rpc-triple</artifactId>
+        </dependency>
+    </dependencies>
+</project>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="wd-system-domain" />
+        <module name="wd-system-api" />
+        <module name="wd-common-sentinel" />
+        <module name="wd-file-center-domain" />
+        <module name="wd-system-dao" />
+        <module name="wd-system-server" />
+        <module name="wd-common-excel" />
+        <module name="wd-file-center-server" />
+        <module name="wd-common-dubbo" />
+        <module name="wd-file-center-api" />
+        <module name="wd-system-service" />
+        <module name="wd-common-job-core" />
+        <module name="wd-auth-api" />
+        <module name="wd-common-mybatis-plus" />
+        <module name="wd-common-redis" />
+        <module name="wd-common-operate-log" />
+        <module name="wd-common-knife4j" />
+        <module name="wd-common-test" />
+        <module name="wd-gateway-server" />
+        <module name="wd-demo-api" />
+        <module name="wd-system-web" />
+        <module name="wd-auth-server" />
+        <module name="wd-file-center-dao" />
+        <module name="wd-file-center-web" />
+        <module name="wd-common-web" />
+        <module name="wd-file-center-service" />
+        <module name="wd-demo-server" />
+        <module name="wd-common-core" />
+        <module name="wd-generator" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="untitled" target="17" />
+      <module name="wd-id-generator" target="17" />
+      <module name="wd-id-generator-api" target="17" />
+      <module name="wd-id-generator-server" target="17" />
+      <module name="wd-parent" target="17" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

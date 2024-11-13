@@ -1,0 +1,48 @@
+package $!{model}.vo;
+#if(${swagger2})
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+#end
+
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
+#foreach($pkg in ${table.importPackages})
+import $!{pkg};
+#end
+/**
+ * @author $!{author}
+ * @date $!{date}
+ * @description $!{table.comment}视图对象
+ */
+
+@Data
+@NoArgsConstructor
+#if(${swagger2})
+@ApiModel(value="$!{vo}视图对象")
+#end
+public class $!{vo} implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+
+## ----------  BEGIN 字段循环遍历  ----------
+#foreach($field in ${table.fields})
+
+    #if(${field.keyFlag})
+        #set($keyPropertyName=${field.propertyName})
+    #end
+    #if("$!field.comment" != "")
+        #if(${swagger2})
+    @ApiModelProperty(value = "$!{field.comment}")
+        #else
+    /**
+     * $!{field.comment}
+     */
+        #end
+    #end
+    private $!{field.propertyType} $!{field.propertyName};
+#end
+## ----------  END 字段循环遍历  ----------
+
+}

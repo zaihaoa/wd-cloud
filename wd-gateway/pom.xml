@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.wd</groupId>
+        <artifactId>wd-cloud</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>wd-gateway</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0.0</version>
+    <description>网关服务</description>
+
+    <modules>
+        <module>wd-gateway-server</module>
+    </modules>
+
+    <properties>
+        <!-- wd-common-core -->
+        <wd-common-core.version>1.0.0</wd-common-core.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- wd-common-core -->
+            <dependency>
+                <groupId>com.wd</groupId>
+                <artifactId>wd-common-core</artifactId>
+                <version>${wd-common-core.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>
