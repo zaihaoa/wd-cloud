@@ -54,9 +54,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Autowired
     private AttachmentFeign attachmentApi;
-
     @Autowired
     private DownloadCenterFeign downloadCenterApi;
+    @Autowired
+    private UserConverter userConverter;
 
     @Override
     public PageInfo<UserPageVO> page(UserPageParam pageParam) {
@@ -66,7 +67,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         }
 
         List<UserPageDTO> dbRecords = baseMapper.page(pageParam);
-        List<UserPageVO> records = UserConverter.INSTANCE.convertUserPageVOList(dbRecords);
+        List<UserPageVO> records = userConverter.convertUserPageVOList(dbRecords);
         records.forEach(record -> {
             record.setStatusDesc(CodeDescEnumUtil.getDescByCode(UserStatusEnum.class, record.getStatus()));
             record.setTypeDesc(CodeDescEnumUtil.getDescByCode(UserTypeEnum.class, record.getType()));
@@ -99,7 +100,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
                     // 分页查询
                     PageInfo<UserPageVO> pageInfo = page(pageParam);
                     // 数据对象转化
-                    List<UserExportDTO> data = UserConverter.INSTANCE.convertUserExportDTOList(pageInfo.getRecords());
+                    List<UserExportDTO> data = userConverter.convertUserExportDTOList(pageInfo.getRecords());
                     // 写入
                     excelWriter.write(data, writeSheet);
 
@@ -179,13 +180,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         User record = baseMapper.selectById(id);
         Assert.notNull(record, "ID[" + id + "]不存在");
 
-        User updateUser = UserConverter.INSTANCE.convertUser(updateUserParam);
+        User updateUser = userConverter.convertUser(updateUserParam);
 
         return baseMapper.update(updateUser, Wrappers.<User>lambdaUpdate().eq(User::getId, id)) > 0;
     }
 
     @Override
     public boolean deleteById(Long id) {
+        log.info("删除用户:{}", id);
+
         Assert.notNull(id, "ID不能为空");
 
         User record = baseMapper.selectById(id);

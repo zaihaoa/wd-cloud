@@ -24,6 +24,10 @@ spring:
         namespace: ${nacos.namespace}
         group: ${nacos.config.group}
         file-extension: yml
+        auto-refresh: true
+        bootstrap:
+          enable: true
+          log-enable: true
       discovery:
         server-addr: ${nacos.server-addr}
         namespace: ${nacos.namespace}

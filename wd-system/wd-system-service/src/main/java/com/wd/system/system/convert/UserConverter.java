@@ -6,7 +6,6 @@ import com.wd.system.system.dto.UserUpdateDTO;
 import com.wd.system.system.entity.User;
 import com.wd.system.system.vo.UserPageVO;
 import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
@@ -14,9 +13,8 @@ import java.util.List;
  * @author huangwenda
  * @date 2023/8/31 14:20
  **/
-@Mapper()
+@Mapper(componentModel = "spring")
 public interface UserConverter {
-    UserConverter INSTANCE = Mappers.getMapper(UserConverter.class);
 
     UserPageVO convertUserPageVO(UserPageDTO obj);
 

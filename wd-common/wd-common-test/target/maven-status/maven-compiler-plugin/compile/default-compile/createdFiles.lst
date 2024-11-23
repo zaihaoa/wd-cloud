@@ -1,0 +1,3 @@
+com/wd/common/test/util/YmlUtil.class
+com/wd/common/test/mybatisplus/TestMybatisSqlSession.class
+com/wd/common/test/mybatisplus/MybatisProperties.class

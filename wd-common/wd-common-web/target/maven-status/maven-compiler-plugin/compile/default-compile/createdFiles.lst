@@ -1,0 +1,4 @@
+com/wd/common/web/config/JacksonSerializerConfig.class
+com/wd/common/web/config/JacksonSerializerConfig$1.class
+com/wd/common/web/exception/handler/GlobalExceptionHandler.class
+com/wd/common/web/interceptor/RequestInterceptor.class

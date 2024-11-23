@@ -8,12 +8,14 @@ import com.wd.system.system.vo.UserPageVO;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-11-13T17:36:50+0800",
+    date = "2024-11-13T18:01:39+0800",
     comments = "version: 1.6.3, compiler: javac, environment: Java 17.0.1 (Oracle Corporation)"
 )
+@Component
 public class UserConverterImpl implements UserConverter {
 
     @Override

@@ -1,0 +1,6 @@
+com/wd/file/enums/DownloadCenterWayEnum.class
+com/wd/file/enums/DownloadCenterStatusEnum.class
+com/wd/file/enums/AttachmentStoreTypeEnum.class
+com/wd/file/entity/Attachment.class
+com/wd/file/entity/DownloadCenter.class
+com/wd/file/enums/AttachmentFileTypeEnum.class

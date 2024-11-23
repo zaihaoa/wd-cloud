@@ -1,0 +1,5 @@
+com/wd/file/feign/DownloadCenterFeign.class
+com/wd/file/feign/AttachmentFeign.class
+com/wd/file/feign/dto/DownloadCenterCreateDTO.class
+com/wd/file/feign/dto/AttachmentDTO.class
+com/wd/file/feign/dto/DownloadCenterCreateDTO$DownloadCenterCreateDTOBuilder.class
