@@ -12,12 +12,7 @@
 
     <modules>
         <module>wd-common</module>
-        <module>wd-gateway</module>
-        <module>wd-auth</module>
-        <module>wd-generator</module>
-        <module>wd-system</module>
         <module>wd-demo</module>
-        <module>wd-file-center</module>
     </modules>
 
     <properties>

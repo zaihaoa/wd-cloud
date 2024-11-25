@@ -13,7 +13,6 @@
         <module name="wd-file-center-domain" />
         <module name="wd-system-dao" />
         <module name="wd-system-server" />
-        <module name="wd-common-excel" />
         <module name="wd-common-feign" />
         <module name="wd-file-center-server" />
         <module name="wd-file-center-api" />
@@ -34,18 +33,23 @@
         <module name="wd-file-center-service" />
         <module name="wd-demo-server" />
         <module name="wd-common-core" />
-        <module name="wd-generator" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="untitled" target="17" />
+      <module name="wd-auth" target="17" />
       <module name="wd-common-dubbo" target="17" />
+      <module name="wd-common-excel" target="17" />
       <module name="wd-common-operate-log" target="17" />
       <module name="wd-common-sentinel" target="17" />
+      <module name="wd-file-center" target="17" />
+      <module name="wd-gateway" target="17" />
+      <module name="wd-generator" target="17" />
       <module name="wd-id-generator" target="17" />
       <module name="wd-id-generator-api" target="17" />
       <module name="wd-id-generator-server" target="17" />
       <module name="wd-parent" target="17" />
+      <module name="wd-system" target="17" />
     </bytecodeTargetLevel>
   </component>
 </project>

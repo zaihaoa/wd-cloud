@@ -9,11 +9,17 @@
     </option>
     <option name="ignoredFiles">
       <set>
+        <option value="$PROJECT_DIR$/wd-auth/pom.xml" />
         <option value="$PROJECT_DIR$/wd-common/wd-common-dubbo/pom.xml" />
+        <option value="$PROJECT_DIR$/wd-common/wd-common-excel/pom.xml" />
         <option value="$PROJECT_DIR$/wd-common/wd-common-operate-log/pom.xml" />
         <option value="$PROJECT_DIR$/wd-common/wd-common-sentinel/pom.xml" />
+        <option value="$PROJECT_DIR$/wd-file-center/pom.xml" />
+        <option value="$PROJECT_DIR$/wd-gateway/pom.xml" />
+        <option value="$PROJECT_DIR$/wd-generator/pom.xml" />
         <option value="$PROJECT_DIR$/wd-id-generator/pom.xml" />
         <option value="$PROJECT_DIR$/wd-parent/pom.xml" />
+        <option value="$PROJECT_DIR$/wd-system/pom.xml" />
         <option value="$PROJECT_DIR$/wd-system/untitled/pom.xml" />
       </set>
     </option>

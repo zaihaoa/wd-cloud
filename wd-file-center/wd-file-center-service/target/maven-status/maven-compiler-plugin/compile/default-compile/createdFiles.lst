@@ -1,7 +1,0 @@
-com/wd/file/service/AttachmentStore.class
-com/wd/file/service/impl/OssAttachmentStore.class
-com/wd/file/service/impl/DownloadCenterServiceImpl.class
-com/wd/file/service/AttachmentService.class
-com/wd/file/service/impl/LocalAttachmentStore.class
-com/wd/file/service/DownloadCenterService.class
-com/wd/file/service/impl/AttachmentServiceImpl.class
