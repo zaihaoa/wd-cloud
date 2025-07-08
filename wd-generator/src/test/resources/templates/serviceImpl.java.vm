@@ -1,0 +1,119 @@
+package ${package.ServiceImpl};
+
+import com.alibaba.fastjson2.JSON;
+import com.wd.common.core.model.Id;
+import com.wd.common.core.model.PageInfo;
+import com.wd.common.mybatisplus.PageUtil;
+import ${package.Entity}.${entity};
+import ${package.Mapper}.${table.mapperName};
+#if(${table.serviceInterface})
+import ${package.Service}.${table.serviceName};
+#end
+import ${superServiceImplClassPackage};
+import ${package.Parent}.domain.dto.${entity}PageParamDTO;
+import ${package.Parent}.domain.vo.${entity}PageVO;
+import ${package.Parent}.domain.dto.${entity}AddDTO;
+import ${package.Parent}.domain.dto.${entity}UpdateDTO;
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * <p>
+ * $!{table.comment} 服务实现类
+ * </p>
+ *
+ * @author ${author}
+ * @since ${date}
+ */
+@Slf4j
+@Service
+#if(${kotlin})
+open class ${table.serviceImplName} : ${superServiceImplClass}<${table.mapperName}, ${entity}>()#if(${table.serviceInterface}), ${table.serviceName}#end {
+
+}
+#else
+public class ${table.serviceImplName} extends ${superServiceImplClass}<${table.mapperName}, ${entity}>#if(${table.serviceInterface}) implements ${table.serviceName}#end {
+
+    @Resource
+    private ${entity}Converter ${acronymEntity}Converter;
+
+    @Override
+    public PageInfo<${entity}PageVO> pageList(${entity}PageParamDTO pageParam) {
+
+        int count = baseMapper.pageCount(pageParam);
+        if (count <= 0) {
+            return PageUtil.buildPageInfo(pageParam);
+        }
+
+        List<${entity}PageDTO> dbRecords = baseMapper.pageList(pageParam);
+
+        List<${entity}PageVO> voRecords = convert${entity}PageVOList(dbRecords);
+
+        return PageUtil.buildPageInfo(pageParam, count, voRecords);
+    }
+
+    private List<${entity}PageVO> convert${entity}PageVOList(List<${entity}PageDTO> dbRecords) {
+        return dbRecords
+                .stream()
+                .map(dbRecord -> {
+                    ${entity}PageVO vo = ${acronymEntity}Converter.convert${entity}PageVO(dbRecord);
+
+
+                    return vo;
+                })
+                .toList();
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public long add${entity}(${entity}AddDTO ${acronymEntity}AddParam) {
+        log.info("新增$!{table.comment},参数:{}", JSON.toJSONString(${acronymEntity}AddParam));
+
+        ${entity} ${acronymEntity} = new ${entity}();
+
+        #foreach($field in ${table.fields})
+        ${acronymEntity}.set${field.capitalName}(${acronymEntity}AddParam.get${field.capitalName}());
+        #end
+
+        return ${acronymEntity}.getId();
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public boolean update${entity}(${entity}UpdateDTO ${acronymEntity}UpdateParam) {
+        log.info("更新$!{table.comment},参数:{}", JSON.toJSONString(${acronymEntity}UpdateParam));
+        return true;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public boolean delete${entity}ById(Id idParam) {
+        log.info("删除$!{table.comment},参数:{}", JSON.toJSONString(idParam));
+        Long id = idParam.getId();
+
+        // 判断数据是否存在
+        get${entity}ByIdAssertExist(id);
+
+        boolean success = baseMapper.deleteById(id) > 0;
+
+        return success;
+    }
+
+    @Override
+    public ${entity} get${entity}ById(Serializable id) {
+        if (id == null) {
+            return null;
+        }
+        return baseMapper.selectById(id);
+    }
+
+    @Override
+    public ${entity} get${entity}ByIdAssertExist(Serializable id) {
+        User record = get${entity}ById(id);
+        AssertUtil.notNull(record, () -> I18nUtil.message("data.not.exist"));
+        return record;
+    }
+}
+#end

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="${package.Mapper}.${table.mapperName}">
+
+#if(${enableCache})
+    <!-- 开启二级缓存 -->
+    <cache type="${cacheClassName}"/>
+
+#end
+#if(${baseResultMap})
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="${package.Entity}.${entity}">
+#foreach($field in ${table.fields})
+#if(${field.keyFlag})##生成主键排在第一位
+        <id column="${field.name}" property="${field.propertyName}" />
+#end
+#end
+#foreach($field in ${table.commonFields})##生成公共字段
+        <result column="${field.name}" property="${field.propertyName}" />
+#end
+#foreach($field in ${table.fields})
+#if(!${field.keyFlag})##生成普通字段
+        <result column="${field.name}" property="${field.propertyName}" />
+#end
+#end
+    </resultMap>
+
+#end
+#if(${baseColumnList})
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+#foreach($field in ${table.commonFields})
+        ${field.columnName},
+#end
+        ${table.fieldNames}
+    </sql>
+
+#end
+
+    <select id="pageCount" resultType="java.lang.Integer">
+        select count(*)
+        from ${schemaName}${table.name}
+        <include refid="Page_Condition"/>
+    </select>
+
+    <select id="pageList" resultType="${package.Parent}.domain.dto.${entity}PageDTO">
+        select
+        #foreach($field in ${table.fields})
+            ${field.columnName} as ${field.propertyName}#if($foreach.hasNext),#end
+        #end
+        from ${schemaName}${table.name}
+        <include refid="Page_Condition"/>
+
+        <if test="param.sort != null and param.sort != ''">
+            ORDER BY ${param.sort} ${param.order}
+        </if>
+        <bind name="limitStart" value="(param.current lte 1) ? 0 : ((param.current - 1) * param.size)"/>
+        LIMIT #{limitStart}, #{param.size}
+    </select>
+
+    <sql id="Page_Condition">
+        <where>
+            #foreach($field in ${table.fields})
+                #if(${field.propertyType} == "String")
+            <if test="param.${field.propertyName} != null and param.${field.propertyName} != ''">
+                and `${field.columnName}` = #{param.${field.propertyName}}
+            </if>
+                #else
+            <if test="param.${field.propertyName} != null">
+                and `${field.columnName}` = #{param.${field.propertyName}}
+            </if>
+                #end
+            #end
+        </where>
+    </sql>
+</mapper>

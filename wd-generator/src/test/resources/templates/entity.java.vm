@@ -38,10 +38,10 @@ import lombok.experimental.Accessors;
 #if(${springdoc})
 @Schema(name = "${entity}", description = "$!{table.comment}")
 #elseif(${swagger})
-@ApiModel(value = "${entity}对象", description = "$!{table.comment}")
+@ApiModel(value = "${entity}", description = "$!{table.comment}")
 #end
 #if(${superEntityClass})
-public class ${entity} extends ${superEntityClass}#if(${activeRecord})<${entity}>#end {
+public class ${entity} extends ${superEntityClass}#if(${activeRecord})<${entity}>#end implements Serializable {
 #elseif(${activeRecord})
 public class ${entity} extends Model<${entity}> {
 #elseif(${entitySerialVersionUID})
@@ -65,9 +65,6 @@ public class ${entity} {
   #elseif(${swagger})
     @ApiModelProperty("${field.comment}")
   #else
-    /**
-     * ${field.comment}
-     */
   #end
 #end
 #if(${field.keyFlag})

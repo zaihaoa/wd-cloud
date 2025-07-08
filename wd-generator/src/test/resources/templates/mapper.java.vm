@@ -1,10 +1,14 @@
 package ${package.Mapper};
 
+import ${package.Parent}.domain.dto.${entity}PageParamDTO;
+import ${package.Parent}.domain.dto.${entity}PageDTO;
 import ${package.Entity}.${entity};
 import ${superMapperClassPackage};
 #if(${mapperAnnotationClass})
 import ${mapperAnnotationClass.name};
 #end
+import org.apache.ibatis.annotations.Param;
+import java.util.List;
 
 /**
  * <p>
@@ -21,6 +25,10 @@ import ${mapperAnnotationClass.name};
 interface ${table.mapperName} : ${superMapperClass}<${entity}>
 #else
 public interface ${table.mapperName} extends ${superMapperClass}<${entity}> {
+
+    int pageCount(@Param("param") ${entity}PageParamDTO pageParam);
+
+    List<${entity}PageDTO> pageList(@Param("param") ${entity}PageParamDTO pageParam);
 
 }
 #end

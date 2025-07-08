@@ -1,0 +1,69 @@
+package ${package.Service};
+
+import com.wd.common.core.model.PageInfo;
+import com.wd.common.core.model.Id;
+import ${package.Parent}.domain.dto.${entity}PageParamDTO;
+import ${package.Parent}.domain.vo.${entity}PageVO;
+import ${package.Parent}.domain.dto.${entity}AddDTO;
+import ${package.Parent}.domain.dto.${entity}UpdateDTO;
+import ${package.Entity}.${entity};
+import ${superServiceClassPackage};
+
+/**
+ * <p>
+ * $!{table.comment} 服务类
+ * </p>
+ *
+ * @author ${author}
+ * @since ${date}
+ */
+#if(${kotlin})
+interface ${table.serviceName} : ${superServiceClass}<${entity}>
+#else
+public interface ${table.serviceName} extends ${superServiceClass}<${entity}> {
+
+    /**
+     * 列表分页查询
+     *
+     * @param pageParam 查询条件
+     * @return 列表数据
+     */
+    PageInfo<${entity}PageVO> pageList(${entity}PageParamDTO pageParam);
+
+    /**
+     * 添加
+     *
+     * @return 添加成功数据ID
+     */
+    long add${entity}(${entity}AddDTO ${acronymEntity}AddParam);
+
+    /**
+     * 更新
+     *
+     * @return 是否更新成功
+     */
+    boolean update${entity}(${entity}UpdateDTO ${acronymEntity}UpdateParam);
+
+    /**
+     * 删除
+     *
+     * @param id 数据ID
+     * @return 是否删除成功
+     */
+    boolean delete${entity}ById(Id id);
+
+    /**
+     * 根据ID查询
+     * @param id 数据ID
+     * @return 数据
+     */
+    ${entity} get${entity}ById(Serializable id);
+
+    /**
+     * 根据ID查询，并断言数据存在
+     * @param id 数据ID
+     * @return 数据
+     */
+    ${entity} get${entity}ByIdAssertExist(Serializable id);
+}
+#end

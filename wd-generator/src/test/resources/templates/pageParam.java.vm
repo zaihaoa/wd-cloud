@@ -1,0 +1,67 @@
+package ${package.Parent}.domain.dto;
+
+#if(${springdoc})
+import io.swagger.v3.oas.annotations.media.Schema;
+#elseif(${swagger})
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+#end
+#if(${entityLombokModel})
+import lombok.Getter;
+import lombok.Setter;
+#if(${chainModel})
+import lombok.experimental.Accessors;
+#end
+#end
+
+/**
+ * <p>
+ * $!{table.comment} 分页查询参数
+ * </p>
+ *
+ * @author ${author}
+ * @since ${date}
+ */
+#if(${entityLombokModel})
+@Getter
+@Setter
+    #if(${chainModel})
+@Accessors(chain = true)
+    #end
+#end
+#if(${springdoc})
+@Schema(description = "$!{table.comment}列表查询参数")
+#elseif(${swagger})
+@ApiModel(value = "${entity}PageParamDTO", description = "$!{table.comment}")
+#end
+#if(${generatePageAndExportPage})
+public class ${entity}PageParamDTO extends BaseExportQuery<Long> {
+#elseif(${generatePage})
+public class ${entity}PageParamDTO extends BaseQuery {
+#elseif(${entitySerialVersionUID})
+public class ${entity}PageParamDTO {
+#else
+public class ${entity}PageParamDTO {
+#end
+
+## ----------  BEGIN 字段循环遍历  ----------
+#foreach($field in ${table.fields})
+
+#if(${field.keyFlag})
+#set($keyPropertyName=${field.propertyName})
+#end
+#if("$!field.comment" != "")
+  #if(${springdoc})
+    @Schema(description = "${field.comment}")
+  #elseif(${swagger})
+    @ApiModelProperty("${field.comment}")
+  #else
+    /**
+     * ${field.comment}
+     */
+  #end
+#end
+    private ${field.propertyType} ${field.propertyName};
+#end
+## ----------  END 字段循环遍历  ----------
+}

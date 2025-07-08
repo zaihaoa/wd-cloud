@@ -1,0 +1,13 @@
+package ${package.Parent}.convert;
+
+import org.mapstruct.Mapper;
+import ${package.Parent}.domain.dto.${entity}PageDTO;
+import ${package.Parent}.domain.vo.${entity}PageVO;
+
+
+@Mapper(componentModel = "spring")
+public interface ${entity}Converter {
+
+    ${entity}PageVO convert${entity}PageVO(${entity}PageDTO dbRecord);
+
+}

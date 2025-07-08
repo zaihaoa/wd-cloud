@@ -1,4 +1,4 @@
-package ${package.Entity};
+package ${package.Parent}.domain.vo;
 
 #if(${springdoc})
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -13,13 +13,10 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 #end
 #end
-#if(${entitySerialVersionUID})
-import java.io.Serializable;
-#end
 
 /**
  * <p>
- * $!{table.comment} 分页查询参数
+ * $!{table.comment}分页VO
  * </p>
  *
  * @author ${author}
@@ -33,22 +30,13 @@ import java.io.Serializable;
     #end
 #end
 #if(${springdoc})
-@Schema(name = "${entity}PageParam", description = "$!{table.comment}")
+@Schema(description = "$!{table.comment}列表VO")
 #elseif(${swagger})
-@ApiModel(value = "${entity}PageParam", description = "$!{table.comment}")
+@ApiModel(value = "${entity}PageVO", description = "$!{table.comment}")
 #end
-#if(${generatePageAndExportPage})
-public class ${entity}PageParam extends BaseExportQuery<Long> {
-#elseif(${generatePage})
-public class ${entity}PageParam extends BaseQuery {
-#elseif(${entitySerialVersionUID})
-public class ${entity}PageParam implements Serializable {
-#else
-public class ${entity}PageParam {
-#end
+public class ${entity}PageVO {
 #if(${entitySerialVersionUID})
 
-    private static final long serialVersionUID = 1L;
 #end
 ## ----------  BEGIN 字段循环遍历  ----------
 #foreach($field in ${table.fields})
@@ -58,7 +46,7 @@ public class ${entity}PageParam {
 #end
 #if("$!field.comment" != "")
   #if(${springdoc})
-    @Schema(description = "${field.comment}", example = "")
+    @Schema(description = "${field.comment}")
   #elseif(${swagger})
     @ApiModelProperty("${field.comment}")
   #else
