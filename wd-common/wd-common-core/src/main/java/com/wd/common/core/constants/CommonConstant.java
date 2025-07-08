@@ -9,6 +9,10 @@ package com.wd.common.core.constants;
 public class CommonConstant {
 
     /**
+     * 本地环境
+     */
+    public static final String PROFILE_LOCAL = "local";
+    /**
      * 开发环境
      */
     public static final String PROFILE_DEV = "dev";
@@ -17,59 +21,68 @@ public class CommonConstant {
      */
     public static final String PROFILE_TEST = "test";
     /**
+     * 预发布环境
+     */
+    public static final String PROFILE_PRE = "pre";
+    /**
      * 生产环境
      */
     public static final String PROFILE_PROD = "prod";
 
-
-    /**
-     * 请求头（用户id）
-     */
-    public static final String COMMON_PARAM_CONTENT = "commonParamContent";
-
     /**
      * 系统用户ID
      */
-    public static final Long SYSTEM_USER_ID = 0L;
+    public static final long SYSTEM_USER_ID = 0L;
     /**
-     * 系统用户真实名称
+     * 系统用户名称
      */
-    public static final String SYSTEM_USER_REAL_NAME = "System";
+    public static final String SYSTEM_USER_NAME = "System";
 
+    /**
+     * 默认值0
+     */
+    public static final Long LONG_ZERO = 0L;
+
+    /**
+     * 默认值0
+     */
+    public static final Integer INT_ZERO = 0;
+
+    /**
+     * 逻辑删除字段未删除标记
+     */
+    public static final long NOT_DELETE_FLAG = 0L;
+
+    /**
+     * 没有权限标记
+     */
+    public static final Long NOT_PERMISSION_FLAG = -1L;
 
     /**
      * 请求头（用户id）
      */
-    public static final String HEADER_USER_ID = "w-user-id";
-    /**
-     * 请求头（用户登录名）
-     */
-    public static final String HEADER_USER_LOGIN_NAME = "w-user-login-name";
-    /**
-     * 请求头（用户真实名称）
-     */
-    public static final String HEADER_USER_REAL_NAME = "w-user-real-name";
+    public static final String HEADER_USER_ID = "W-User-Id";
     /**
      * 请求头（traceId）
      */
-    public static final String HEADER_TRACE_ID = "w-trace-id";
+    public static final String HEADER_TRACE_ID = "W-Trace-Id";
+    /**
+     * 请求头（traceExtra）
+     */
+    public static final String HEADER_TRACE_EXTRA = "W-Trace-Extra";
+    /**
+     * 请求头（请求id）
+     */
+    public static final String HEADER_REQUEST_IP = "W-Request-Ip";
     /**
      * 请求头（token）
      */
-    public static final String HEADER_TOKEN = "w-token";
+    public static final String HEADER_TOKEN = "W-Token";
+
     /**
      * 用户id
      */
     public static final String USER_ID = "userId";
-    /**
-     * 用户登录名
-     */
-    public static final String USER_LOGIN_NAME = "userLoginName";
-    /**
-     * 用户姓名
-     */
-    public static final String USER_REAL_NAME = "userRealName";
-
     /**
      * traceId
      */
@@ -79,7 +92,12 @@ public class CommonConstant {
      */
     public static final String TRACE_EXTRA = "traceExtra";
     /**
+     * 请求IP
+     */
+    public static final String REQUEST_IP = "requestIp";
+    /**
      * token
      */
     public static final String TOKEN = "token";
+
 }

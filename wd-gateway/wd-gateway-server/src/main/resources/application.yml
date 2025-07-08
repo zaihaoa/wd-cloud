@@ -3,18 +3,17 @@ nacos:
   server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
   username: ${NACOS_USERNAME:nacos}
   password: ${NACOS_PASSWORD:nacos}
-  namespace: ${NACOS_NAMESPACE:dev-namespace}
+  namespace: ${NACOS_NAMESPACE:wd-cloud}
   config:
-    group: ${NACOS_CONFIG_GROUP:SERVER}
+    group: ${NACOS_CONFIG_GROUP:server}
   discovery:
-    group: ${NACOS_DISCOVERY_GROUP:dev}
+    group: ${NACOS_DISCOVERY_GROUP:public}
     cluster-name: ${NACOS_DISCOVERY_CLUSTER:master}
+
 
 spring:
   application:
-    name: ${APPLICATION_NAME:wd-gateway}
-  profiles:
-    active: ${APPLICATION_PROFILE:dev}
+    name: ${APPLICATION_NAME:gateway-server}
   cloud:
     nacos:
       username: ${nacos.username}
@@ -24,6 +23,10 @@ spring:
         namespace: ${nacos.namespace}
         group: ${nacos.config.group}
         file-extension: yml
+        auto-refresh: true
+        bootstrap:
+          enable: true
+          log-enable: true
       discovery:
         server-addr: ${nacos.server-addr}
         namespace: ${nacos.namespace}
@@ -31,5 +34,7 @@ spring:
         cluster-name: ${nacos.discovery.cluster-name}
   config:
     import:
-      - nacos:wd-gateway.yml
-
+      - nacos:gateway-server
+      - optional:nacos:common?group=common&refreshEnabled=true
+      - optional:nacos:redis?group=common&refreshEnabled=true
+      - optional:nacos:sa-token?group=common&refreshEnabled=false

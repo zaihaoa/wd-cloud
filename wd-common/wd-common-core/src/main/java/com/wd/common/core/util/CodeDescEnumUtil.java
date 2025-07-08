@@ -1,7 +1,10 @@
 package com.wd.common.core.util;
 
-import com.wd.common.core.CodeDescEnum;
-import com.wd.common.core.SelectCombobox;
+
+
+
+import com.wd.common.core.model.CodeDescEnum;
+import com.wd.common.core.model.SelectCombobox;
 
 import java.util.*;
 
@@ -16,10 +19,9 @@ public class CodeDescEnumUtil {
      * @param enumClass 枚举类
      * @param code      枚举值
      * @param <E>       枚举类型
-     * @param <V>       值类型
      * @return true：存在
      */
-    public static <E extends Enum<? extends CodeDescEnum<V>>, V> boolean isExist(Class<E> enumClass, V code) {
+    public static <E extends Enum<? extends CodeDescEnum>, V> boolean isExist(Class<E> enumClass, String code) {
         return Objects.nonNull(getEnumByCode(enumClass, code));
     }
 
@@ -31,18 +33,57 @@ public class CodeDescEnumUtil {
      * @return 枚举描述
      */
     @SuppressWarnings("unchecked")
-    public static <E extends Enum<? extends CodeDescEnum<V>>, V> String getDescByCode(Class<E> enumClass, V code) {
+    public static <E extends Enum<? extends CodeDescEnum>> String getDescByCode(Class<E> enumClass, String code) {
         if (code == null) {
             return null;
         }
-        for (Enum<? extends CodeDescEnum<V>> e : enumClass.getEnumConstants()) {
-            if (((CodeDescEnum<V>) e).getCode().equals(code)) {
-                return ((CodeDescEnum<V>) e).getDesc();
+        for (Enum<? extends CodeDescEnum> e : enumClass.getEnumConstants()) {
+            if (((CodeDescEnum) e).getCode().equals(code)) {
+                return ((CodeDescEnum) e).getDesc();
             }
         }
         return null;
     }
 
+    /**
+     * 根据对应的名字获取枚举值
+     *
+     * @param enumClass 枚举
+     * @param desc      对应的名字
+     * @return 枚举描述
+     */
+    @SuppressWarnings("unchecked")
+    public static <E extends Enum<? extends CodeDescEnum>> String getCodeByDesc(Class<E> enumClass, String desc) {
+        if (desc == null) {
+            return null;
+        }
+        for (Enum<? extends CodeDescEnum> e : enumClass.getEnumConstants()) {
+            if (((CodeDescEnum) e).getDesc().equals(desc)) {
+                return ((CodeDescEnum) e).getCode();
+            }
+        }
+        return null;
+    }
+
+    public static <E extends Enum<? extends CodeDescEnum>> Map<String, String> codeDescMap(Class<E> enumClass) {
+        E[] enumConstants = enumClass.getEnumConstants();
+        Map<String, String> result = new HashMap<>(enumConstants.length);
+
+        for (Enum<? extends CodeDescEnum> e : enumConstants) {
+            result.put(((CodeDescEnum) e).getCode(), ((CodeDescEnum) e).getDesc());
+        }
+        return result;
+    }
+
+    public static <E extends Enum<? extends CodeDescEnum>> Map<String, E> codeEnumMap(Class<E> enumClass) {
+        E[] enumConstants = enumClass.getEnumConstants();
+        Map<String, E> result = new HashMap<>(enumConstants.length);
+
+        for (E e : enumConstants) {
+            result.put(((CodeDescEnum) e).getCode(), e);
+        }
+        return result;
+    }
 
     /**
      * 根据枚举值获取对应的枚举对象
@@ -52,12 +93,12 @@ public class CodeDescEnumUtil {
      * @return 枚举对象
      */
     @SuppressWarnings("unchecked")
-    public static <E extends Enum<? extends CodeDescEnum<V>>, V> E getEnumByCode(E[] enums, V code) {
+    public static <E extends Enum<? extends CodeDescEnum>> E getEnumByCode(E[] enums, String code) {
         if (enums == null || code == null) {
             return null;
         }
         for (E e : enums) {
-            if (((CodeDescEnum<V>) e).getCode().equals(code)) {
+            if (((CodeDescEnum) e).getCode().equals(code)) {
                 return e;
             }
         }
@@ -71,7 +112,7 @@ public class CodeDescEnumUtil {
      * @param code      code值
      * @return 枚举对象
      */
-    public static <E extends Enum<? extends CodeDescEnum<V>>, V> E getEnumByCode(Class<E> enumClass, V code) {
+    public static <E extends Enum<? extends CodeDescEnum>> E getEnumByCode(Class<E> enumClass, String code) {
         if (enumClass == null || code == null) {
             return null;
         }
@@ -84,7 +125,7 @@ public class CodeDescEnumUtil {
      * @param enumClass 枚举class
      * @return 下拉框对象集合
      */
-    public static <E extends Enum<? extends CodeDescEnum<V>>, V> List<SelectCombobox> convertSelectCombobox(Class<E> enumClass) {
+    public static <E extends Enum<? extends CodeDescEnum>> List<SelectCombobox> convertSelectCombobox(Class<E> enumClass) {
         return convertSelectCombobox(enumClass, null);
     }
 
@@ -94,7 +135,7 @@ public class CodeDescEnumUtil {
      * @param enumClass 枚举class
      * @return 下拉框对象集合
      */
-    public static <E extends Enum<? extends CodeDescEnum<V>>, V> List<SelectCombobox> convertSelectCombobox(Class<E> enumClass, Collection<E> excludeEnums) {
+    public static <E extends Enum<? extends CodeDescEnum>> List<SelectCombobox> convertSelectCombobox(Class<E> enumClass, Collection<E> excludeEnums) {
         if (enumClass == null) {
             return new ArrayList<>();
         }
@@ -103,7 +144,7 @@ public class CodeDescEnumUtil {
             if (excludeEnums != null && excludeEnums.contains(e)) {
                 continue;
             }
-            selectComboboxList.add(new SelectCombobox(((CodeDescEnum) e).getCode().toString(), ((CodeDescEnum) e).getDesc()));
+            selectComboboxList.add(new SelectCombobox(((CodeDescEnum) e).getCode(), ((CodeDescEnum) e).getDesc()));
         }
         return selectComboboxList;
     }

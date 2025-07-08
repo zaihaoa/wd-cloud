@@ -1,14 +1,13 @@
 package com.wd.common.core.validator;
 
-import com.wd.common.core.CodeDescEnum;
 import com.wd.common.core.annotions.EnumCodeExist;
+import com.wd.common.core.model.CodeDescEnum;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * AssertRequestReportTypeExist实现类
@@ -43,10 +42,14 @@ public class EnumCodeExistValidator implements ConstraintValidator<EnumCodeExist
         if (enumClass.isEnum()) {
             if (value instanceof Collection<?>) {
                 Collection values = (Collection) value;
-                List enums = Arrays.stream(enumClass.getEnumConstants()).filter(v -> v instanceof CodeDescEnum).map(v -> ((CodeDescEnum) v).getCode()).collect(Collectors.toList());
-                return enums.containsAll(values);
+                List codes = Arrays.stream(enumClass.getEnumConstants())
+                        .filter(v -> v instanceof CodeDescEnum)
+                        .map(v -> ((CodeDescEnum) v).getCode())
+                        .toList();
+                return codes.containsAll(values);
             } else {
-                return Arrays.stream(enumClass.getEnumConstants()).anyMatch(v -> v instanceof CodeDescEnum && ((CodeDescEnum) v).getCode().equals(value));
+                return Arrays.stream(enumClass.getEnumConstants())
+                        .anyMatch(v -> v instanceof CodeDescEnum && ((CodeDescEnum) v).getCode().equals(value));
             }
         }
         return false;

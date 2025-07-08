@@ -14,11 +14,22 @@
     <description>系统服务</description>
 
     <dependencies>
-        <!-- wd-system-web -->
+        <!-- nacos注册中心 -->
         <dependency>
-            <groupId>com.wd</groupId>
-            <artifactId>wd-system-web</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+
+        <!-- nacos配置中心 -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+        </dependency>
+
+        <!-- druid -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid-spring-boot-3-starter</artifactId>
         </dependency>
 
         <!-- mysql-connector-j -->
@@ -26,16 +37,94 @@
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
         </dependency>
-        <!-- nacos 配置中心 -->
+
+        <!-- wd-common-server -->
         <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+            <groupId>com.wd</groupId>
+            <artifactId>wd-common-server</artifactId>
+            <version>${project.version}</version>
         </dependency>
-        <!-- nacos 服务发现 -->
+
+        <!-- wd-common-log -->
         <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+            <groupId>com.wd</groupId>
+            <artifactId>wd-common-log</artifactId>
+            <version>${project.version}</version>
         </dependency>
+
+        <!-- wd-common-mybatisplus -->
+        <dependency>
+            <groupId>com.wd</groupId>
+            <artifactId>wd-common-mybatisplus</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- wd-common-openfeign -->
+        <dependency>
+            <groupId>com.wd</groupId>
+            <artifactId>wd-common-openfeign</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- wd-common-job-core -->
+        <dependency>
+            <groupId>com.wd</groupId>
+            <artifactId>wd-common-job-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- wd-common-redis -->
+        <dependency>
+            <groupId>com.wd</groupId>
+            <artifactId>wd-common-redis</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- spring-boot-starter-test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Sa-Token权限认证 -->
+        <dependency>
+            <groupId>cn.dev33</groupId>
+            <artifactId>sa-token-spring-boot3-starter</artifactId>
+        </dependency>
+
+        <!-- sa-token-jwt -->
+        <dependency>
+            <groupId>cn.dev33</groupId>
+            <artifactId>sa-token-jwt</artifactId>
+        </dependency>
+
+        <!-- sa-token-redis-jackson -->
+        <dependency>
+            <groupId>cn.dev33</groupId>
+            <artifactId>sa-token-redis-jackson</artifactId>
+        </dependency>
+
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot.version}</version>
+                <configuration>
+                    <mainClass>com.wd.SystemApplication</mainClass>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

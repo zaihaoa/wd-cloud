@@ -16,14 +16,13 @@
 
     <modules>
         <module>wd-common-core</module>
-        <module>wd-common-mybatis-plus</module>
-        <module>wd-common-web</module>
         <module>wd-common-redis</module>
-        <module>wd-common-knife4j</module>
         <module>wd-common-job-core</module>
-        <module>wd-common-test</module>
-        <module>wd-common-excel</module>
-        <module>wd-common-feign</module>
+        <module>wd-common-easyexcel</module>
+        <module>wd-common-mybatisplus</module>
+        <module>wd-common-server</module>
+        <module>wd-common-openfeign</module>
+        <module>wd-common-log</module>
     </modules>
 
 </project>

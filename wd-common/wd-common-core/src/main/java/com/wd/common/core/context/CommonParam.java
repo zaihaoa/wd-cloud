@@ -12,18 +12,11 @@ import lombok.ToString;
 @Setter
 @ToString
 public class CommonParam {
+
     /**
      * 用户id
      */
     private Long userId;
-    /**
-     * 用户登录名
-     */
-    private String userLoginName;
-    /**
-     * 用户姓名
-     */
-    private String userRealName;
 
     /**
      * traceId
@@ -36,7 +29,7 @@ public class CommonParam {
     private String traceExtra;
 
     /**
-     * token
+     * 请求IP
      */
-    private String token;
+    private String requestIp;
 }

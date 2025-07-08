@@ -12,7 +12,7 @@ public class TableConstant {
     /**
      * 数据库表更新用户id
      */
-    public static final String TABLE_CREATE_UPDATE_ID = "update_user_id";
+    public static final String TABLE_UPDATE_USER_ID = "update_user_id";
     /**
      * 数据库表创建时间
      */
@@ -29,7 +29,7 @@ public class TableConstant {
     /**
      * java实体更新用户id
      */
-    public static final String ENTITY_CREATE_UPDATE_ID = "updateUserId";
+    public static final String ENTITY_UPDATE_USER_ID = "updateUserId";
     /**
      * java实体创建时间
      */

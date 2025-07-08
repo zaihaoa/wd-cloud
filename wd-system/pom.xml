@@ -15,10 +15,6 @@
     <description>系统服务</description>
 
     <modules>
-        <module>wd-system-domain</module>
-        <module>wd-system-dao</module>
-        <module>wd-system-service</module>
-        <module>wd-system-web</module>
         <module>wd-system-server</module>
         <module>wd-system-api</module>
     </modules>
@@ -30,17 +26,11 @@
         <wd-common-feign.version>1.0.0</wd-common-feign.version>
         <!-- wd-common-mybatis-plus -->
         <wd-common-mybatis-plus.version>1.0.0</wd-common-mybatis-plus.version>
-        <!-- wd-common-web -->
-        <wd-common-web.version>1.0.0</wd-common-web.version>
-        <!-- wd-common-knife4j -->
-        <wd-common-knife4j.version>1.0.0</wd-common-knife4j.version>
         <!-- wd-common-excel -->
         <wd-common-excel.version>1.0.0</wd-common-excel.version>
         <!-- wd-common-redis -->
         <wd-common-redis.version>1.0.0</wd-common-redis.version>
 
-        <!-- wd-file-center-api -->
-        <wd-file-center-api.version>1.0.0</wd-file-center-api.version>
     </properties>
 
     <dependencyManagement>
@@ -54,26 +44,14 @@
             <!-- wd-common-feign -->
             <dependency>
                 <groupId>com.wd</groupId>
-                <artifactId>wd-common-feign</artifactId>
+                <artifactId>wd-common-openfeign</artifactId>
                 <version>${wd-common-feign.version}</version>
             </dependency>
             <!-- wd-common-mybatis-plus -->
             <dependency>
                 <groupId>com.wd</groupId>
-                <artifactId>wd-common-mybatis-plus</artifactId>
+                <artifactId>wd-common-mybatisplus</artifactId>
                 <version>${wd-common-mybatis-plus.version}</version>
-            </dependency>
-            <!-- wd-common-web -->
-            <dependency>
-                <groupId>com.wd</groupId>
-                <artifactId>wd-common-web</artifactId>
-                <version>${wd-common-web.version}</version>
-            </dependency>
-            <!-- wd-common-knife4j -->
-            <dependency>
-                <groupId>com.wd</groupId>
-                <artifactId>wd-common-knife4j</artifactId>
-                <version>${wd-common-knife4j.version}</version>
             </dependency>
 
             <!-- wd-common-redis -->
@@ -82,18 +60,12 @@
                 <artifactId>wd-common-redis</artifactId>
                 <version>${wd-common-redis.version}</version>
             </dependency>
+
             <!-- wd-common-excel -->
             <dependency>
                 <groupId>com.wd</groupId>
-                <artifactId>wd-common-excel</artifactId>
+                <artifactId>wd-common-easyexcel</artifactId>
                 <version>${wd-common-excel.version}</version>
-            </dependency>
-
-            <!-- wd-file-center-api -->
-            <dependency>
-                <groupId>com.wd</groupId>
-                <artifactId>wd-file-center-api</artifactId>
-                <version>${wd-file-center-api.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

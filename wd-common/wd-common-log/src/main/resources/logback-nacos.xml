@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="false">
+
+	<springProperty scope="context" name="SERVICE_NAME" source="spring.application.name"/>
+	<springProperty scope="context" name="LOG_PATH" source="logging.file-path"/>
+	<springProperty scope="context" name="SAVE_TYPE" source="logging.save-type" defaultValue="console,file,cls"/>
+	<springProperty scope="context" name="CLS_ENDPOINT" source="logging.cls.endpoint"/>
+	<springProperty scope="context" name="CLS_ACCESS_KEY_ID" source="logging.cls.access-key-id"/>
+	<springProperty scope="context" name="CLS_ACCESS_KEY_SECRET" source="logging.cls.access-key-secret"/>
+	<springProperty scope="context" name="CLS_TOPIC_ID" source="logging.cls.topic-id"/>
+
+	<!--定义日志文件的存储地址 -->
+    <property name="CONSOLE_PATTERN" value='%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%-5level) [%X{traceId}] [%thread] %cyan(%logger{50}:%L) %msg%xEx%n'/>
+    <property name="LOG_PATTERN" value='%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{traceId}] [%thread] %logger{50}:%L %msg%xEx%n'/>
+
+	<!-- 控制台输出 -->
+	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>${CONSOLE_PATTERN}</pattern>
+		</encoder>
+	</appender>
+
+	<!-- 按照每天生成日志文件 -->
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<!--日志文件输出的文件名 -->
+			<FileNamePattern>${LOG_PATH}/${SERVICE_NAME}-%d{yyyy-MM-dd}.%i.log</FileNamePattern>
+			<!--日志文件保留天数 -->
+			<MaxHistory>30</MaxHistory>
+			<maxFileSize>50MB</maxFileSize>
+		</rollingPolicy>
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符 -->
+			<pattern>${LOG_PATTERN}</pattern>
+		</encoder>
+	</appender>
+
+	<!-- 腾讯云日志 https://cloud.tencent.com/document/product/614/66329 -->
+	<appender name="LOGHUB" class="com.tencentcloudapi.cls.LoghubAppender">
+		<!--必选项-->
+        <endpoint>${CLS_ENDPOINT}</endpoint>
+        <accessKeyId>${CLS_ACCESS_KEY_ID}</accessKeyId>
+        <accessKeySecret>${CLS_ACCESS_KEY_SECRET}</accessKeySecret>
+        <!--日志主题ID-->
+		<topicId>${CLS_TOPIC_ID}</topicId>
+
+		<!-- 可选项 详见 '参数说明'-->
+		<totalSizeInBytes>104857600</totalSizeInBytes>
+		<maxBlockMs>0</maxBlockMs>
+		<sendThreadCount>4</sendThreadCount>
+		<batchSizeThresholdInBytes>524288</batchSizeThresholdInBytes>
+		<batchCountThreshold>4096</batchCountThreshold>
+		<lingerMs>1000</lingerMs>
+		<retries>10</retries>
+		<maxReservedAttempts>11</maxReservedAttempts>
+		<baseRetryBackoffMs>100</baseRetryBackoffMs>
+		<maxRetryBackoffMs>50000</maxRetryBackoffMs>
+
+		<!-- 可选项 设置时间格式 -->
+		<timeFormat>yyyy-MM-dd HH:mm:ss.SSS</timeFormat>
+		<timeZone>Asia/Shanghai</timeZone>
+
+		<customFields>{"serverName":"${SERVICE_NAME}"}</customFields>
+
+		<mdcFields>traceId,traceExtra,supplierId,userId</mdcFields>
+	</appender>
+
+	<!-- 日志输出级别 -->
+	<root level="INFO">
+		<if condition='property("SAVE_TYPE").contains("console")'>
+			<then>
+				<appender-ref ref="CONSOLE"/>
+			</then>
+		</if>
+		<if condition='property("SAVE_TYPE").contains("file")'>
+			<then>
+				<appender-ref ref="FILE"/>
+			</then>
+		</if>
+		<if condition='property("SAVE_TYPE").contains("cls")'>
+			<then>
+				<appender-ref ref="LOGHUB"/>
+			</then>
+		</if>
+	</root>
+
+</configuration>

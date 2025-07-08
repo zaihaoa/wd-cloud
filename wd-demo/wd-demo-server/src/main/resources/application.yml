@@ -34,7 +34,3 @@ spring:
       - nacos:wd-demo.yml
       - optional:nacos:wd-common.yml?group=COMMON&refreshEnabled=true
 
-logging:
-  file:
-    path: /Users/huangwenda/logs/wd-cloud
-    name: ${spring.application.name}

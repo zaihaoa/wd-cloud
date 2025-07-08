@@ -27,8 +27,6 @@
         <wd-common-core.version>1.0.0</wd-common-core.version>
         <!-- wd-common-feign -->
         <wd-common-feign.version>1.0.0</wd-common-feign.version>
-        <!-- wd-common-web -->
-        <wd-common-web.version>1.0.0</wd-common-web.version>
         <!-- wd-common-knife4j -->
         <wd-common-knife4j.version>1.0.0</wd-common-knife4j.version>
     </properties>
@@ -51,7 +49,7 @@
             <!-- wd-common-feign -->
             <dependency>
                 <groupId>com.wd</groupId>
-                <artifactId>wd-common-feign</artifactId>
+                <artifactId>wd-common-openfeign</artifactId>
                 <version>${wd-common-feign.version}</version>
             </dependency>
             <!-- wd-common-web -->

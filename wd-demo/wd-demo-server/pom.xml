@@ -14,50 +14,72 @@
     <description>Demo服务</description>
 
     <dependencies>
-        <!-- wd-demo-api -->
-        <dependency>
-            <groupId>com.wd</groupId>
-            <artifactId>wd-demo-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <!-- wd-system-api -->
-        <dependency>
-            <groupId>com.wd</groupId>
-            <artifactId>wd-system-api</artifactId>
-        </dependency>
-
-        <!-- wd-common-core -->
-        <dependency>
-            <groupId>com.wd</groupId>
-            <artifactId>wd-common-core</artifactId>
-        </dependency>
-        <!-- wd-common-feign -->
-        <dependency>
-            <groupId>com.wd</groupId>
-            <artifactId>wd-common-feign</artifactId>
-        </dependency>
-        <!-- wd-common-web -->
-        <dependency>
-            <groupId>com.wd</groupId>
-            <artifactId>wd-common-web</artifactId>
-        </dependency>
-        <!-- wd-common-knife4j -->
-        <dependency>
-            <groupId>com.wd</groupId>
-            <artifactId>wd-common-knife4j</artifactId>
-        </dependency>
-
-        <!-- nacos 配置中心 -->
-        <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
-        </dependency>
-        <!-- nacos 服务发现 -->
+        <!-- nacos注册中心 -->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
         </dependency>
+
+        <!-- nacos配置中心 -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+        </dependency>
+
+        <!-- druid -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid-spring-boot-3-starter</artifactId>
+        </dependency>
+
+        <!-- mysql-connector-j -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+        </dependency>
+
+        <!-- wd-common-server -->
+        <dependency>
+            <groupId>com.wd</groupId>
+            <artifactId>wd-common-server</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- wd-common-log -->
+        <dependency>
+            <groupId>com.wd</groupId>
+            <artifactId>wd-common-log</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- wd-common-mybatisplus -->
+        <dependency>
+            <groupId>com.wd</groupId>
+            <artifactId>wd-common-mybatisplus</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- wd-common-openfeign -->
+        <dependency>
+            <groupId>com.wd</groupId>
+            <artifactId>wd-common-openfeign</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- wd-common-redis -->
+        <dependency>
+            <groupId>com.wd</groupId>
+            <artifactId>wd-common-redis</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- spring-boot-starter-test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
 </project>

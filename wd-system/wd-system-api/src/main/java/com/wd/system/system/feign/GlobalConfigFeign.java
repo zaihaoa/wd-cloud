@@ -1,6 +1,6 @@
 package com.wd.system.system.feign;
 
-import com.wd.common.core.R;
+import com.wd.common.core.model.R;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;

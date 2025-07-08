@@ -1,6 +1,6 @@
 package com.wd.demo.controller;
 
-import com.wd.common.core.R;
+import com.wd.common.core.model.R;
 import com.wd.system.system.feign.GlobalConfigFeign;
 import com.wd.system.system.feign.UserFeign;
 import io.swagger.v3.oas.annotations.Operation;

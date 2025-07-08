@@ -1,6 +1,6 @@
 package com.wd.common.core.annotions;
 
-import com.wd.common.core.CodeDescEnum;
+import com.wd.common.core.model.CodeDescEnum;
 import com.wd.common.core.validator.EnumCodeExistValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;

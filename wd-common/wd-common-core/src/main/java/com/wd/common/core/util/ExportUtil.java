@@ -1,7 +1,9 @@
 package com.wd.common.core.util;
 
-import com.wd.common.core.BaseExportQuery;
-import com.wd.common.core.ExportTypeEnum;
+
+
+import com.wd.common.core.enums.ExportTypeEnum;
+import com.wd.common.core.model.BaseExportQuery;
 
 import java.util.List;
 
@@ -13,7 +15,7 @@ public class ExportUtil {
     /**
      * 导出默认分页大小
      */
-    public static final long EXPORT_DEFAULT_PAGE_SIZE = 2000L;
+    public static final int EXPORT_DEFAULT_PAGE_SIZE = 2000;
 
 
     public static void pageExportParamValidAndDefaultValue(BaseExportQuery exportQuery) {
@@ -26,7 +28,7 @@ public class ExportUtil {
      * @param exportQuery 导出参数
      * @param size        每次查询分页大小
      */
-    public static void pageExportParamValidAndDefaultValue(BaseExportQuery exportQuery, long size) {
+    public static void pageExportParamValidAndDefaultValue(BaseExportQuery exportQuery, int size) {
         String exportType = exportQuery.getExportType();
         if (!CodeDescEnumUtil.isExist(ExportTypeEnum.class, exportType)) {
             throw new IllegalArgumentException("导出类型不正确");

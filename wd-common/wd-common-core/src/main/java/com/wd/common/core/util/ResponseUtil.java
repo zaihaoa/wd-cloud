@@ -1,11 +1,16 @@
 package com.wd.common.core.util;
 
 
-import com.wd.common.core.R;
-import com.wd.common.core.ResponseCodeEnum;
-import com.wd.common.core.annotions.Nullable;
 
+import com.alibaba.fastjson2.JSON;
+import com.wd.common.core.annotions.Nullable;
+import com.wd.common.core.enums.ResponseCodeEnum;
+import com.wd.common.core.exception.FeignRespException;
+import com.wd.common.core.model.R;
+
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * @author huangwenda
@@ -60,5 +65,47 @@ public class ResponseUtil {
         if (isFailure(r)) {
             throw new IllegalStateException(message);
         }
+    }
+
+    public static void assertSuccessPrompt(@Nullable R r, String message) {
+        if (isFailure(r)) {
+            String prompt = Optional.ofNullable(message).orElse("请求失败");
+            if (Objects.isNull(r)) {
+                throw new IllegalStateException(String.format("%s,返回对象为空", prompt));
+            }
+            throw new IllegalStateException(String.format("%s,状态码:%s,提示信息:%s,数据:%s",
+                    prompt,
+                    r.getCode(),
+                    r.getMessage(),
+                    JSON.toJSONString(r.getData())));
+        }
+    }
+
+    /**
+     * 断言响应成功
+     *
+     * @param r       通用返回对象
+     * @param messageSupplier 异常信息提供者
+     */
+    public static void assertSuccessSupplier(@Nullable R r, Supplier<String> messageSupplier) {
+        if (isFailure(r)) {
+            throw new IllegalStateException(nullSafeGet(messageSupplier));
+        }
+    }
+
+    private static String nullSafeGet(@Nullable Supplier<String> messageSupplier) {
+        return messageSupplier != null ? messageSupplier.get() : null;
+    }
+
+    /**
+     * 断言响应成功
+     *
+     * @param r       通用返回对象
+     */
+    public static <T> T assertSuccessGetData(@Nullable R<T> r) {
+        if (isSuccess(r)) {
+            return r.getData();
+        }
+        throw new FeignRespException(r.getCode(), r.getMessage());
     }
 }
