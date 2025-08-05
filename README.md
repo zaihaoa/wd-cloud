@@ -1,5 +1,5 @@
 # 项目简介
-项目名称：ws-cloud
+项目名称：wd-cloud
 
 ## 后端框架
 ### 使用Java语言，Spring Cloud Alibaba微服务架构
@@ -22,7 +22,7 @@ Spring Cloud Alibaba 2023.0.3.2
 
 ## API文档
 API文档工具：Apifox  
-项目地址：https://app.apifox.com/project/6407466
+地址：https://app.apifox.com
 
 推荐安装Idea插件生成文档到Apifox项目中，不需要手动在Apifox中维护文档  
 Idea插件帮助文档：https://docs.apifox.com/5743620m0
@@ -42,16 +42,6 @@ XXL-JOB定时任务调度器
 服务名：system-server  
 网关请求路径前缀：/sys
 
-### 运营服务
-PO订单、DF订单等运营相关功能  
-服务名：operation-server  
-网关请求路径前缀：/op
-
-### 供应链服务
-产品、报价、仓储等供应链相关功能  
-服务名：supply-server  
-网关请求路径前缀：/supply
-
-### 三方集成服务
-与第三方平台交互的接口都放在这个服务，统一封装第三方接口，方便对接、统一处理、接口复用  
-服务名：integration-server
+### Demo服务
+演示服务 
+网关请求路径前缀：/demo

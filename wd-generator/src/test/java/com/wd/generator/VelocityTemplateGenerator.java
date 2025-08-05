@@ -20,7 +20,7 @@ import java.util.Collections;
 public class VelocityTemplateGenerator {
 
     // 当前要生成的表
-    private static final String[] TO_GENERATE_TABLE_NAME = {"sys_user"};
+    private static final String[] TO_GENERATE_TABLE_NAME = {"sys_user_role_relevance", "sys_menu", "sys_role", "sys_role_menu_relevance", "sys_common_log", "sys_dictionary", "sys_dictionary_item"};
     // 表前缀
     static String TABLE_PREFIX = "sys_";
 
@@ -136,14 +136,6 @@ public class VelocityTemplateGenerator {
                                     .packageName(PARENT_PACKAGE + ".domain.dto")
                                     .build())
                     ;
-//                    if (generatorParam.getGeneratePage() || generatorParam.getGeneratePageAndExportPage()) {
-//                        builder.customFile(new CustomFile.Builder()
-//                                .fileName("PageParam.java")
-//                                .filePath(OUTPUT_DIR_FILE)
-//                                .templatePath("templates/pageParam.java.vm")
-//                                .packageName(PARENT_PACKAGE + ".dto")
-//                                .build());
-//                    }
                 })
                 .strategyConfig(builder -> builder
                                 .addInclude(TO_GENERATE_TABLE_NAME) // 表匹配

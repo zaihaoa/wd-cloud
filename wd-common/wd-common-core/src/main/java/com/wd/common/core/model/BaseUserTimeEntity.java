@@ -20,11 +20,11 @@ import java.time.LocalDateTime;
 @ToString
 public class BaseUserTimeEntity {
 
-    @Schema(description = "创建人用户ID")
+    @Schema(description = "创建人ID")
     @TableField(value = TableConstant.TABLE_CREATE_USER_ID, fill = FieldFill.INSERT, insertStrategy = FieldStrategy.DEFAULT, updateStrategy = FieldStrategy.NEVER)
     protected Long createUserId;
 
-    @Schema(description = "更新人用户ID")
+    @Schema(description = "更新人ID")
     @TableField(value = TableConstant.TABLE_UPDATE_USER_ID, fill = FieldFill.INSERT_UPDATE, insertStrategy = FieldStrategy.DEFAULT, updateStrategy = FieldStrategy.DEFAULT)
     protected Long updateUserId;
 

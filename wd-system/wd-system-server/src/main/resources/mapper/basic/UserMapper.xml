@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wd.system.basic.mapper.UserMapper">
+
+
+    <select id="pageCount" resultType="java.lang.Integer">
+        select count(*)
+        from sys_user
+        <include refid="Page_Condition"/>
+    </select>
+
+    <select id="pageList" resultType="com.wd.system.basic.domain.dto.UserPageDTO">
+        select
+            id as id,
+            username as username,
+            name as name,
+            password as password,
+            status as status,
+            type as type,
+            phone as phone,
+            email as email,
+            delete_flag as deleteFlag
+        from sys_user
+        <include refid="Page_Condition"/>
+
+        <if test="param.sort != null and param.sort != ''">
+            ORDER BY ${param.sort} ${param.order}
+        </if>
+        <bind name="limitStart" value="(param.current lte 1) ? 0 : ((param.current - 1) * param.size)"/>
+        LIMIT #{limitStart}, #{param.size}
+    </select>
+
+    <sql id="Page_Condition">
+        <where>
+            <if test="param.id != null">
+                and `id` = #{param.id}
+            </if>
+            <if test="param.username != null and param.username != ''">
+                and `username` = #{param.username}
+            </if>
+            <if test="param.name != null and param.name != ''">
+                and `name` = #{param.name}
+            </if>
+            <if test="param.password != null and param.password != ''">
+                and `password` = #{param.password}
+            </if>
+            <if test="param.status != null and param.status != ''">
+                and `status` = #{param.status}
+            </if>
+            <if test="param.type != null and param.type != ''">
+                and `type` = #{param.type}
+            </if>
+            <if test="param.phone != null and param.phone != ''">
+                and `phone` = #{param.phone}
+            </if>
+            <if test="param.email != null and param.email != ''">
+                and `email` = #{param.email}
+            </if>
+            <if test="param.deleteFlag != null">
+                and `delete_flag` = #{param.deleteFlag}
+            </if>
+        </where>
+    </sql>
+</mapper>

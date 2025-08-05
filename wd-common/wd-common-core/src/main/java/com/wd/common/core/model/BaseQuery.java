@@ -26,6 +26,7 @@ public abstract class BaseQuery {
 
     /**
      * PageUtil.ASC
+     * PageUtil.DESC
      */
     @Schema(description = "排序规则,默认ASC（ASC:升序,DESC:降序）", example = "ASC", allowableValues = {"ASC", "DESC"})
     protected String order = "ASC";
