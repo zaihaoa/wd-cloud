@@ -11,15 +11,29 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * <p>
+ * feign:
+ *   mock:
+ *     enabled: true
+ *     servers:
+ *       demo-server:
+ *         target-url: https://m1.apifoxmock.com/m1/123
+ *         include-path:
+ *           - /path1
+ *           - /path2
+ *         exclude-path:
+ *           - /path3
+ *           - /path4
+ * </p>
  * @author huangwenda
  * @date 2023/5/11 14:31
  **/
-@ConfigurationProperties(prefix = "mock")
+@ConfigurationProperties(prefix = "feign.mock")
 @Configuration
 @Getter
 @Setter
 @ToString
-public class MockFeignProperties {
+public class FeignMockProperties {
 
     /**
      * 是否开启mock
@@ -38,9 +52,9 @@ public class MockFeignProperties {
     public static class AssignUrl {
 
         /**
-         * 访问url
+         * 目标url
          */
-        private String url;
+        private String targetUrl;
 
         /**
          * 包含的路径

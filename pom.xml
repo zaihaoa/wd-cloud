@@ -44,6 +44,8 @@
         <mybatis-plus.version>3.5.12</mybatis-plus.version>
         <!-- mybatis-spring-boot-starter -->
         <mybatis-spring-boot-starter.version>3.0.4</mybatis-spring-boot-starter.version>
+        <!-- p6spy-spring-boot-starter -->
+        <p6spy-spring-boot-starter.version>1.12.0</p6spy-spring-boot-starter.version>
         <!-- velocity-engine-core -->
         <velocity-engine-core.version>2.3</velocity-engine-core.version>
         <!-- swagger3-annotations -->
@@ -163,6 +165,13 @@
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-jsqlparser</artifactId>
                 <version>${mybatis-plus.version}</version>
+            </dependency>
+
+            <!-- p6spy -->
+            <dependency>
+                <groupId>com.github.gavlyukovskiy</groupId>
+                <artifactId>p6spy-spring-boot-starter</artifactId>
+                <version>${p6spy-spring-boot-starter.version}</version>
             </dependency>
 
             <!-- velocity-engine-core -->

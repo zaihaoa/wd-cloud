@@ -1,14 +1,11 @@
 package com.wd.common.mybatisplus;
 
 
-import cn.hutool.core.util.StrUtil;
-import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wd.common.core.model.BaseQuery;
 import com.wd.common.core.model.PageInfo;
 
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -55,9 +52,9 @@ public class PageUtil {
 
     public static <T, R> PageInfo<R> buildPageInfo(Page<T> page, Function<? super T, ? extends R> mapper) {
         return PageInfo.<R>builder()
-                .current((int)page.getCurrent())
-                .size((int)page.getSize())
-                .total((int)page.getTotal())
+                .current((int) page.getCurrent())
+                .size((int) page.getSize())
+                .total((int) page.getTotal())
                 .records(page.getRecords().stream().map(mapper).collect(Collectors.toList()))
                 .build();
     }
@@ -83,37 +80,7 @@ public class PageUtil {
         return current > 0 ? current : 1;
     }
 
-//    public static <T> Page<T> toPage(BaseQuery baseQuery) {
-//        return new Page<>(baseQuery.getCurrent(), baseQuery.getSize());
-//    }
-
     public static <T> Page<T> toPage(BaseQuery baseQuery) {
-        Page<T> page = new Page<>(baseQuery.getCurrent(), baseQuery.getSize());
-
-        // 判断是否设置了排序字段
-        String sort = baseQuery.getSort();
-        String order = baseQuery.getOrder();
-
-        String mappedField = null;
-        // 根据 VO 字段映射到数据库字段名
-        if (StrUtil.isNotBlank(sort)) {
-            mappedField = FIELD_MAPPING.getOrDefault(sort, sort);// 映射不到就用原字段名
-        }
-
-        if (sort != null && !sort.isBlank()) {
-            if (ASC.equalsIgnoreCase(order)) {
-                page.addOrder(OrderItem.asc(mappedField));
-            } else {
-                page.addOrder(OrderItem.desc(mappedField)); // 默认 DESC
-            }
-        }
-        return page;
+        return new Page<>(baseQuery.getCurrent(), baseQuery.getSize());
     }
-
-    private static final Map<String, String> FIELD_MAPPING = Map.of(
-            "startDate", "start_date",
-            "endDate", "end_date",
-            "createTime","create_time"
-    );
-
 }

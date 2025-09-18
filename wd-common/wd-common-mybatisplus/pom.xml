@@ -20,6 +20,7 @@
     </properties>
 
     <dependencies>
+
         <!-- wd-common-core -->
         <dependency>
             <groupId>com.wd</groupId>
@@ -37,6 +38,12 @@
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-jsqlparser</artifactId>
+        </dependency>
+
+        <!-- p6spy -->
+        <dependency>
+            <groupId>com.github.gavlyukovskiy</groupId>
+            <artifactId>p6spy-spring-boot-starter</artifactId>
         </dependency>
 
         <!-- wd-common-redis -->

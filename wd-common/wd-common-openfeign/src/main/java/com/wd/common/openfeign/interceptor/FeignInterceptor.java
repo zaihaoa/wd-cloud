@@ -4,7 +4,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.wd.common.core.constants.CommonConstant;
 import com.wd.common.core.context.CommonParam;
 import com.wd.common.core.context.SystemContext;
-import com.wd.common.openfeign.properties.MockFeignProperties;
+import com.wd.common.openfeign.properties.FeignMockProperties;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ import java.util.Optional;
 public class FeignInterceptor implements RequestInterceptor {
 
     @Autowired
-    private MockFeignProperties mockFeignProperties;
+    private FeignMockProperties feignMockProperties;
 
     @Override
     public void apply(RequestTemplate requestTemplate) {
@@ -77,12 +77,12 @@ public class FeignInterceptor implements RequestInterceptor {
 
     private void replaceMockUrl(RequestTemplate requestTemplate) {
         // 没有开启mock
-        if (!Optional.ofNullable(mockFeignProperties).map(MockFeignProperties::getEnabled).orElse(false)) {
+        if (!Optional.ofNullable(feignMockProperties).map(FeignMockProperties::getEnabled).orElse(false)) {
             return;
         }
 
         // map<请求服务名, 替换的url>
-        Map<String, MockFeignProperties.AssignUrl> servers = mockFeignProperties.getServers();
+        Map<String, FeignMockProperties.AssignUrl> servers = feignMockProperties.getServers();
         if (Objects.isNull(servers)) {
             return;
         }
@@ -91,14 +91,14 @@ public class FeignInterceptor implements RequestInterceptor {
         String serviceName = requestTemplate.feignTarget().name();
 
         // 指定的url
-        MockFeignProperties.AssignUrl assignUrl = servers.get(serviceName);
-        if (Objects.isNull(assignUrl) || StringUtils.isBlank(assignUrl.getUrl())) {
+        FeignMockProperties.AssignUrl assignUrl = servers.get(serviceName);
+        if (Objects.isNull(assignUrl) || StringUtils.isBlank(assignUrl.getTargetUrl())) {
             log.info("不需要替换URL");
             return;
         }
 
         // 服务
-        String host = assignUrl.getUrl();
+        String host = assignUrl.getTargetUrl();
 
         // path前缀
         String prefixPath = StringUtils.substringAfter(requestTemplate.feignTarget().url(), serviceName);
