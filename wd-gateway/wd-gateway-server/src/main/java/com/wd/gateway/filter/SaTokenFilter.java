@@ -1,7 +1,6 @@
 package com.wd.gateway.filter;
 
 import cn.dev33.satoken.context.SaHolder;
-import cn.dev33.satoken.context.model.SaResponse;
 import cn.dev33.satoken.exception.NotLoginException;
 import cn.dev33.satoken.exception.NotPermissionException;
 import cn.dev33.satoken.reactor.filter.SaReactorFilter;
@@ -19,9 +18,6 @@ import org.slf4j.MDC;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
-
-import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 
 /**
  *
@@ -43,22 +39,13 @@ public class SaTokenFilter {
                 // 前置函数：在每次认证函数之前执行（BeforeAuth 不受 includeList 与 excludeList 的限制，所有请求都会进入）
                 .setBeforeAuth(obj -> {
 
-                    // 通用参数
-                    CommonParam commonParam = new CommonParam();
-                    // 系统上下文
-                    SystemContext.set(commonParam);
-
-                    SaResponse response = SaHolder.getResponse();
-
-                    // traceId
-                    String traceId = get32UUID();
-                    commonParam.setTraceId(traceId);
-                    MDC.put(CommonConstant.TRACE_ID, traceId);
-                    // 设置到响应头
-                    response.setHeader(CommonConstant.HEADER_TRACE_ID, traceId);
-
                     if (StpUtil.isLogin()) {
-                        // 用户id
+                        // 通用参数
+                        CommonParam commonParam = new CommonParam();
+                        // 系统上下文
+                        SystemContext.set(commonParam);
+
+                        // 用户ID
                         long userId = StpUtil.getLoginIdAsLong();
                         commonParam.setUserId(userId);
                         MDC.put(CommonConstant.USER_ID, String.valueOf(userId));
@@ -90,10 +77,5 @@ public class SaTokenFilter {
                     }
                     return JSON.toJSONString(R.failure(e.getMessage()));
                 });
-    }
-
-    private static String get32UUID() {
-        ThreadLocalRandom random = ThreadLocalRandom.current();
-        return (new UUID(random.nextLong(), random.nextLong())).toString().replace("-", "");
     }
 }

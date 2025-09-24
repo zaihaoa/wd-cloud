@@ -1,18 +1,16 @@
 package com.wd.gateway.filter;
 
 import com.wd.common.core.constants.CommonConstant;
-import com.wd.common.core.context.CommonParam;
 import com.wd.common.core.context.SystemContext;
-import com.wd.gateway.util.RequestUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
-import org.springframework.cloud.gateway.filter.GatewayFilterChain;
-import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
@@ -26,47 +24,38 @@ import java.util.Objects;
 @Slf4j
 @Component
 @Order(-70)
-public class RequestHeaderFilter implements GlobalFilter {
+public class RequestHeaderFilter implements WebFilter {
 
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
+        ServerHttpResponse response = exchange.getResponse();
 
-        // ip
-        String ip = RequestUtil.getIpAddress(request);
-        MDC.put(CommonConstant.REQUEST_IP, ip);
+        HttpHeaders responseHeaders = response.getHeaders();
 
         ServerHttpRequest newRequest = request
                 .mutate()
                 // 移除ce相关header,不接受header直接传参
-                .headers(h -> h.remove(CommonConstant.HEADER_USER_ID))
                 .headers(h -> h.remove(CommonConstant.HEADER_TRACE_ID))
                 .headers(h -> h.remove(CommonConstant.HEADER_TRACE_EXTRA))
                 .headers(h -> h.remove(CommonConstant.HEADER_REQUEST_IP))
+                .headers(h -> h.remove(CommonConstant.HEADER_USER_ID))
                 // 添加header
                 .headers(headers -> {
-                    CommonParam commonParam = SystemContext.get();
 
-                    // 用户id
-                    Long userId = commonParam.getUserId();
+                    String traceId = responseHeaders.getFirst(CommonConstant.HEADER_TRACE_ID);
+                    headers.set(CommonConstant.HEADER_TRACE_ID, traceId);
+
+                    String requestIp = responseHeaders.getFirst(CommonConstant.HEADER_REQUEST_IP);
+                    headers.set(CommonConstant.HEADER_REQUEST_IP, requestIp);
+
+
+                    // 用户ID
+                    Long userId = SystemContext.getUserId();
                     if (Objects.nonNull(userId)) {
                         headers.set(CommonConstant.HEADER_USER_ID, String.valueOf(userId));
+                        responseHeaders.set(CommonConstant.HEADER_USER_ID, String.valueOf(userId));
                     }
-
-                    // traceId
-                    String traceId = commonParam.getTraceId();
-                    if (StringUtils.hasText(traceId)) {
-                        headers.set(CommonConstant.HEADER_TRACE_ID, traceId);
-                    }
-
-                    // traceExtra
-                    String traceExtra = commonParam.getTraceExtra();
-                    if (StringUtils.hasText(traceExtra)) {
-                        headers.set(CommonConstant.HEADER_TRACE_EXTRA, traceExtra);
-                    }
-
-                    // 请求ip
-                    headers.set(CommonConstant.HEADER_REQUEST_IP, ip);
                 })
                 .build();
 

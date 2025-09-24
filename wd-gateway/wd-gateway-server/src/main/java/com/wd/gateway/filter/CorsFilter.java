@@ -1,5 +1,6 @@
 package com.wd.gateway.filter;
 
+import com.wd.common.core.constants.CommonConstant;
 import com.wd.common.core.context.SystemContext;
 import com.wd.gateway.util.RequestUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,9 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
+import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
+
 /**
  *
  *
@@ -30,7 +34,6 @@ public class CorsFilter implements WebFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
-
         ServerHttpResponse response = exchange.getResponse();
 
         // 响应头
@@ -53,13 +56,33 @@ public class CorsFilter implements WebFilter {
             return Mono.empty();
         }
 
+        long start = System.currentTimeMillis();
+
         // 路径
         String path = RequestUtil.getPathTemplate(request);
 
-        long start = System.currentTimeMillis();
+        // traceId
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        String traceId = new UUID(random.nextLong(), random.nextLong()).toString().replace("-", "");
+        MDC.put(CommonConstant.TRACE_ID, traceId);
+
+        // 请求ip
+        String requestIp = RequestUtil.getIpAddress(request);
+        MDC.put(CommonConstant.REQUEST_IP, requestIp);
+
+        // 设置到响应头
+        responseHeaders.set(CommonConstant.HEADER_TRACE_ID, traceId);
+        responseHeaders.set(CommonConstant.HEADER_REQUEST_IP, requestIp);
 
         return chain.filter(exchange)
                 .doFinally(r -> {
+
+                    HttpHeaders finalResponseHeaders = response.getHeaders();
+
+                    MDC.put(CommonConstant.TRACE_ID, finalResponseHeaders.getFirst(CommonConstant.HEADER_TRACE_ID));
+                    MDC.put(CommonConstant.REQUEST_IP, finalResponseHeaders.getFirst(CommonConstant.HEADER_REQUEST_IP));
+                    MDC.put(CommonConstant.USER_ID, finalResponseHeaders.getFirst(CommonConstant.HEADER_USER_ID));
+
                     log.info("path:{},time:{}", path, System.currentTimeMillis() - start);
 
                     // 清除上下文

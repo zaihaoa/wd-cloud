@@ -65,7 +65,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         log.info("添加菜单,参数:{}", JSON.toJSONString(menuAddDTO));
 
         Long parentId = menuAddDTO.getParentId();
-        if (Objects.nonNull(parentId) && !Objects.equals(parentId, CommonConstant.LONG_ZERO)) {
+        if (Objects.nonNull(parentId) && !Objects.equals(parentId, CommonConstant.ZERO_LONG)) {
             long parentIdCount = baseMapper.selectCount(Wrappers.<Menu>lambdaQuery().eq(Menu::getId, parentId));
             AssertUtil.isTrue(parentIdCount > 0, "父级菜单不存在");
         }
@@ -81,7 +81,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         menu.setId(id);
         String name = menuAddDTO.getName();
         menu.setName(name);
-        menu.setParentId(Optional.ofNullable(parentId).orElse(CommonConstant.LONG_ZERO));
+        menu.setParentId(Optional.ofNullable(parentId).orElse(CommonConstant.ZERO_LONG));
         menu.setSortNumber(Optional.ofNullable(menuAddDTO.getSortNumber()).orElse(0));
         menu.setMenuType(menuAddDTO.getMenuType());
         menu.setPath(path);
@@ -120,7 +120,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         String menuName = menu.getName();
 
         Long parentId = menuUpdateDTO.getParentId();
-        if (Objects.nonNull(parentId) && !Objects.equals(parentId, CommonConstant.LONG_ZERO)) {
+        if (Objects.nonNull(parentId) && !Objects.equals(parentId, CommonConstant.ZERO_LONG)) {
             long parentIdCount = baseMapper.selectCount(Wrappers.<Menu>lambdaQuery().eq(Menu::getId, parentId));
             AssertUtil.isTrue(parentIdCount > 0, "父级菜单不存在");
         }
@@ -136,7 +136,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         String compareLog = ObjectCompareUtil.compareLog(menu, menuUpdateDTO);
 
         menu.setName(menuUpdateDTO.getName());
-        menu.setParentId(Optional.ofNullable(parentId).orElse(CommonConstant.LONG_ZERO));
+        menu.setParentId(Optional.ofNullable(parentId).orElse(CommonConstant.ZERO_LONG));
         menu.setSortNumber(Optional.ofNullable(menuUpdateDTO.getSortNumber()).orElse(0));
         menu.setMenuType(menuUpdateDTO.getMenuType());
         menu.setPath(path);
@@ -213,7 +213,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         // 第一级
         List<MenuTreeVO> levelOneTreeList = menuTreeList
                 .stream()
-                .filter(v -> CommonConstant.LONG_ZERO.equals(v.getParentId()))
+                .filter(v -> CommonConstant.ZERO_LONG.equals(v.getParentId()))
                 .sorted(Comparator.comparing(MenuTreeVO::getSortNumber))
                 .toList();
 

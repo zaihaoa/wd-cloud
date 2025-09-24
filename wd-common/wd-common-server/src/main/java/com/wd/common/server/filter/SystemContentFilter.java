@@ -46,13 +46,6 @@ public class SystemContentFilter implements Filter {
         // 通用参数
         CommonParam commonParam = new CommonParam();
 
-        // 用户id
-        String userId = request.getHeader(CommonConstant.HEADER_USER_ID);
-        if (StringUtils.isNotBlank(userId)) {
-            commonParam.setUserId(Long.valueOf(userId));
-            MDC.put(CommonConstant.USER_ID, userId);
-        }
-
         // traceId
         String traceId = request.getHeader(CommonConstant.HEADER_TRACE_ID);
         if (StringUtils.isNotBlank(traceId)) {
@@ -60,7 +53,7 @@ public class SystemContentFilter implements Filter {
             MDC.put(CommonConstant.TRACE_ID, traceId);
         }
 
-        // traceId
+        // traceExtra
         String traceExtra = request.getHeader(CommonConstant.HEADER_TRACE_EXTRA);
         if (StringUtils.isNotBlank(traceExtra)) {
             commonParam.setTraceExtra(traceExtra);
@@ -72,6 +65,13 @@ public class SystemContentFilter implements Filter {
         if (StringUtils.isNotBlank(requestIp)) {
             commonParam.setRequestIp(requestIp);
             MDC.put(CommonConstant.REQUEST_IP, requestIp);
+        }
+
+        // 用户ID
+        String userId = request.getHeader(CommonConstant.HEADER_USER_ID);
+        if (StringUtils.isNotBlank(userId)) {
+            commonParam.setUserId(Long.valueOf(userId));
+            MDC.put(CommonConstant.USER_ID, userId);
         }
 
         // 设置线程数据

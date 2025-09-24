@@ -110,7 +110,7 @@ public class CommonLogServiceImpl extends ServiceImpl<CommonLogMapper, CommonLog
                 CommonLog commonLog = new CommonLog();
                 commonLog.setId(IdWorker.getId());
                 commonLog.setBusinessType(Optional.ofNullable(commonLogAddParam.getBusinessType()).orElse(""));
-                commonLog.setBusinessId(Optional.ofNullable(commonLogAddParam.getBusinessId()).orElse(CommonConstant.LONG_ZERO));
+                commonLog.setBusinessId(Optional.ofNullable(commonLogAddParam.getBusinessId()).orElse(CommonConstant.ZERO_LONG));
                 commonLog.setOperationType(Optional.ofNullable(commonLogAddParam.getOperationType()).orElse(""));
                 commonLog.setContent(splitContent);
 

@@ -14,11 +14,6 @@ import lombok.ToString;
 public class CommonParam {
 
     /**
-     * 用户id
-     */
-    private Long userId;
-
-    /**
      * traceId
      */
     private String traceId;
@@ -32,4 +27,9 @@ public class CommonParam {
      * 请求IP
      */
     private String requestIp;
+
+    /**
+     * 用户id
+     */
+    private Long userId;
 }

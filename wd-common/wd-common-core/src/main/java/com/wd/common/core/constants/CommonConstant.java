@@ -41,12 +41,12 @@ public class CommonConstant {
     /**
      * 默认值0
      */
-    public static final Long LONG_ZERO = 0L;
+    public static final Long ZERO_LONG = 0L;
 
     /**
      * 默认值0
      */
-    public static final Integer INT_ZERO = 0;
+    public static final Integer ZERO_INTEGER = 0;
 
     /**
      * 逻辑删除字段未删除标记
@@ -58,10 +58,7 @@ public class CommonConstant {
      */
     public static final Long NOT_PERMISSION_FLAG = -1L;
 
-    /**
-     * 请求头（用户id）
-     */
-    public static final String HEADER_USER_ID = "W-User-Id";
+
     /**
      * 请求头（traceId）
      */
@@ -78,11 +75,12 @@ public class CommonConstant {
      * 请求头（token）
      */
     public static final String HEADER_TOKEN = "W-Token";
-
     /**
-     * 用户id
+     * 请求头（用户id）
      */
-    public static final String USER_ID = "userId";
+    public static final String HEADER_USER_ID = "W-User-Id";
+
+
     /**
      * traceId
      */
@@ -99,5 +97,9 @@ public class CommonConstant {
      * token
      */
     public static final String TOKEN = "token";
+    /**
+     * 用户id
+     */
+    public static final String USER_ID = "userId";
 
 }
