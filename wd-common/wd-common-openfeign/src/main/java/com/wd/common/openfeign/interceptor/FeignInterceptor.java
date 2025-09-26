@@ -7,10 +7,10 @@ import com.wd.common.core.context.SystemContext;
 import com.wd.common.openfeign.properties.FeignMockProperties;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -28,7 +28,7 @@ import java.util.Optional;
 @Component
 public class FeignInterceptor implements RequestInterceptor {
 
-    @Autowired
+    @Resource
     private FeignMockProperties feignMockProperties;
 
     @Override

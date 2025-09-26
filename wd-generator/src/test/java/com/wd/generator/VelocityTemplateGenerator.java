@@ -20,22 +20,18 @@ import java.util.Collections;
 public class VelocityTemplateGenerator {
 
     // 当前要生成的表
-    private static final String[] TO_GENERATE_TABLE_NAME = {"sys_user_role_relevance", "sys_menu", "sys_role", "sys_role_menu_relevance", "sys_common_log", "sys_dictionary", "sys_dictionary_item"};
+    private static final String[] TO_GENERATE_TABLE_NAME = {"sys_dictionary"};
     // 表前缀
     static String TABLE_PREFIX = "sys_";
 
     // 模块名
     static String MODULE_NAME = "/wd-system/wd-system-server";
-    // 模块名
-    static String XML_MODULE_NAME = "/wd-system/wd-system-server";
 
     static String MODULE_PACKAGE_NAME = "basic";
 
     // 输出目录
     static String OUTPUT_DIR_FILE = System.getProperty("user.dir") + MODULE_NAME + "/src/main/java";
-    static String OUTPUT_DIR_XML = System.getProperty("user.dir") + XML_MODULE_NAME + "/src/main/resources/mapper/" + MODULE_PACKAGE_NAME;
-//    static String OUTPUT_DIR_FILE = "/Users/huangwenda/Downloads" + MODULE_NAME + "/src/main/java";
-//    static String OUTPUT_DIR_XML = "/Users/huangwenda/Downloads" + XML_MODULE_NAME + "/src/main/resources/mapper";
+    static String OUTPUT_DIR_XML = System.getProperty("user.dir") + MODULE_NAME + "/src/main/resources/mapper/" + MODULE_PACKAGE_NAME;
 
     // 父包名
     static String PARENT_PACKAGE = "com.wd.system." + MODULE_PACKAGE_NAME;
@@ -43,9 +39,6 @@ public class VelocityTemplateGenerator {
     static String AUTHOR = "huangwenda";
 
     public static void main(String[] args) {
-        // /Users/huangwenda/IdeaProjects/sz/celebrity
-//        System.out.println(System.getProperty("user.dir"));
-
         generate();
     }
 

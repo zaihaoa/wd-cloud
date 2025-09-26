@@ -42,10 +42,6 @@ public class CommonLogServiceImpl extends ServiceImpl<CommonLogMapper, CommonLog
     @Override
     public PageInfo<CommonLogPageVO> pageList(CommonLogPageParamDTO pageParam) {
 
-        // 默认创建时间降序
-        pageParam.setSort("createTime");
-        pageParam.setOrder(PageUtil.DESC);
-
         int count = baseMapper.pageCount(pageParam);
         if (count <= 0) {
             return PageUtil.buildPageInfo(pageParam);
@@ -104,18 +100,28 @@ public class CommonLogServiceImpl extends ServiceImpl<CommonLogMapper, CommonLog
         for (CommonLogAddDTO commonLogAddParam : commonLogAddParams) {
 
             String content = Optional.ofNullable(commonLogAddParam.getContent()).orElse("");
-            // 如果内容超出10000,截取分批插入
-            String[] splitContentList = StrUtil.split(content, 10000);
-            for (String splitContent : splitContentList) {
+            if (content.length() <= 10000) {
                 CommonLog commonLog = new CommonLog();
                 commonLog.setId(IdWorker.getId());
                 commonLog.setBusinessType(Optional.ofNullable(commonLogAddParam.getBusinessType()).orElse(""));
                 commonLog.setBusinessId(Optional.ofNullable(commonLogAddParam.getBusinessId()).orElse(CommonConstant.ZERO_LONG));
                 commonLog.setOperationType(Optional.ofNullable(commonLogAddParam.getOperationType()).orElse(""));
-                commonLog.setContent(splitContent);
-
+                commonLog.setContent(content);
                 addRecords.add(commonLog);
+            } else {
+                // 如果内容超出10000,截取分批插入
+                String[] splitContentList = StrUtil.split(content, 10000);
+                for (String splitContent : splitContentList) {
+                    CommonLog commonLog = new CommonLog();
+                    commonLog.setId(IdWorker.getId());
+                    commonLog.setBusinessType(Optional.ofNullable(commonLogAddParam.getBusinessType()).orElse(""));
+                    commonLog.setBusinessId(Optional.ofNullable(commonLogAddParam.getBusinessId()).orElse(CommonConstant.ZERO_LONG));
+                    commonLog.setOperationType(Optional.ofNullable(commonLogAddParam.getOperationType()).orElse(""));
+                    commonLog.setContent(splitContent);
+                    addRecords.add(commonLog);
+                }
             }
+
         }
 
         return baseMapper.insertBatchSomeColumn(addRecords) > 0;

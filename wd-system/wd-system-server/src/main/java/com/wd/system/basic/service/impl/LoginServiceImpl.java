@@ -2,7 +2,6 @@ package com.wd.system.basic.service.impl;
 
 import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.dev33.satoken.stp.StpUtil;
-import cn.dev33.satoken.stp.parameter.SaLoginParameter;
 import com.wd.common.core.context.SystemContext;
 import com.wd.common.core.util.AssertUtil;
 import com.wd.system.basic.domain.dto.LoginParamDTO;
@@ -12,8 +11,8 @@ import com.wd.system.basic.domain.vo.LoginResultVO;
 import com.wd.system.basic.service.LoginService;
 import com.wd.system.basic.service.UserService;
 import com.wd.system.basic.util.UserHelper;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -27,7 +26,7 @@ import org.springframework.util.Assert;
 @Service
 public class LoginServiceImpl implements LoginService {
 
-    @Autowired
+    @Resource
     private UserService userService;
 
     @Override

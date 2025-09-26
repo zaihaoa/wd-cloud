@@ -10,9 +10,9 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.wd.common.redis.CacheRegion;
+import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Component;
 
@@ -46,7 +46,7 @@ public class RedisHelper {
      */
     public static final ObjectMapper OM = redisSerializationObjectMapper();
 
-    @Autowired
+    @Resource
     private StringRedisTemplate stringRedisTemplate;
 
 
