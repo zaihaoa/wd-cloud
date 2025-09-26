@@ -33,7 +33,7 @@ public class CodeGeneratorHelper {
         String redisKey = RedisHelper.joinKey(codePrefix, nowDate);
         long incr = redisHelper.increment(CacheRegion.CODE_GENERATOR, redisKey, 1);
 
-        if (incr <= 5) {
+        if (incr <= 2) {
             // 设置超时时间2天
             redisHelper.setExpire(CacheRegion.CODE_GENERATOR, redisKey, 2, TimeUnit.DAYS);
         }
