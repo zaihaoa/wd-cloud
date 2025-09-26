@@ -6,7 +6,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.TimeUnit;
 
@@ -19,18 +19,29 @@ public class CodeGeneratorHelper {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
 
-    /**
-     * 编号生成
-     * 默认后面填充4位,incr不足4位则填充0,incr超过4位则直接拼接
-     * CS202301010001 -> CS202301010002 -> CS202301010002 -> CS2023010110001 -> CS2023010110002
-     *
-     * @param codePrefix 编号前缀
-     * @return 编号前缀 + 8位日期 + 4位以上编号
-     */
     public String codeGenerator(String codePrefix) {
-        String nowDate = LocalDateTime.now().format(DATE_FORMATTER);
+        return codeGenerator(codePrefix, LocalDate.now().format(DATE_FORMATTER), 4);
+    }
 
-        String redisKey = RedisHelper.joinKey(codePrefix, nowDate);
+    public String codeGenerator(String codePrefix, int suffixDigit) {
+        return codeGenerator(codePrefix, LocalDate.now().format(DATE_FORMATTER), suffixDigit);
+    }
+
+    public String codeGenerator(String codePrefix, String codeMiddle) {
+        return codeGenerator(codePrefix, codeMiddle, 4);
+    }
+
+    /**
+     * 生成编码字符串
+     *
+     * @param codePrefix 编码前缀
+     * @param codeMiddle 编码中间部分
+     * @param suffixDigit 后缀数字位数
+     * @return 生成的完整编码字符串
+     */
+    public String codeGenerator(String codePrefix, String codeMiddle, int suffixDigit) {
+
+        String redisKey = RedisHelper.joinKey(codePrefix, codeMiddle);
         long incr = redisHelper.increment(CacheRegion.CODE_GENERATOR, redisKey, 1);
 
         if (incr <= 2) {
@@ -38,7 +49,11 @@ public class CodeGeneratorHelper {
             redisHelper.setExpire(CacheRegion.CODE_GENERATOR, redisKey, 2, TimeUnit.DAYS);
         }
 
-        String codeSuffix = incr <= 999 ? String.format("%04d", incr) : String.valueOf(incr);
-        return codePrefix + nowDate + codeSuffix;
+        // 构造格式化字符串，如%04d表示最少4位，不足补0
+        String format = "%0" + suffixDigit + "d";
+        long threshold = (long) Math.pow(10, suffixDigit - 1);
+        String codeSuffix = incr <= threshold ? String.format(format, incr) : String.valueOf(incr);
+
+        return codePrefix + codeMiddle + codeSuffix;
     }
 }
