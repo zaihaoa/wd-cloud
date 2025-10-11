@@ -13,6 +13,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 #end
 #end
+import java.time.LocalDateTime;
 
 /**
  * <p>
@@ -56,6 +57,12 @@ public class ${entity}PageVO {
   #end
 #end
     private ${field.propertyType} ${field.propertyName};
+#end
+
+#foreach($field in ${table.commonFields})
+    @Schema(description = "${field.comment}")
+    private ${field.propertyType} ${field.propertyName};
+
 #end
 ## ----------  END 字段循环遍历  ----------
 }

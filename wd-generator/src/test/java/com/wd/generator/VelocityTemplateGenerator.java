@@ -86,7 +86,8 @@ public class VelocityTemplateGenerator {
                         objectMap.put("acronymEntity", acronym(entity));
 
                         // 自定义属性
-                                objectMap.put("generatePageAndExportPage", true);
+//                                objectMap.put("generatePageAndExportPage", true);
+                                objectMap.put("generatePage", true);
                                 objectMap.put("generateImport", true);
                                 objectMap.put("generateAdd", true);
                                 objectMap.put("generateUpdate", true);
