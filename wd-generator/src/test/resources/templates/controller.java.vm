@@ -1,14 +1,17 @@
 package ${package.Controller};
 
+import com.wd.common.core.annotions.Folder;
 import com.wd.common.core.model.Id;
 import com.wd.common.core.model.PageInfo;
 import com.wd.common.core.model.R;
 import ${package.Parent}.domain.dto.${entity}PageParamDTO;
 import ${package.Parent}.domain.vo.${entity}PageVO;
+import ${package.Parent}.domain.vo.${entity}DetailVO;
 import ${package.Parent}.domain.dto.${entity}AddDTO;
 import ${package.Parent}.domain.dto.${entity}UpdateDTO;
 import ${package.Service}.${entity}Service;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +27,8 @@ import ${superControllerClassPackage};
  * @author ${author}
  * @since ${date}
  */
+@Folder("$!{table.comment}")
+@Tag(name = "$!{table.comment}")
 #if(${restControllerStyle})
 @RestController
 #else
@@ -40,32 +45,38 @@ public class ${table.controllerName} extends ${superControllerClass} {
 public class ${table.controllerName} {
 #end
 
-        @Resource
-        private ${table.serviceName} ${acronymEntity}Service;
+    @Resource
+    private ${table.serviceName} ${acronymEntity}Service;
 
-        @Operation(summary = "列表查询")
-        @PostMapping("/page")
-        public R<PageInfo<${entity}PageVO>> pageList(@RequestBody ${entity}PageParamDTO pageParam) {
-            return R.success(${acronymEntity}Service.pageList(pageParam));
-        }
+    @Operation(summary = "列表查询")
+    @PostMapping("/page")
+    public R<PageInfo<${entity}PageVO>> pageList(@RequestBody ${entity}PageParamDTO pageParam) {
+        return R.success(${acronymEntity}Service.pageList(pageParam));
+    }
 
-        @Operation(summary = "新增$!{table.comment}")
-        @PostMapping("/add")
-        public R<Long> add${entity}(@RequestBody @Valid ${entity}AddDTO ${acronymEntity}AddParam) {
-            return R.success(${acronymEntity}Service.add${entity}(${acronymEntity}AddParam));
-        }
+    @Operation(summary = "新增$!{table.comment}")
+    @PostMapping("/add")
+    public R<Long> add${entity}(@RequestBody @Valid ${entity}AddDTO ${acronymEntity}AddParam) {
+        return R.success(${acronymEntity}Service.add${entity}(${acronymEntity}AddParam));
+    }
 
-        @Operation(summary = "更新$!{table.comment}")
-        @PutMapping("/update")
-        public R<Boolean> update${entity}(@RequestBody @Valid ${entity}UpdateDTO ${acronymEntity}UpdateParam) {
-            return R.success(${acronymEntity}Service.update${entity}(${acronymEntity}UpdateParam));
-        }
+    @Operation(summary = "更新$!{table.comment}")
+    @PutMapping("/update")
+    public R<Boolean> update${entity}(@RequestBody @Valid ${entity}UpdateDTO ${acronymEntity}UpdateParam) {
+        return R.success(${acronymEntity}Service.update${entity}(${acronymEntity}UpdateParam));
+    }
 
-        @Operation(summary = "删除$!{table.comment}")
-        @DeleteMapping("/delete")
-        public R<Boolean> delete${entity}ById(@RequestBody @Valid Id id) {
-            return R.success(${acronymEntity}Service.delete${entity}ById(id));
-        }
+    @Operation(summary = "获取$!{table.comment}详情")
+    @GetMapping("/detail")
+    public R<${entity}DetailVO> detail(@RequestParam("id") Long id) {
+        return R.success(${acronymEntity}Service.detail(id));
+    }
+
+    @Operation(summary = "删除$!{table.comment}")
+    @DeleteMapping("/delete")
+    public R<Boolean> delete${entity}ById(@RequestBody @Valid Id id) {
+        return R.success(${acronymEntity}Service.delete${entity}ById(id));
+    }
 
 }
 #end

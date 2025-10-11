@@ -20,7 +20,7 @@ import java.util.Collections;
 public class VelocityTemplateGenerator {
 
     // 当前要生成的表
-    private static final String[] TO_GENERATE_TABLE_NAME = {"sys_dictionary"};
+    private static final String[] TO_GENERATE_TABLE_NAME = {"sys_global_config"};
     // 表前缀
     static String TABLE_PREFIX = "sys_";
 
@@ -119,13 +119,19 @@ public class VelocityTemplateGenerator {
                             .customFile(new CustomFile.Builder()
                                     .fileName("AddDTO.java")
                                     .filePath(OUTPUT_DIR_FILE)
-                                    .templatePath("templates/add.java.vm")
+                                    .templatePath("templates/addDTO.java.vm")
                                     .packageName(PARENT_PACKAGE + ".domain.dto")
                                     .build())
                             .customFile(new CustomFile.Builder()
                                     .fileName("UpdateDTO.java")
                                     .filePath(OUTPUT_DIR_FILE)
-                                    .templatePath("templates/update.java.vm")
+                                    .templatePath("templates/updateDTO.java.vm")
+                                    .packageName(PARENT_PACKAGE + ".domain.dto")
+                                    .build())
+                            .customFile(new CustomFile.Builder()
+                                    .fileName("DetailVO.java")
+                                    .filePath(OUTPUT_DIR_FILE)
+                                    .templatePath("templates/detailVO.java.vm")
                                     .packageName(PARENT_PACKAGE + ".domain.dto")
                                     .build())
                     ;

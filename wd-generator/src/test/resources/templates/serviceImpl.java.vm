@@ -3,6 +3,8 @@ package ${package.ServiceImpl};
 import com.alibaba.fastjson2.JSON;
 import com.wd.common.core.model.Id;
 import com.wd.common.core.model.PageInfo;
+import com.wd.common.core.util.AssertUtil;
+import com.wd.common.core.util.I18nUtil;
 import com.wd.common.mybatisplus.PageUtil;
 import ${package.Entity}.${entity};
 import ${package.Mapper}.${table.mapperName};
@@ -10,14 +12,18 @@ import ${package.Mapper}.${table.mapperName};
 import ${package.Service}.${table.serviceName};
 #end
 import ${superServiceImplClassPackage};
+import ${package.Parent}.convert.${entity}Converter;
 import ${package.Parent}.domain.dto.${entity}PageParamDTO;
+import ${package.Parent}.domain.dto.${entity}PageDTO;
 import ${package.Parent}.domain.vo.${entity}PageVO;
+import ${package.Parent}.domain.vo.${entity}DetailVO;
 import ${package.Parent}.domain.dto.${entity}AddDTO;
 import ${package.Parent}.domain.dto.${entity}UpdateDTO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
 
 /**
  * <p>
@@ -69,13 +75,14 @@ public class ${table.serviceImplName} extends ${superServiceImplClass}<${table.m
     @Transactional(rollbackFor = Exception.class)
     @Override
     public long add${entity}(${entity}AddDTO ${acronymEntity}AddParam) {
-        log.info("新增$!{table.comment},参数:{}", JSON.toJSONString(${acronymEntity}AddParam));
+        log.info("新增$!{table.comment}:{}", JSON.toJSONString(${acronymEntity}AddParam));
 
         ${entity} ${acronymEntity} = new ${entity}();
 
         #foreach($field in ${table.fields})
         ${acronymEntity}.set${field.capitalName}(${acronymEntity}AddParam.get${field.capitalName}());
         #end
+        baseMapper.insert(${acronymEntity});
 
         return ${acronymEntity}.getId();
     }
@@ -83,14 +90,33 @@ public class ${table.serviceImplName} extends ${superServiceImplClass}<${table.m
     @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean update${entity}(${entity}UpdateDTO ${acronymEntity}UpdateParam) {
-        log.info("更新$!{table.comment},参数:{}", JSON.toJSONString(${acronymEntity}UpdateParam));
-        return true;
+        log.info("更新$!{table.comment}:{}", JSON.toJSONString(${acronymEntity}UpdateParam));
+
+        ${entity} existRecord = get${entity}ByIdAssertExist(${acronymEntity}UpdateParam.getId());
+
+        // todo
+
+        boolean success = baseMapper.updateById(existRecord) > 0;
+
+        return success;
+    }
+
+    @Override
+    public ${entity}DetailVO detail(Long id) {
+        ${entity} record = get${entity}ById(id);
+        if (record == null) {
+            return null;
+        }
+
+        ${entity}DetailVO vo = ${acronymEntity}Converter.convert${entity}DetailVO(record);
+
+        return vo;
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean delete${entity}ById(Id idParam) {
-        log.info("删除$!{table.comment},参数:{}", JSON.toJSONString(idParam));
+        log.info("删除$!{table.comment}:{}", JSON.toJSONString(idParam));
         Long id = idParam.getId();
 
         // 判断数据是否存在
@@ -102,7 +128,7 @@ public class ${table.serviceImplName} extends ${superServiceImplClass}<${table.m
     }
 
     @Override
-    public ${entity} get${entity}ById(Serializable id) {
+    public ${entity} get${entity}ById(Long id) {
         if (id == null) {
             return null;
         }
@@ -110,8 +136,8 @@ public class ${table.serviceImplName} extends ${superServiceImplClass}<${table.m
     }
 
     @Override
-    public ${entity} get${entity}ByIdAssertExist(Serializable id) {
-        User record = get${entity}ById(id);
+    public ${entity} get${entity}ByIdAssertExist(Long id) {
+        ${entity} record = get${entity}ById(id);
         AssertUtil.notNull(record, () -> I18nUtil.message("data.not.exist"));
         return record;
     }

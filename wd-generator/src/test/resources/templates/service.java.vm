@@ -4,6 +4,7 @@ import com.wd.common.core.model.PageInfo;
 import com.wd.common.core.model.Id;
 import ${package.Parent}.domain.dto.${entity}PageParamDTO;
 import ${package.Parent}.domain.vo.${entity}PageVO;
+import ${package.Parent}.domain.vo.${entity}DetailVO;
 import ${package.Parent}.domain.dto.${entity}AddDTO;
 import ${package.Parent}.domain.dto.${entity}UpdateDTO;
 import ${package.Entity}.${entity};
@@ -45,6 +46,13 @@ public interface ${table.serviceName} extends ${superServiceClass}<${entity}> {
     boolean update${entity}(${entity}UpdateDTO ${acronymEntity}UpdateParam);
 
     /**
+     * 获取详情
+     *
+     * @return 详情
+     */
+    ${entity}DetailVO detail(Long id);
+
+    /**
      * 删除
      *
      * @param id 数据ID
@@ -57,13 +65,13 @@ public interface ${table.serviceName} extends ${superServiceClass}<${entity}> {
      * @param id 数据ID
      * @return 数据
      */
-    ${entity} get${entity}ById(Serializable id);
+    ${entity} get${entity}ById(Long id);
 
     /**
      * 根据ID查询，并断言数据存在
      * @param id 数据ID
      * @return 数据
      */
-    ${entity} get${entity}ByIdAssertExist(Serializable id);
+    ${entity} get${entity}ByIdAssertExist(Long id);
 }
 #end

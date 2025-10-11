@@ -46,7 +46,10 @@
     <select id="pageList" resultType="${package.Parent}.domain.dto.${entity}PageDTO">
         select
         #foreach($field in ${table.fields})
-            ${field.columnName} as ${field.propertyName}#if($foreach.hasNext),#end
+            `${field.columnName}` as `${field.propertyName}`,
+        #end
+        #foreach($field in ${table.commonFields})
+            `${field.columnName}` as `${field.propertyName}`#if($foreach.hasNext),#end
         #end
         from ${schemaName}${table.name}
         <include refid="Page_Condition"/>

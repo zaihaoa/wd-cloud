@@ -3,11 +3,14 @@ package ${package.Parent}.convert;
 import org.mapstruct.Mapper;
 import ${package.Parent}.domain.dto.${entity}PageDTO;
 import ${package.Parent}.domain.vo.${entity}PageVO;
+import ${package.Parent}.domain.entity.${entity}
 
 
 @Mapper(componentModel = "spring")
 public interface ${entity}Converter {
 
     ${entity}PageVO convert${entity}PageVO(${entity}PageDTO dbRecord);
+
+    ${entity}DetailVO convert${entity}DetailVO(${entity} record);
 
 }

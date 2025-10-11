@@ -1,16 +1,10 @@
-package ${package.Parent}.domain.dto;
+package ${package.Parent}.domain.vo;
 
 #if(${springdoc})
 import io.swagger.v3.oas.annotations.media.Schema;
 #elseif(${swagger})
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-#end
-#if(${generatePageAndExportPage})
-import com.wd.common.core.model.BaseExportQuery;
-#elseif(${generatePage})
-import com.wd.common.core.model.BaseQuery;
-#else
 #end
 #if(${entityLombokModel})
 import lombok.Getter;
@@ -22,7 +16,7 @@ import lombok.experimental.Accessors;
 
 /**
  * <p>
- * $!{table.comment} 分页查询参数
+ * $!{table.comment}分页VO
  * </p>
  *
  * @author ${author}
@@ -36,20 +30,14 @@ import lombok.experimental.Accessors;
     #end
 #end
 #if(${springdoc})
-@Schema(description = "$!{table.comment}列表查询参数")
+@Schema(description = "$!{table.comment}详情VO")
 #elseif(${swagger})
-@ApiModel(value = "${entity}PageParamDTO", description = "$!{table.comment}")
+@ApiModel(value = "${entity}DetailVO", description = "$!{table.comment}")
 #end
-#if(${generatePageAndExportPage})
-public class ${entity}PageParamDTO extends BaseExportQuery<Long> {
-#elseif(${generatePage})
-public class ${entity}PageParamDTO extends BaseQuery {
-#elseif(${entitySerialVersionUID})
-public class ${entity}PageParamDTO {
-#else
-public class ${entity}PageParamDTO {
-#end
+public class ${entity}DetailVO {
+#if(${entitySerialVersionUID})
 
+#end
 ## ----------  BEGIN 字段循环遍历  ----------
 #foreach($field in ${table.fields})
 
