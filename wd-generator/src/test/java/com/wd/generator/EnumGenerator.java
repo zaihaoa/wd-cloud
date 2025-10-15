@@ -47,7 +47,7 @@ public class EnumGenerator {
         sb.append("================类名==================").append("\n\n");
 
         sb.append("================类实现================").append("\n");
-        sb.append("com.wd.common.core.model.CodeDescEnum;\n" +
+        sb.append("import com.wd.common.core.model.CodeDescEnum;\n" +
                 "import lombok.AllArgsConstructor;\n" +
                 "import lombok.Getter;\n" +
                 "\n" +

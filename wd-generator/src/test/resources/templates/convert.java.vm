@@ -3,6 +3,7 @@ package ${package.Parent}.convert;
 import org.mapstruct.Mapper;
 import ${package.Parent}.domain.dto.${entity}PageDTO;
 import ${package.Parent}.domain.vo.${entity}PageVO;
+import ${package.Parent}.domain.vo.${entity}DetailVO;
 import ${package.Parent}.domain.entity.${entity};
 
 

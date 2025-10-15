@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wd.system.basic.mapper.GlobalConfigMapper">
+
+
+    <select id="pageCount" resultType="java.lang.Integer">
+        select count(*)
+        from sys_global_config
+        <include refid="Page_Condition"/>
+    </select>
+
+    <select id="pageList" resultType="com.wd.system.basic.domain.dto.GlobalConfigPageDTO">
+        select
+            `id` as `id`,
+            `code` as `code`,
+            `value` as `value`,
+            `remark` as `remark`,
+            `type` as `type`,
+            `sort_number` as `sortNumber`,
+            `create_user_id` as `createUserId`,
+            `update_user_id` as `updateUserId`,
+            `create_time` as `createTime`,
+            `update_time` as `updateTime`
+        from sys_global_config
+        <include refid="Page_Condition"/>
+
+        <if test="param.sort != null and param.sort != ''">
+            ORDER BY ${param.sort} ${param.order}
+        </if>
+        <bind name="limitStart" value="(param.current lte 1) ? 0 : ((param.current - 1) * param.size)"/>
+        LIMIT #{limitStart}, #{param.size}
+    </select>
+
+    <sql id="Page_Condition">
+        <where>
+            <if test="param.code != null and param.code != ''">
+                and `code` like concat('%',#{param.code}, '%')
+            </if>
+            <if test="param.value != null and param.value != ''">
+                and `value` like concat('%',#{param.value}, '%')
+            </if>
+            <if test="param.remark != null and param.remark != ''">
+                and `remark` like concat('%',#{param.remark}, '%')
+            </if>
+            <if test="param.type != null and param.type != ''">
+                and `type` = #{param.type}
+            </if>
+        </where>
+    </sql>
+</mapper>
