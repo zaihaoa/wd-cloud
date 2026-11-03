@@ -4,11 +4,11 @@ import cn.hutool.core.collection.CollUtil;
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
 import com.wd.common.core.constants.CommonConstant;
-import com.wd.common.core.model.Id;
+import com.wd.common.core.model.IdDTO;
 import com.wd.common.core.util.AssertUtil;
 import com.wd.common.core.util.CodeDescEnumUtil;
 import com.wd.common.core.util.ObjectCompareUtil;
@@ -156,7 +156,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public boolean deleteMenuById(Id idParam) {
+    public boolean deleteMenuById(IdDTO idParam) {
         log.info("删除菜单,参数:{}", JSON.toJSONString(idParam));
 
         Long id = idParam.getId();
@@ -273,7 +273,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     }
 
     @Override
-    public MenuDetailVO detail(Id idParam) {
+    public MenuDetailVO detail(IdDTO idParam) {
         Long menuId = idParam.getId();
 
         Menu menu = getMenuById(menuId);

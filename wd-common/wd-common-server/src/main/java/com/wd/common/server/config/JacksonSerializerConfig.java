@@ -1,22 +1,18 @@
 package com.wd.common.server.config;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
-import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.cfg.DateTimeFeature;
+import tools.jackson.databind.ext.javatime.deser.LocalDateDeserializer;
+import tools.jackson.databind.ext.javatime.deser.LocalDateTimeDeserializer;
+import tools.jackson.databind.ext.javatime.deser.LocalTimeDeserializer;
+import tools.jackson.databind.ext.javatime.ser.LocalDateSerializer;
+import tools.jackson.databind.ext.javatime.ser.LocalDateTimeSerializer;
+import tools.jackson.databind.ext.javatime.ser.LocalTimeSerializer;
+import tools.jackson.databind.module.SimpleModule;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -29,66 +25,29 @@ import java.time.format.DateTimeFormatter;
 @Configuration
 public class JacksonSerializerConfig {
 
-    private static final String LOCAL_DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
-    private static final String LOCAL_DATE_FORMAT = "yyyy-MM-dd";
-    private static final String LOCAL_TIME_FORMAT = "HH:mm:ss";
-
-//    @Bean
-//    public ObjectMapper objectMapper() {
-//        ObjectMapper om = new ObjectMapper();
-//        JavaTimeModule javaTimeModule = new JavaTimeModule();
-//        //序列化
-//
-//        javaTimeModule.addSerializer(LocalDateTime.class,
-//                new LocalDateTimeSerializer(DateTimeFormatter.ofPattern(LOCAL_DATE_TIME_FORMAT)));
-//        javaTimeModule.addSerializer(LocalDate.class,
-//                new LocalDateSerializer(DateTimeFormatter.ofPattern(LOCAL_DATE_FORMAT)));
-//        javaTimeModule.addSerializer(LocalTime.class,
-//                new LocalTimeSerializer(DateTimeFormatter.ofPattern(LOCAL_TIME_FORMAT)));
-//
-//        //反序列化
-//        javaTimeModule.addDeserializer(LocalDateTime.class,
-//                new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern(LOCAL_DATE_TIME_FORMAT)));
-//        javaTimeModule.addDeserializer(LocalDate.class,
-//                new LocalDateDeserializer(DateTimeFormatter.ofPattern(LOCAL_DATE_FORMAT)));
-//        javaTimeModule.addDeserializer(LocalTime.class,
-//                new LocalTimeDeserializer(DateTimeFormatter.ofPattern(LOCAL_TIME_FORMAT)));
-//
-//        om.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-//        om.registerModule(javaTimeModule);
-//        return om;
-//    }
+    private static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private static final String DATE_FORMAT = "yyyy-MM-dd";
+    private static final String TIME_FORMAT = "HH:mm:ss";
 
     @Bean
-    public Jackson2ObjectMapperBuilderCustomizer jackson2ObjectMapperBuilderCustomizer() {
+    public JsonMapperBuilderCustomizer jacksonCustomizer() {
+
+        SimpleModule module = new SimpleModule("TOFUWINE-WORKBENCH-MODULE");
+        module
+                .addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)))
+                .addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)))
+
+                .addSerializer(LocalDate.class, new LocalDateSerializer(DateTimeFormatter.ofPattern(DATE_FORMAT)))
+                .addDeserializer(LocalDate.class, new LocalDateDeserializer(DateTimeFormatter.ofPattern(DATE_FORMAT)))
+
+                .addSerializer(LocalTime.class, new LocalTimeSerializer(DateTimeFormatter.ofPattern(TIME_FORMAT)))
+                .addDeserializer(LocalTime.class, new LocalTimeDeserializer(DateTimeFormatter.ofPattern(TIME_FORMAT)));
+
         return builder -> {
+            builder.enable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
+                    .addModule(module)
+                    .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES); // 忽略未知字段 (避免版本升级等原因导致反序列化失败)
 
-            // 时间反序列化（接收数据）
-            builder.deserializerByType(LocalDateTime.class,
-                    new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern(LOCAL_DATE_TIME_FORMAT)));
-            builder.deserializerByType(LocalDate.class,
-                    new LocalDateDeserializer(DateTimeFormatter.ofPattern(LOCAL_DATE_FORMAT)));
-            builder.deserializerByType(LocalTime.class,
-                    new LocalTimeDeserializer(DateTimeFormatter.ofPattern(LOCAL_TIME_FORMAT)));
-
-            // 时间序列化（返回数据）
-            builder.serializerByType(LocalDateTime.class,
-                    new LocalDateTimeSerializer(DateTimeFormatter.ofPattern(LOCAL_DATE_TIME_FORMAT)));
-            builder.serializerByType(LocalDate.class,
-                    new LocalDateSerializer(DateTimeFormatter.ofPattern(LOCAL_DATE_FORMAT)));
-            builder.serializerByType(LocalTime.class,
-                    new LocalTimeSerializer(DateTimeFormatter.ofPattern(LOCAL_TIME_FORMAT)));
-
-
-            // 数值序列化（返回数据）
-            builder.serializerByType(Long.class, ToStringSerializer.instance);
-            builder.serializerByType(BigInteger.class, ToStringSerializer.instance);
-            builder.serializerByType(BigDecimal.class, new JsonSerializer<BigDecimal>() {
-                @Override
-                public void serialize(BigDecimal value, JsonGenerator gen, SerializerProvider serializerProvider) throws IOException {
-                    gen.writeString(value.stripTrailingZeros().toPlainString());
-                }
-            });
         };
     }
 }

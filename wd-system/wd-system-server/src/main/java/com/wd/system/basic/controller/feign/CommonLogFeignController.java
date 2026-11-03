@@ -1,8 +1,6 @@
 package com.wd.system.basic.controller.feign;
 
-import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
-import com.github.xiaoymin.knife4j.annotations.ApiSupport;
-import com.wd.common.core.annotions.Folder;
+import com.wd.common.core.annotions.ApifoxFolder;
 import com.wd.common.core.model.R;
 import com.wd.system.basic.domain.dto.CommonLogAddDTO;
 import com.wd.system.basic.service.CommonLogService;
@@ -26,9 +24,8 @@ import java.util.List;
  * @since 2025-05-28
  */
 @Slf4j
-@Folder("通用日志/feign接口")
+@ApifoxFolder("通用日志/feign接口")
 @Tag(name = "通用日志-feign接口")
-@ApiSupport(order = 300)
 @RestController
 @RequestMapping("/feign/common-log")
 public class CommonLogFeignController {
@@ -37,14 +34,12 @@ public class CommonLogFeignController {
     private CommonLogService commonLogService;
 
     @Operation(summary = "新增日志")
-    @ApiOperationSupport(order = 300)
     @PostMapping("/add-log")
     public R<Boolean> addLog(@RequestBody CommonLogAddDTO commonLogAddParam) {
         return R.success(commonLogService.addLog(commonLogAddParam));
     }
 
     @Operation(summary = "批量新增日志")
-    @ApiOperationSupport(order = 300)
     @PostMapping("/batch-add-log")
     public R<Boolean> batchAddLog(@RequestBody List<CommonLogAddDTO> commonLogAddParams) {
         return R.success(commonLogService.batchAddLog(commonLogAddParams));

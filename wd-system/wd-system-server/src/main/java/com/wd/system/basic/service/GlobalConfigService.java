@@ -1,7 +1,7 @@
 package com.wd.system.basic.service;
 
 import com.wd.common.core.model.PageInfo;
-import com.wd.common.core.model.Id;
+import com.wd.common.core.model.IdDTO;
 import com.wd.system.basic.domain.dto.GlobalConfigPageParamDTO;
 import com.wd.system.basic.domain.vo.GlobalConfigPageVO;
 import com.wd.system.basic.domain.vo.GlobalConfigDetailVO;
@@ -55,7 +55,7 @@ public interface GlobalConfigService extends SuperService<GlobalConfig> {
      * @param id 数据ID
      * @return 是否删除成功
      */
-    boolean deleteGlobalConfigById(Id id);
+    boolean deleteGlobalConfigById(IdDTO id);
 
     /**
      * 根据ID查询

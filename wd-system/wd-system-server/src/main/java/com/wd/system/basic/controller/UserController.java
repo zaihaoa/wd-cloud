@@ -1,6 +1,6 @@
 package com.wd.system.basic.controller;
 
-import com.wd.common.core.model.Id;
+import com.wd.common.core.model.IdDTO;
 import com.wd.common.core.model.PageInfo;
 import com.wd.common.core.model.R;
 import com.wd.system.basic.domain.dto.UserAddDTO;
@@ -48,7 +48,7 @@ public class UserController {
 
     @Operation(summary = "删除用户")
     @DeleteMapping("/delete")
-    public R<Boolean> deleteUserById(@RequestBody @Valid Id id) {
+    public R<Boolean> deleteUserById(@RequestBody @Valid IdDTO id) {
         return R.success(userService.deleteUserById(id));
     }
 

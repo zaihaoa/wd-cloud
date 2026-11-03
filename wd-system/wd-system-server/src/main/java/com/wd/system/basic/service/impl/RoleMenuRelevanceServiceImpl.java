@@ -1,6 +1,6 @@
 package com.wd.system.basic.service.impl;
 
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.wd.system.basic.domain.entity.RoleMenuRelevance;
 import com.wd.system.basic.mapper.RoleMenuRelevanceMapper;
 import com.wd.system.basic.service.RoleMenuRelevanceService;

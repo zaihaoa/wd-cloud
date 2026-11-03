@@ -17,10 +17,6 @@ import lombok.Setter;
 @Schema(description = "用户新增DTO")
 public class UserAddDTO {
 
-
-    @Schema(description = "主键ID")
-    private Long id;
-
     @Schema(description = "用户名")
     private String username;
 

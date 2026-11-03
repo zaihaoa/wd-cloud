@@ -1,8 +1,8 @@
 package com.wd.system.basic.service.impl;
 
 import com.alibaba.fastjson2.JSON;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.wd.common.core.model.Id;
+import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
+import com.wd.common.core.model.IdDTO;
 import com.wd.common.core.model.PageInfo;
 import com.wd.common.core.util.AssertUtil;
 import com.wd.common.core.util.I18nUtil;
@@ -91,7 +91,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public boolean deleteRoleById(Id idParam) {
+    public boolean deleteRoleById(IdDTO idParam) {
         log.info("删除角色,参数:{}", JSON.toJSONString(idParam));
         Long id = idParam.getId();
 

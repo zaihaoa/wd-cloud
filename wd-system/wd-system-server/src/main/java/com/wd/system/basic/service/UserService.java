@@ -1,7 +1,7 @@
 package com.wd.system.basic.service;
 
 import com.wd.common.core.model.PageInfo;
-import com.wd.common.core.model.Id;
+import com.wd.common.core.model.IdDTO;
 import com.wd.system.basic.domain.dto.UserPageParamDTO;
 import com.wd.system.basic.domain.vo.UserPageVO;
 import com.wd.system.basic.domain.dto.UserAddDTO;
@@ -51,7 +51,7 @@ public interface UserService extends SuperService<User> {
      * @param id 数据ID
      * @return 是否删除成功
      */
-    boolean deleteUserById(Id id);
+    boolean deleteUserById(IdDTO id);
 
     /**
      * 根据ID查询

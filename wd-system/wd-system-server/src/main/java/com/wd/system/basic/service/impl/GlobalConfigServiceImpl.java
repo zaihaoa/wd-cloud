@@ -3,8 +3,9 @@ package com.wd.system.basic.service.impl;
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.wd.common.core.constants.CommonConstant;
-import com.wd.common.core.model.Id;
+import com.wd.common.core.model.IdDTO;
 import com.wd.common.core.model.PageInfo;
 import com.wd.common.core.util.AssertUtil;
 import com.wd.common.core.util.CodeDescEnumUtil;
@@ -14,7 +15,6 @@ import com.wd.system.basic.domain.entity.GlobalConfig;
 import com.wd.system.basic.domain.enums.GlobalConfigTypeEnum;
 import com.wd.system.basic.mapper.GlobalConfigMapper;
 import com.wd.system.basic.service.GlobalConfigService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wd.system.basic.convert.GlobalConfigConverter;
 import com.wd.system.basic.domain.dto.GlobalConfigPageParamDTO;
 import com.wd.system.basic.domain.dto.GlobalConfigPageDTO;
@@ -119,7 +119,7 @@ public class GlobalConfigServiceImpl extends ServiceImpl<GlobalConfigMapper, Glo
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public boolean deleteGlobalConfigById(Id idParam) {
+    public boolean deleteGlobalConfigById(IdDTO idParam) {
         log.info("删除全局配置:{}", JSON.toJSONString(idParam));
         Long id = idParam.getId();
 

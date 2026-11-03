@@ -1,6 +1,6 @@
 package com.wd.system.basic.controller;
 
-import com.wd.common.core.annotions.Folder;
+import com.wd.common.core.annotions.ApifoxFolder;
 import com.wd.common.core.model.PageInfo;
 import com.wd.common.core.model.R;
 import com.wd.system.basic.domain.dto.CommonLogPageParamDTO;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author huangwenda
  * @since 2025-07-08
  */
-@Folder("通用日志")
+@ApifoxFolder("通用日志")
 @Tag(name = "通用日志")
 @RestController
 @RequestMapping("/common-log")

@@ -1,6 +1,6 @@
 package com.wd.system.basic.controller;
 
-import com.wd.common.core.annotions.Folder;
+import com.wd.common.core.annotions.ApifoxFolder;
 import com.wd.common.core.model.R;
 import com.wd.system.basic.domain.dto.LoginParamDTO;
 import com.wd.system.basic.domain.vo.LoginResultVO;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author huangwenda
  * @date 2024/1/4 15:52
  **/
-@Folder("登录注销")
+@ApifoxFolder("登录注销")
 @Tag(name = "登录注销")
 @Slf4j
 @RestController

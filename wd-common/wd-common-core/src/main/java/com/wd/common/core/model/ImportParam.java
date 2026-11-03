@@ -17,6 +17,10 @@ import lombok.ToString;
 @ToString
 public class ImportParam {
 
+    @Schema(description = "文件名称")
+    @NotBlank(message = "文件名称不能为空")
+    private String fileName;
+
     @Schema(description = "文件路径", example = "/te/sd/123.xlsx")
     @NotBlank(message = "文件路径不能为空")
     private String filePath;

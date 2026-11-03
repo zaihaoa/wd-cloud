@@ -1,6 +1,6 @@
 package com.wd.system.basic.service;
 
-import com.wd.common.core.model.Id;
+import com.wd.common.core.model.IdDTO;
 import com.wd.common.mybatisplus.SuperService;
 import com.wd.system.basic.domain.dto.MenuAddDTO;
 import com.wd.system.basic.domain.dto.MenuUpdateDTO;
@@ -42,7 +42,7 @@ public interface MenuService extends SuperService<Menu> {
      * @param idParam id
      * @return 是否删除成功
      */
-    boolean deleteMenuById(Id idParam);
+    boolean deleteMenuById(IdDTO idParam);
 
     /**
      * 所有菜单列表Tree（过滤个人用户权限）
@@ -71,7 +71,7 @@ public interface MenuService extends SuperService<Menu> {
     /**
      * 获取详情
      */
-    MenuDetailVO detail(Id idParam);
+    MenuDetailVO detail(IdDTO idParam);
 
     /**
      * 所有菜单对应的权限

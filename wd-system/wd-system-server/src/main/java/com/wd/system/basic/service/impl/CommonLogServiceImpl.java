@@ -3,7 +3,7 @@ package com.wd.system.basic.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.wd.common.core.constants.CommonConstant;
@@ -101,30 +101,31 @@ public class CommonLogServiceImpl extends ServiceImpl<CommonLogMapper, CommonLog
 
             String content = Optional.ofNullable(commonLogAddParam.getContent()).orElse("");
             if (content.length() <= 10000) {
-                CommonLog commonLog = new CommonLog();
-                commonLog.setId(IdWorker.getId());
-                commonLog.setBusinessType(Optional.ofNullable(commonLogAddParam.getBusinessType()).orElse(""));
-                commonLog.setBusinessId(Optional.ofNullable(commonLogAddParam.getBusinessId()).orElse(CommonConstant.ZERO_LONG));
-                commonLog.setOperationType(Optional.ofNullable(commonLogAddParam.getOperationType()).orElse(""));
-                commonLog.setContent(content);
-                addRecords.add(commonLog);
+                addRecords.add(buildCommonLog(commonLogAddParam, content));
             } else {
                 // 如果内容超出10000,截取分批插入
                 String[] splitContentList = StrUtil.split(content, 10000);
                 for (String splitContent : splitContentList) {
-                    CommonLog commonLog = new CommonLog();
-                    commonLog.setId(IdWorker.getId());
-                    commonLog.setBusinessType(Optional.ofNullable(commonLogAddParam.getBusinessType()).orElse(""));
-                    commonLog.setBusinessId(Optional.ofNullable(commonLogAddParam.getBusinessId()).orElse(CommonConstant.ZERO_LONG));
-                    commonLog.setOperationType(Optional.ofNullable(commonLogAddParam.getOperationType()).orElse(""));
-                    commonLog.setContent(splitContent);
-                    addRecords.add(commonLog);
+                    addRecords.add(buildCommonLog(commonLogAddParam, splitContent));
                 }
             }
 
         }
 
         return baseMapper.insertBatchSomeColumn(addRecords) > 0;
+    }
+
+    private CommonLog buildCommonLog(CommonLogAddDTO commonLogAddParam, String content) {
+        CommonLog commonLog = new CommonLog();
+        commonLog.setId(IdWorker.getId());
+        commonLog.setBusinessType(Optional.ofNullable(commonLogAddParam.getBusinessType()).orElse(""));
+        commonLog.setBusinessId(Optional.ofNullable(commonLogAddParam.getBusinessId()).orElse(CommonConstant.ZERO_LONG));
+        commonLog.setOperationType(Optional.ofNullable(commonLogAddParam.getOperationType()).orElse(""));
+        commonLog.setContent(content);
+        if (commonLogAddParam.getCreateUserId() != null) {
+            commonLog.setCreateUserId(commonLogAddParam.getCreateUserId());
+        }
+        return commonLog;
     }
 
 }

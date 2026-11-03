@@ -66,22 +66,36 @@
 	</appender>
 
 	<!-- 日志输出级别 -->
-	<root level="INFO">
-		<if condition='property("SAVE_TYPE").contains("console")'>
-			<then>
+	<root level="INFO"/>
+	<condition class="ch.qos.logback.core.boolex.ExpressionPropertyCondition">
+		<expression>propertyContains("SAVE_TYPE", "console")</expression>
+	</condition>
+	<if>
+		<then>
+			<root>
 				<appender-ref ref="CONSOLE"/>
-			</then>
-		</if>
-		<if condition='property("SAVE_TYPE").contains("file")'>
-			<then>
+			</root>
+		</then>
+	</if>
+	<condition class="ch.qos.logback.core.boolex.ExpressionPropertyCondition">
+		<expression>propertyContains("SAVE_TYPE", "file")</expression>
+	</condition>
+	<if>
+		<then>
+			<root>
 				<appender-ref ref="FILE"/>
-			</then>
-		</if>
-		<if condition='property("SAVE_TYPE").contains("cls")'>
-			<then>
+			</root>
+		</then>
+	</if>
+	<condition class="ch.qos.logback.core.boolex.ExpressionPropertyCondition">
+		<expression>propertyContains("SAVE_TYPE", "cls")</expression>
+	</condition>
+	<if>
+		<then>
+			<root>
 				<appender-ref ref="LOGHUB"/>
-			</then>
-		</if>
-	</root>
+			</root>
+		</then>
+	</if>
 
 </configuration>

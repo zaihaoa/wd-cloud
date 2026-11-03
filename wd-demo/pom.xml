@@ -27,8 +27,6 @@
         <wd-common-core.version>1.0.0</wd-common-core.version>
         <!-- wd-common-feign -->
         <wd-common-feign.version>1.0.0</wd-common-feign.version>
-        <!-- wd-common-knife4j -->
-        <wd-common-knife4j.version>1.0.0</wd-common-knife4j.version>
     </properties>
 
     <dependencyManagement>
@@ -58,12 +56,7 @@
                 <artifactId>wd-common-web</artifactId>
                 <version>${wd-common-web.version}</version>
             </dependency>
-            <!-- wd-common-knife4j -->
-            <dependency>
-                <groupId>com.wd</groupId>
-                <artifactId>wd-common-knife4j</artifactId>
-                <version>${wd-common-knife4j.version}</version>
-            </dependency>
+
         </dependencies>
     </dependencyManagement>
 </project>

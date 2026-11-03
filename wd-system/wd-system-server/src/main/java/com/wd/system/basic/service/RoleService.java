@@ -1,7 +1,7 @@
 package com.wd.system.basic.service;
 
 import com.wd.common.core.model.PageInfo;
-import com.wd.common.core.model.Id;
+import com.wd.common.core.model.IdDTO;
 import com.wd.system.basic.domain.dto.RolePageParamDTO;
 import com.wd.system.basic.domain.vo.RolePageVO;
 import com.wd.system.basic.domain.dto.RoleAddDTO;
@@ -49,7 +49,7 @@ public interface RoleService extends SuperService<Role> {
      * @param id 数据ID
      * @return 是否删除成功
      */
-    boolean deleteRoleById(Id id);
+    boolean deleteRoleById(IdDTO id);
 
     /**
      * 根据ID查询

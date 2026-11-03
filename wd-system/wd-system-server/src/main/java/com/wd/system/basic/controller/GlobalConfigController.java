@@ -1,7 +1,7 @@
 package com.wd.system.basic.controller;
 
-import com.wd.common.core.annotions.Folder;
-import com.wd.common.core.model.Id;
+import com.wd.common.core.annotions.ApifoxFolder;
+import com.wd.common.core.model.IdDTO;
 import com.wd.common.core.model.PageInfo;
 import com.wd.common.core.model.R;
 import com.wd.system.basic.domain.dto.GlobalConfigPageParamDTO;
@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
  * @author huangwenda
  * @since 2025-10-11
  */
-@Folder("全局配置")
+@ApifoxFolder("全局配置")
 @Tag(name = "全局配置")
 @RestController
 @RequestMapping("/global-config")
@@ -59,7 +59,7 @@ public class GlobalConfigController {
 
     @Operation(summary = "删除全局配置")
     @DeleteMapping("/delete")
-    public R<Boolean> deleteGlobalConfigById(@RequestBody @Valid Id id) {
+    public R<Boolean> deleteGlobalConfigById(@RequestBody @Valid IdDTO id) {
         return R.success(globalConfigService.deleteGlobalConfigById(id));
     }
 

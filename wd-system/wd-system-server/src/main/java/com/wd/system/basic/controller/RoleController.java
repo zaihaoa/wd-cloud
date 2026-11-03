@@ -1,6 +1,6 @@
 package com.wd.system.basic.controller;
 
-import com.wd.common.core.model.Id;
+import com.wd.common.core.model.IdDTO;
 import com.wd.common.core.model.PageInfo;
 import com.wd.common.core.model.R;
 import com.wd.system.basic.domain.dto.RoleAddDTO;
@@ -48,7 +48,7 @@ public class RoleController {
 
     @Operation(summary = "删除角色")
     @DeleteMapping("/delete")
-    public R<Boolean> deleteRoleById(@RequestBody @Valid Id id) {
+    public R<Boolean> deleteRoleById(@RequestBody @Valid IdDTO id) {
         return R.success(roleService.deleteRoleById(id));
     }
 

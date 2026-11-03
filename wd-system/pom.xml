@@ -64,7 +64,7 @@
             <!-- wd-common-excel -->
             <dependency>
                 <groupId>com.wd</groupId>
-                <artifactId>wd-common-easyexcel</artifactId>
+                <artifactId>wd-common-excel</artifactId>
                 <version>${wd-common-excel.version}</version>
             </dependency>
         </dependencies>

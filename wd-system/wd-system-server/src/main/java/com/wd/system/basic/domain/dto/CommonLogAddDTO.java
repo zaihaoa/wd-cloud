@@ -20,9 +20,6 @@ import lombok.*;
 @Schema(description = "通用日志添加DTO")
 public class CommonLogAddDTO {
 
-    @Schema(description = "供应商ID")
-    private Long supplierId;
-
     @Schema(description = "业务类型")
     private String businessType;
 
@@ -34,4 +31,7 @@ public class CommonLogAddDTO {
 
     @Schema(description = "操作内容")
     private String content;
+
+    @Schema(description = "创建用户ID(不传则系统默认填充)")
+    private Long createUserId;
 }

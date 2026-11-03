@@ -2,7 +2,7 @@ package com.wd.system.basic.controller;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.wd.common.core.constants.PermissionConstant;
-import com.wd.common.core.model.Id;
+import com.wd.common.core.model.IdDTO;
 import com.wd.common.core.model.R;
 import com.wd.system.basic.domain.dto.MenuAddDTO;
 import com.wd.system.basic.domain.dto.MenuUpdateDTO;
@@ -48,7 +48,7 @@ public class MenuController {
     @Operation(summary = "删除菜单")
     @SaCheckPermission(PermissionConstant.MENU_DELETE)
     @DeleteMapping("/delete")
-    public R<Boolean> deleteMenuById(@RequestBody @Valid Id idParam) {
+    public R<Boolean> deleteMenuById(@RequestBody @Valid IdDTO idParam) {
         return R.success(menuService.deleteMenuById(idParam));
     }
 
@@ -67,7 +67,7 @@ public class MenuController {
 
     @Operation(summary = "获取详情")
     @PostMapping("/detail")
-    public R<MenuDetailVO> detail(@RequestBody @Valid Id idParam) {
+    public R<MenuDetailVO> detail(@RequestBody @Valid IdDTO idParam) {
         return R.success(menuService.detail(idParam));
     }
 

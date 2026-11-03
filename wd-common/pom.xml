@@ -18,11 +18,12 @@
         <module>wd-common-core</module>
         <module>wd-common-redis</module>
         <module>wd-common-job-core</module>
-        <module>wd-common-easyexcel</module>
+        <module>wd-common-excel</module>
         <module>wd-common-mybatisplus</module>
         <module>wd-common-server</module>
         <module>wd-common-openfeign</module>
         <module>wd-common-log</module>
+        <module>wd-common-satoken</module>
     </modules>
 
 </project>

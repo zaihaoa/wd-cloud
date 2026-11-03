@@ -1,11 +1,14 @@
 package com.wd.system.basic.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import com.alibaba.fastjson2.JSON;
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.collect.Maps;
 import com.wd.common.core.constants.CommonConstant;
-import com.wd.common.core.model.Id;
+import com.wd.common.core.model.IdDTO;
 import com.wd.common.core.model.PageInfo;
 import com.wd.common.core.util.AssertUtil;
 import com.wd.common.core.util.I18nUtil;
@@ -87,7 +90,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         User user = new User();
 
-        user.setId(userAddParam.getId());
+        user.setId(IdWorker.getId());
         user.setUsername(userAddParam.getUsername());
         user.setName(userAddParam.getName());
         user.setPassword(userAddParam.getPassword());
@@ -109,7 +112,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public boolean deleteUserById(Id idParam) {
+    public boolean deleteUserById(IdDTO idParam) {
         log.info("删除用户,参数:{}", JSON.toJSONString(idParam));
         Long id = idParam.getId();
 
@@ -138,8 +141,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public Map<Long, String> getUserIdNameMap(Collection<Long> userIds) {
-        // todo
-        return getUserIdNameMap();
+
+        Map<Long, String> userIdNameMap = getUserIdNameMap();
+        if (CollUtil.isEmpty(userIdNameMap) || CollUtil.isEmpty(userIds)) {
+            return userIdNameMap;
+        }
+
+        Map<Long, String> result = Maps.newHashMap();
+
+        userIdNameMap.forEach((k, v) -> {
+            if (userIds.contains(k)) {
+                result.put(k, v);
+            }
+        });
+
+        return result;
     }
 
     @Override
@@ -161,6 +177,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                         .select(User::getId, User::getName))
                 .stream()
                 .collect(Collectors.toMap(User::getId, User::getName));
+
+        userIdNameMap.put(CommonConstant.SYSTEM_USER_ID, CommonConstant.SYSTEM_USER_NAME);
 
         redisHelper.setEx(CacheRegion.USER, key, userIdNameMap, 3, TimeUnit.DAYS);
 
