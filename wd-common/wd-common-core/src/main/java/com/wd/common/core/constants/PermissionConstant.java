@@ -14,6 +14,7 @@ public class PermissionConstant {
     public static final String USER_ADD = "user:add";
     public static final String USER_UPDATE = "user:update";
     public static final String USER_DELETE = "user:delete";
+    public static final String USER_RESET_PASSWORD = "user:reset-password";
 
     /**
      * 角色

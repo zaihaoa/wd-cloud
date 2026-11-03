@@ -1,13 +1,8 @@
-package com.wd.common.core.util;
+package com.wd.common.core.objectcompare;
 
 
 import cn.hutool.core.lang.func.LambdaUtil;
 import cn.hutool.core.util.StrUtil;
-import com.wd.common.core.annotions.ObjectCompare;
-import com.wd.common.core.model.ObjectCompareCustom;
-import com.wd.common.core.model.ObjectCompareField;
-import com.wd.common.core.model.ObjectCompareLogFormatEnum;
-import com.wd.common.core.model.ObjectCompareResult;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
@@ -16,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.regex.Matcher;
 
 /**
  * @author huangwenda
@@ -70,6 +66,25 @@ public class ObjectCompareUtil {
      * @param target                    目标数据对象,修改后的数据对象
      * @param ignoreFields              忽略比较的字段
      * @param objectCompareCustomList   自定义解析字段
+     * @return 对应属性值的比较变化
+     */
+    public static String compareLog(Object source,
+                                    Object target,
+                                    Collection<String> ignoreFields,
+                                    ObjectCompareCustom... objectCompareCustomList) {
+        List<ObjectCompareResult> compareResultList = compare(source, target, ignoreFields, objectCompareCustomList);
+        if (compareResultList.isEmpty()) {
+            return "";
+        }
+        return getLogContent(compareResultList, ObjectCompareLogFormatEnum.SIMPLE);
+    }
+    /**
+     * 属性比较
+     *
+     * @param source                    源数据对象,原始数据对象
+     * @param target                    目标数据对象,修改后的数据对象
+     * @param ignoreFields              忽略比较的字段
+     * @param objectCompareCustomList   自定义解析字段
      * @param logEnum                   日志格式枚举
      * @return 对应属性值的比较变化
      */
@@ -82,10 +97,10 @@ public class ObjectCompareUtil {
         if (compareResultList.isEmpty()) {
             return "";
         }
-        return getLogContent(compareResultList,logEnum);
+        return getLogContent(compareResultList, logEnum);
     }
 
-    private static String getLogContent(List<ObjectCompareResult> compareResultList,ObjectCompareLogFormatEnum logEnum){
+    private static String getLogContent(List<ObjectCompareResult> compareResultList, ObjectCompareLogFormatEnum logEnum) {
         if (compareResultList.isEmpty()) {
             return "";
         }
@@ -98,28 +113,32 @@ public class ObjectCompareUtil {
             String oldValue = compareResult.getOldValue();
             String newValue = compareResult.getNewValue();
 
+            if (Objects.equals(oldValue, newValue)) {
+                continue;
+            }
+
             // 更新
             if (!isBlank(oldValue) && !isBlank(newValue)) {
                 String logFormat = logEnum.getUpdateFormat();
-                logFormat = logFormat.replaceAll("name", name);
-                logFormat = logFormat.replaceAll("oldValue", oldValue);
-                logFormat = logFormat.replaceAll("newValue", newValue);
+                logFormat = logFormat.replace("name", Matcher.quoteReplacement(name));
+                logFormat = logFormat.replace("oldValue", oldValue);
+                logFormat = logFormat.replace("newValue", newValue);
                 sb.append(logFormat);
             }
 
             // 新增
             if (isBlank(oldValue) && !isBlank(newValue)) {
                 String logFormat = logEnum.getAddFormat();
-                logFormat = logFormat.replaceAll("name", name);
-                logFormat = logFormat.replaceAll("newValue", newValue);
+                logFormat = logFormat.replace("name", name);
+                logFormat = logFormat.replace("newValue", newValue);
                 sb.append(logFormat);
             }
 
             // 移除
             if (!isBlank(oldValue) && isBlank(newValue)) {
                 String logFormat = logEnum.getRemoveFormat();
-                logFormat = logFormat.replaceAll("name", name);
-                logFormat = logFormat.replaceAll("oldValue", oldValue);
+                logFormat = logFormat.replace("name", name);
+                logFormat = logFormat.replace("oldValue", oldValue);
                 sb.append(logFormat);
             }
 
@@ -172,7 +191,7 @@ public class ObjectCompareUtil {
                 ObjectCompareField source = sourceMap.get(key);
                 ObjectCompareField target = targetMap.get(key);
                 if (Objects.nonNull(source)) {
-                    String name = StrUtil.isBlank(target.getAnnotationName())?key:target.getAnnotationName();
+                    String name = StrUtil.isBlank(target.getAnnotationName()) ? key : target.getAnnotationName();
                     ObjectCompareCustom objectCompareCustom = customConvert(key, objectCompareCustomList);
                     if (Objects.isNull(objectCompareCustom)) {
                         String sourceValue = source.getValue();
@@ -222,9 +241,9 @@ public class ObjectCompareUtil {
         Map<String, ObjectCompareField> map = new LinkedHashMap<>();
         for (Field field : fields) {
             ObjectCompare compareAnnotation = field.getAnnotation(ObjectCompare.class);
-//            if (Objects.isNull(compareAnnotation) || compareAnnotation.ignore()) {
-//                continue;
-//            }
+            if (Objects.isNull(compareAnnotation) || compareAnnotation.ignore()) {
+                continue;
+            }
             field.setAccessible(true);
             try {
                 String name = field.getName();
@@ -296,18 +315,55 @@ public class ObjectCompareUtil {
     }
 
     /**
-     * str不为空时拼接prefix前缀
+     * 连接三个字符串，格式为：prefix + delimiter + suffix
      *
-     * @param str 字符串
-     * @param prefix 前缀
+     * @param prefix 前缀字符串
+     * @param delimiter 分隔符字符串
+     * @param suffix 后缀字符串
+     * @return 连接后的字符串，如果prefix或suffix为空则返回对应的非空部分
      */
-    public static String notBlankJoinPrefix(String str, String prefix) {
-        if (isBlank(str)) {
-            return "";
-        }
+    public static String joinStr(String prefix, String delimiter, String suffix) {
         if (isBlank(prefix)) {
-            return str;
+            return suffix;
         }
-        return prefix + str;
+        if (isBlank(suffix)) {
+            return prefix;
+        }
+        return prefix + delimiter + suffix;
+    }
+
+    /**
+     * 构建log内容
+     *
+     * @param name 字段名称
+     * @param oldValue 旧值
+     * @param newValue 新值
+     * @return log内容
+     */
+    public static String buildLogContent(String name, String oldValue, String newValue) {
+        return getLogContent(List.of(new ObjectCompareResult(name, oldValue, newValue)), ObjectCompareLogFormatEnum.SIMPLE);
+    }
+
+    /**
+     * 构建log内容
+     *
+     * @param name 字段名称
+     * @param oldValue 旧值
+     * @param newValue 新值
+     * @param logEnum  log输出格式
+     * @return log内容
+     */
+    public static String buildLogContent(String name, String oldValue, String newValue, ObjectCompareLogFormatEnum logEnum) {
+        return getLogContent(List.of(new ObjectCompareResult(name, oldValue, newValue)), logEnum);
+    }
+
+    /**
+     * 构建log内容
+     * @param compareResultList 对比结果
+     * @param logEnum log输出格式
+     * @return log内容
+     */
+    public static String buildLogContent(List<ObjectCompareResult> compareResultList, ObjectCompareLogFormatEnum logEnum) {
+        return getLogContent(compareResultList, logEnum);
     }
 }

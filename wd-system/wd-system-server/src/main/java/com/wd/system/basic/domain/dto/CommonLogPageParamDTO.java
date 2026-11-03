@@ -21,6 +21,6 @@ public class CommonLogPageParamDTO extends BaseQuery {
     @Schema(description = "业务类型")
     private String businessType;
 
-    @Schema(description = "业务ID")
-    private Long businessId;
+    @Schema(description = "业务KEY")
+    private String businessKey;
 }

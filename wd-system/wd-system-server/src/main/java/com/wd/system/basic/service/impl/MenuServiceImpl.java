@@ -5,13 +5,12 @@ import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
 import com.wd.common.core.constants.CommonConstant;
 import com.wd.common.core.model.IdDTO;
 import com.wd.common.core.util.AssertUtil;
 import com.wd.common.core.util.CodeDescEnumUtil;
-import com.wd.common.core.util.ObjectCompareUtil;
+import com.wd.common.core.objectcompare.ObjectCompareUtil;
 import com.wd.common.redis.CacheRegion;
 import com.wd.common.redis.RedisKey;
 import com.wd.common.redis.util.RedisHelper;
@@ -33,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.type.TypeReference;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -99,10 +99,10 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         return id;
     }
 
-    private void addLog(Long businessId, String operationType, String content) {
+    private void addLog(Long businessKey, String operationType, String content) {
         CommonLogAddDTO commonLog = CommonLogAddDTO.builder()
                 .businessType(CommonLogBusinessTypeEnum.MENU.getCode())
-                .businessId(businessId)
+                .businessKey(String.valueOf(businessKey))
                 .operationType(operationType)
                 .content(content)
                 .build();

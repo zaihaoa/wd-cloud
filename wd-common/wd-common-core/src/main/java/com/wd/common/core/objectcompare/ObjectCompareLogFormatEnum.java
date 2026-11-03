@@ -1,4 +1,4 @@
-package com.wd.common.core.model;
+package com.wd.common.core.objectcompare;
 
 /**
  * 对象比较log输出格式

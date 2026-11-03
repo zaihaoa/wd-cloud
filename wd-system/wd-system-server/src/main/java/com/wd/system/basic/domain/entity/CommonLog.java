@@ -35,9 +35,9 @@ public class CommonLog extends BaseUserTimeEntity implements Serializable {
     @TableField("business_type")
     private String businessType;
 
-    @Schema(description = "业务ID")
-    @TableField("business_id")
-    private Long businessId;
+    @Schema(description = "业务KEY")
+    @TableField("business_key")
+    private String businessKey;
 
     @Schema(description = "操作类型")
     @TableField("operation_type")

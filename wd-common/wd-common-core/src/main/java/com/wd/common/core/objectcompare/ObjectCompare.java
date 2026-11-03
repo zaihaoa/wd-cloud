@@ -1,4 +1,4 @@
-package com.wd.common.core.annotions;
+package com.wd.common.core.objectcompare;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

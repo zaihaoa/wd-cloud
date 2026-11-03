@@ -13,12 +13,14 @@
             id as id,
             username as username,
             name as name,
-            password as password,
             status as status,
             type as type,
             phone as phone,
             email as email,
-            delete_flag as deleteFlag
+            create_user_id as createUserId,
+            update_user_id as updateUserId,
+            create_time as createTime,
+            update_time as updateTime
         from sys_user
         <include refid="Page_Condition"/>
 
@@ -31,17 +33,11 @@
 
     <sql id="Page_Condition">
         <where>
-            <if test="param.id != null">
-                and `id` = #{param.id}
-            </if>
             <if test="param.username != null and param.username != ''">
-                and `username` = #{param.username}
+                and `username` like concat('%',#{param.username}, '%')
             </if>
             <if test="param.name != null and param.name != ''">
-                and `name` = #{param.name}
-            </if>
-            <if test="param.password != null and param.password != ''">
-                and `password` = #{param.password}
+                and `name` like concat('%',#{param.name}, '%')
             </if>
             <if test="param.status != null and param.status != ''">
                 and `status` = #{param.status}
@@ -50,13 +46,10 @@
                 and `type` = #{param.type}
             </if>
             <if test="param.phone != null and param.phone != ''">
-                and `phone` = #{param.phone}
+                and `phone` like concat('%',#{param.phone}, '%')
             </if>
             <if test="param.email != null and param.email != ''">
-                and `email` = #{param.email}
-            </if>
-            <if test="param.deleteFlag != null">
-                and `delete_flag` = #{param.deleteFlag}
+                and `email` like concat('%',#{param.email}, '%')
             </if>
         </where>
     </sql>

@@ -16,6 +16,7 @@ public enum CacheRegion implements CodeDescEnum {
     SYSTEM("system", "系统"),
     MENU("menu", "菜单"),
     USER("user", "用户"),
+    PERMISSION("permission", "权限"),
     ;
 
     private final String code;

@@ -13,7 +13,7 @@
         select
         id as id,
         business_type as businessType,
-        business_id as businessId,
+        business_key as businessKey,
         operation_type as operationType,
         content as content,
         create_user_id as createUserId,
@@ -34,8 +34,8 @@
             <if test="param.businessType != null and param.businessType != ''">
                 and `business_type` = #{param.businessType}
             </if>
-            <if test="param.businessId != null">
-                and `business_id` = #{param.businessId}
+            <if test="param.businessKey != null">
+                and `business_key` = #{param.businessKey}
             </if>
         </where>
     </sql>

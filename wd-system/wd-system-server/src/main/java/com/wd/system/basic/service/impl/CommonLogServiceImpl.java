@@ -56,11 +56,7 @@ public class CommonLogServiceImpl extends ServiceImpl<CommonLogMapper, CommonLog
 
     private List<CommonLogPageVO> convertCommonLogPageVOList(List<CommonLogPageDTO> dbRecords) {
 
-        Set<Long> userIds = Sets.newHashSet();
-        userIds.addAll(dbRecords.stream().map(CommonLogPageDTO::getCreateUserId).collect(Collectors.toSet()));
-        userIds.addAll(dbRecords.stream().map(CommonLogPageDTO::getUpdateUserId).collect(Collectors.toSet()));
-
-        Map<Long, String> userIdNameMap = userService.getUserIdNameMap(userIds);
+        Map<Long, String> userIdNameMap = userService.getUserIdNameMap();
 
         return dbRecords
                 .stream()
@@ -68,7 +64,7 @@ public class CommonLogServiceImpl extends ServiceImpl<CommonLogMapper, CommonLog
                     CommonLogPageVO vo = new CommonLogPageVO();
                     vo.setId(dbRecord.getId());
                     vo.setBusinessType(dbRecord.getBusinessType());
-                    vo.setBusinessId(dbRecord.getBusinessId());
+                    vo.setBusinessKey(dbRecord.getBusinessKey());
                     vo.setOperationType(dbRecord.getOperationType());
                     vo.setContent(dbRecord.getContent());
                     vo.setCreateUserId(dbRecord.getCreateUserId());
@@ -119,7 +115,7 @@ public class CommonLogServiceImpl extends ServiceImpl<CommonLogMapper, CommonLog
         CommonLog commonLog = new CommonLog();
         commonLog.setId(IdWorker.getId());
         commonLog.setBusinessType(Optional.ofNullable(commonLogAddParam.getBusinessType()).orElse(""));
-        commonLog.setBusinessId(Optional.ofNullable(commonLogAddParam.getBusinessId()).orElse(CommonConstant.ZERO_LONG));
+        commonLog.setBusinessKey(Optional.ofNullable(commonLogAddParam.getBusinessKey()).orElse(""));
         commonLog.setOperationType(Optional.ofNullable(commonLogAddParam.getOperationType()).orElse(""));
         commonLog.setContent(content);
         if (commonLogAddParam.getCreateUserId() != null) {

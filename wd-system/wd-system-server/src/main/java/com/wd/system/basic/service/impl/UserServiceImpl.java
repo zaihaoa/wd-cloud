@@ -1,41 +1,49 @@
 package com.wd.system.basic.service.impl;
 
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.collection.CollUtil;
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Maps;
 import com.wd.common.core.constants.CommonConstant;
+import com.wd.common.core.context.SystemContext;
+import com.wd.common.core.exception.PromptException;
 import com.wd.common.core.model.IdDTO;
 import com.wd.common.core.model.PageInfo;
+import com.wd.common.core.model.SelectCombobox;
+import com.wd.common.core.objectcompare.ObjectCompareUtil;
 import com.wd.common.core.util.AssertUtil;
+import com.wd.common.core.util.CodeDescEnumUtil;
 import com.wd.common.core.util.I18nUtil;
 import com.wd.common.mybatisplus.PageUtil;
 import com.wd.common.redis.CacheRegion;
 import com.wd.common.redis.RedisKey;
 import com.wd.common.redis.util.RedisHelper;
 import com.wd.system.basic.convert.UserConverter;
-import com.wd.system.basic.domain.dto.UserAddDTO;
-import com.wd.system.basic.domain.dto.UserPageDTO;
-import com.wd.system.basic.domain.dto.UserPageParamDTO;
-import com.wd.system.basic.domain.dto.UserUpdateDTO;
+import com.wd.system.basic.domain.dto.*;
 import com.wd.system.basic.domain.entity.User;
+import com.wd.system.basic.domain.enums.CommonLogBusinessTypeEnum;
+import com.wd.system.basic.domain.enums.UserStatusEnum;
+import com.wd.system.basic.domain.enums.UserTypeEnum;
+import com.wd.system.basic.domain.vo.UserDetailVO;
+import com.wd.system.basic.domain.vo.UserInfoVO;
 import com.wd.system.basic.domain.vo.UserPageVO;
 import com.wd.system.basic.mapper.UserMapper;
+import com.wd.system.basic.service.CommonLogService;
 import com.wd.system.basic.service.UserService;
+import com.wd.system.basic.util.UserHelper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
+import tools.jackson.core.type.TypeReference;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -55,6 +63,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private UserConverter userConverter;
     @Resource
     private RedisHelper redisHelper;
+    @Resource
+    private CommonLogService commonLogService;
 
     @Override
     public PageInfo<UserPageVO> pageList(UserPageParamDTO pageParam) {
@@ -72,11 +82,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     private List<UserPageVO> convertUserPageVOList(List<UserPageDTO> dbRecords) {
+
+        Map<Long, String> userIdNameMap = getUserIdNameMap();
+
         return dbRecords
                 .stream()
                 .map(dbRecord -> {
                     UserPageVO vo = userConverter.convertUserPageVO(dbRecord);
+                    vo.setStatusDesc(CodeDescEnumUtil.getDescByCode(UserStatusEnum.class, vo.getStatus()));
+                    vo.setTypeDesc(CodeDescEnumUtil.getDescByCode(UserTypeEnum.class, vo.getType()));
 
+                    vo.setCreateUserName(userIdNameMap.get(vo.getCreateUserId()));
+                    vo.setUpdateUserName(userIdNameMap.get(vo.getUpdateUserId()));
 
                     return vo;
                 })
@@ -86,28 +103,100 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Transactional(rollbackFor = Exception.class)
     @Override
     public long addUser(UserAddDTO userAddParam) {
-        log.info("新增用户,参数:{}", JSON.toJSONString(userAddParam));
+
+        String username = userAddParam.getUsername();
+        String name = userAddParam.getName();
+        String password = userAddParam.getPassword();
+        String confirmPassword = userAddParam.getConfirmPassword();
+        String phone = userAddParam.getPhone();
+        String email = userAddParam.getEmail();
+        log.info("新增用户,username:{},name:{},phone:{},email:{}", username, name, phone, email);
+
+        Assert.isTrue(Objects.equals(password, confirmPassword), "两次密码输入不一致");
+        Assert.isTrue(!Objects.equals(name, CommonConstant.SYSTEM_USER_NAME), "姓名不能使用" + CommonConstant.SYSTEM_USER_NAME);
+
+        Long usernameCount = baseMapper.selectCount(Wrappers.<User>lambdaQuery().eq(User::getUsername, username));
+        Assert.isTrue(usernameCount <= 0, "用户名已存在");
+
+        if (StringUtils.isNotBlank(phone)) {
+            Long phoneCount = baseMapper.selectCount(Wrappers.<User>lambdaQuery().eq(User::getPhone, phone));
+            Assert.isTrue(phoneCount <= 0, "手机号已存在");
+        }
+
+        if (StringUtils.isNotBlank(email)) {
+            Long emailCount = baseMapper.selectCount(Wrappers.<User>lambdaQuery().eq(User::getEmail, email));
+            Assert.isTrue(emailCount <= 0, "邮箱已存在");
+        }
 
         User user = new User();
+        long id = IdWorker.getId();
+        user.setId(id);
+        user.setUsername(username);
+        user.setName(name);
+        user.setPassword(UserHelper.encryptPassword(password));
+        user.setStatus(UserStatusEnum.NORMAL.getCode());
+        user.setType(UserTypeEnum.NORMAL.getCode());
+        user.setPhone(Optional.ofNullable(phone).orElse(""));
+        user.setEmail(Optional.ofNullable(email).orElse(""));
+        user.setDeleteFlag(CommonConstant.NOT_DELETE_FLAG);
 
-        user.setId(IdWorker.getId());
-        user.setUsername(userAddParam.getUsername());
-        user.setName(userAddParam.getName());
-        user.setPassword(userAddParam.getPassword());
-        user.setStatus(userAddParam.getStatus());
-        user.setType(userAddParam.getType());
-        user.setPhone(userAddParam.getPhone());
-        user.setEmail(userAddParam.getEmail());
-        user.setDeleteFlag(userAddParam.getDeleteFlag());
+        baseMapper.insert(user);
 
-        return user.getId();
+        // 添加日志
+        addLog(id, "新增", "新增用户");
+
+        // 清除缓存
+        clearUserCache();
+
+        return id;
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean updateUser(UserUpdateDTO userUpdateParam) {
         log.info("更新用户,参数:{}", JSON.toJSONString(userUpdateParam));
-        return true;
+
+        Long id = userUpdateParam.getId();
+        String username = userUpdateParam.getUsername();
+        String name = userUpdateParam.getName();
+        String phone = userUpdateParam.getPhone();
+        String email = userUpdateParam.getEmail();
+
+        User user = getUserByIdAssertExist(id);
+
+        Long usernameCount = baseMapper.selectCount(Wrappers.<User>lambdaQuery().eq(User::getUsername, username).ne(User::getId, id));
+        Assert.isTrue(usernameCount <= 0, "用户名已存在");
+
+        Assert.isTrue(!Objects.equals(name, CommonConstant.SYSTEM_USER_NAME), "姓名不能使用" + CommonConstant.SYSTEM_USER_NAME);
+
+        if (StringUtils.isNotBlank(phone)) {
+            Long phoneCount = baseMapper.selectCount(Wrappers.<User>lambdaQuery().eq(User::getPhone, phone).ne(User::getId, id));
+            Assert.isTrue(phoneCount <= 0, "手机号已存在");
+        }
+
+        if (StringUtils.isNotBlank(email)) {
+            Long emailCount = baseMapper.selectCount(Wrappers.<User>lambdaQuery().eq(User::getEmail, email).ne(User::getId, id));
+            Assert.isTrue(emailCount <= 0, "邮箱已存在");
+        }
+
+        String compareLog = ObjectCompareUtil.compareLog(user, userUpdateParam);
+
+        boolean success = baseMapper.update(Wrappers.<User>lambdaUpdate()
+                .set(User::getUsername, username)
+                .set(User::getName, name)
+                .set(User::getPhone, Optional.ofNullable(phone).orElse(""))
+                .set(User::getEmail, Optional.ofNullable(email).orElse(""))
+                .eq(User::getId, id)) > 0;
+
+        // 添加日志
+        if (StringUtils.isNotBlank(compareLog)) {
+            addLog(id, "编辑", "编辑用户，" + compareLog);
+        }
+
+        // 清除缓存
+        clearUserCache();
+
+        return success;
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -117,9 +206,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         Long id = idParam.getId();
 
         // 判断数据是否存在
-        getUserByIdAssertExist(id);
+        User user = getUserByIdAssertExist(id);
+        if (UserTypeEnum.SYSTEM.getCode().equals(user.getType())) {
+            throw new PromptException("系统用户不能删除");
+        }
 
-        boolean success = baseMapper.deleteById(id) > 0;
+        boolean success = baseMapper.update(Wrappers.<User>lambdaUpdate()
+                .set(User::getDeleteFlag, id)
+                .eq(User::getId, id)) > 0;
+
+//        userRoleRelevanceService.remove(Wrappers.<UserRoleRelevance>lambdaQuery().eq(UserRoleRelevance::getUserId, userId));
+//        userDataPermissionRelevanceService.remove(Wrappers.<UserDataPermissionRelevance>lambdaQuery().eq(UserDataPermissionRelevance::getUserId, userId));
+
+        // 添加日志
+        addLog(id, "删除", "删除用户");
+
+        // 登出系统
+        StpUtil.logout(id);
+
+        // 清除缓存
+        clearUserCache();
 
         return success;
     }
@@ -191,5 +297,150 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             return null;
         }
         return baseMapper.selectOne(Wrappers.<User>lambdaQuery().eq(User::getUsername, username));
+    }
+
+    private void addLog(Long businessKey, String operationType, String content) {
+        CommonLogAddDTO commonLog = CommonLogAddDTO.builder()
+                .businessType(CommonLogBusinessTypeEnum.USER.getCode())
+                .businessKey(String.valueOf(businessKey))
+                .operationType(operationType)
+                .content(content)
+                .build();
+        commonLogService.addLog(commonLog);
+    }
+
+    private void clearUserCache() {
+        redisHelper.deleteByCacheRegion(CacheRegion.USER);
+        redisHelper.deleteByCacheRegion(CacheRegion.PERMISSION);
+    }
+
+    @Override
+    public boolean updateStatus(UserUpdateStatusDTO updateStatusDTO) {
+        log.info("更新状态,参数:{}", JSON.toJSONString(updateStatusDTO));
+
+        Long userId = updateStatusDTO.getId();
+        String status = updateStatusDTO.getStatus();
+
+        User user = getUserByIdAssertExist(userId);
+        AssertUtil.isTrue(UserTypeEnum.NORMAL.getCode().equals(user.getType()), "该用户不能修改状态");
+
+        boolean success = true;
+
+        if (!Objects.equals(status, user.getStatus())) {
+            success = baseMapper.update(Wrappers.<User>lambdaUpdate()
+                    .set(User::getStatus, status)
+                    .eq(User::getId, userId)) > 0;
+
+            // 添加日志
+            addLog(userId, "编辑", CodeDescEnumUtil.getDescByCode(UserStatusEnum.class, status) + "用户");
+        }
+
+        if (!UserStatusEnum.NORMAL.getCode().equals(status)) {
+            // 登出系统
+            StpUtil.logout(userId);
+        }
+
+        // 清除缓存
+        clearUserCache();
+
+        return success;
+    }
+
+    @Override
+    public boolean updatePassword(UserUpdatePasswordDTO userUpdatePasswordDTO) {
+        Long userId = userUpdatePasswordDTO.getId();
+        log.info("修改密码,用户ID:{}", userId);
+
+        String oldPassword = userUpdatePasswordDTO.getOldPassword();
+        String password = userUpdatePasswordDTO.getPassword();
+        String confirmPassword = userUpdatePasswordDTO.getConfirmPassword();
+
+        AssertUtil.isTrue(Objects.equals(password, confirmPassword), "两次密码输入不一致");
+
+        User user = getUserByIdAssertExist(userId);
+        AssertUtil.isTrue(UserHelper.checkPassword(oldPassword, user.getPassword()), "旧密码不正确");
+
+        baseMapper.update(Wrappers.<User>lambdaUpdate()
+                .set(User::getPassword, UserHelper.encryptPassword(password))
+                .eq(User::getId, userId));
+
+        // 添加日志
+        addLog(userId, "修改密码", "修改密码成功");
+
+        // 登出系统
+        StpUtil.logout(userId);
+
+        // 清除缓存
+        clearUserCache();
+
+        return true;
+    }
+
+    @Override
+    public boolean resetPassword(UserResetPasswordDTO userResetPasswordDTO) {
+        Long userId = userResetPasswordDTO.getId();
+        log.info("重置密码,用户ID:{}", userId);
+
+        String password = userResetPasswordDTO.getPassword();
+        String confirmPassword = userResetPasswordDTO.getConfirmPassword();
+
+        AssertUtil.isTrue(Objects.equals(password, confirmPassword), "两次密码输入不一致");
+
+        baseMapper.update(Wrappers.<User>lambdaUpdate()
+                .set(User::getPassword, UserHelper.encryptPassword(password))
+                .eq(User::getId, userId));
+
+        // 添加日志
+        addLog(userId, "重置密码", "重置密码成功");
+
+        // 登出系统
+        StpUtil.logout(userId);
+
+        // 清除缓存
+        clearUserCache();
+
+        return true;
+    }
+
+    @Override
+    public UserDetailVO detail(IdDTO idDTO) {
+        User user = getUserById(idDTO.getId());
+        if (Objects.isNull(user)) {
+            return null;
+        }
+
+        UserDetailVO vo = userConverter.convertUserDetailVO(user);
+        vo.setStatusDesc(CodeDescEnumUtil.getDescByCode(UserStatusEnum.class, vo.getStatus()));
+        vo.setTypeDesc(CodeDescEnumUtil.getDescByCode(UserTypeEnum.class, vo.getType()));
+
+        Map<Long, String> userIdNameMap = getUserIdNameMap();
+
+        vo.setCreateUserName(userIdNameMap.get(vo.getCreateUserId()));
+        vo.setUpdateUserName(userIdNameMap.get(vo.getUpdateUserId()));
+
+        return vo;
+    }
+
+    @Override
+    public UserInfoVO currentUserInfo() {
+        UserDetailVO userDetail = detail(new IdDTO(SystemContext.getUserIdAssertExist()));
+
+        UserInfoVO userInfoVO = userConverter.convertUserInfoVO(userDetail);
+
+        return userInfoVO;
+    }
+
+    @Override
+    public List<SelectCombobox> userCombobox(String status) {
+
+        // 用户ID和姓名
+        return baseMapper
+                .selectList(Wrappers.<User>lambdaQuery()
+                        .eq(StringUtils.isNotBlank(status), User::getStatus, status)
+                        .select(User::getId, User::getName))
+                .stream()
+                .map(v -> new SelectCombobox(String.valueOf(v.getId()), v.getName()))
+                .sorted(Comparator.comparing(SelectCombobox::getLabel))
+                .toList();
     }
 }

@@ -1,4 +1,4 @@
-package com.wd.common.core.model;
+package com.wd.common.core.objectcompare;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;

@@ -1,6 +1,9 @@
 package com.wd.system.basic.domain.dto;
 
+import com.wd.common.core.objectcompare.ObjectCompare;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,31 +20,25 @@ import lombok.Setter;
 @Schema(description = "用户更新DTO")
 public class UserUpdateDTO {
 
-
     @Schema(description = "主键ID")
+    @NotNull(message = "主键ID不能为空")
     private Long id;
 
     @Schema(description = "用户名")
+    @ObjectCompare("用户名")
+    @NotBlank(message = "用户名不能为空")
     private String username;
 
     @Schema(description = "姓名")
+    @ObjectCompare("姓名")
+    @NotBlank(message = "姓名不能为空")
     private String name;
 
-    @Schema(description = "用户密码")
-    private String password;
-
-    @Schema(description = "状态(NORMAL:正常,DISABLE:禁用)")
-    private String status;
-
-    @Schema(description = "类型(BUILT_IN:内置用户,NORMAL:普通用户)")
-    private String type;
-
     @Schema(description = "手机号码")
+    @ObjectCompare("手机号码")
     private String phone;
 
     @Schema(description = "邮箱")
+    @ObjectCompare("邮箱")
     private String email;
-
-    @Schema(description = "删除标记，等于0表示没有删除，否则为删除")
-    private Long deleteFlag;
 }

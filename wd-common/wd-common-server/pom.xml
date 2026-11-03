@@ -62,11 +62,6 @@
             <artifactId>fastjson2</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
-        </dependency>
-
         <!-- spring-boot-starter -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -111,6 +106,7 @@
             <artifactId>spring-cloud-context</artifactId>
         </dependency>
 
+        <!-- springdoc -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>

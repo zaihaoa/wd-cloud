@@ -1,20 +1,19 @@
 package com.wd.common.redis.util;
 
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.wd.common.redis.CacheRegion;
 import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.cfg.DateTimeFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -44,30 +43,25 @@ public class RedisHelper {
     /**
      * 对象转json
      */
-    public static final ObjectMapper OM = redisSerializationObjectMapper();
+    public static final JsonMapper JSON_MAPPER = redisSerializationJsonMapper();
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
 
 
-    public static ObjectMapper redisSerializationObjectMapper() {
-        ObjectMapper om = new ObjectMapper();
-        // 指定要序列化的域，field,get和set,以及修饰符范围，ANY是都有包括private和public
-        om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-        // 解决jackson2无法反序列化LocalDateTime的问题
-        om.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        om.registerModule(new ParameterNamesModule());
-        om.registerModule(new Jdk8Module());
-
-        om.registerModule(new JavaTimeModule());
-
-        // 忽略null字段
-        om.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-
-        // 支持序列化没有字段的空对象
-        om.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-
-        return om;
+    public static JsonMapper redisSerializationJsonMapper() {
+        return JsonMapper.builder()
+                // 指定要序列化的域，field,get和set,以及修饰符范围，ANY是都有包括private和public
+                .changeDefaultVisibility(visibility -> visibility.withVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY))
+                // Jackson 3 已内置 Java 时间类型、Optional 和构造参数名支持
+                .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
+                // 忽略null字段和容器中的null值
+                .changeDefaultPropertyInclusion(inclusion -> inclusion
+                        .withValueInclusion(JsonInclude.Include.NON_NULL)
+                        .withContentInclusion(JsonInclude.Include.NON_NULL))
+                // 支持序列化没有字段的空对象
+                .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+                .build();
     }
 
 
@@ -361,7 +355,7 @@ public class RedisHelper {
         if (str == null) {
             return null;
         }
-        return OM.readValue(str, o);
+        return JSON_MAPPER.readValue(str, o);
     }
 
     @SneakyThrows
@@ -369,12 +363,12 @@ public class RedisHelper {
         if (str == null) {
             return null;
         }
-        return OM.readValue(str, valueTypeRef);
+        return JSON_MAPPER.readValue(str, valueTypeRef);
     }
 
     @SneakyThrows
     public static String toString(Object o) {
-        return OM.writeValueAsString(o);
+        return JSON_MAPPER.writeValueAsString(o);
     }
 
 

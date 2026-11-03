@@ -1,4 +1,4 @@
-package com.wd.common.core.model;
+package com.wd.common.core.objectcompare;
 
 import cn.hutool.core.lang.func.Func1;
 import io.swagger.v3.oas.annotations.media.Schema;

@@ -1,7 +1,7 @@
 package com.wd.system.basic.domain.dto;
 
 import com.wd.common.core.annotions.EnumCodeExist;
-import com.wd.common.core.annotions.ObjectCompare;
+import com.wd.common.core.objectcompare.ObjectCompare;
 import com.wd.system.basic.domain.enums.MenuTypeEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;

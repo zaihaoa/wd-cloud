@@ -1,16 +1,19 @@
 package com.wd.system.basic.service;
 
-import com.wd.common.core.model.PageInfo;
 import com.wd.common.core.model.IdDTO;
-import com.wd.system.basic.domain.dto.UserPageParamDTO;
-import com.wd.system.basic.domain.vo.UserPageVO;
-import com.wd.system.basic.domain.dto.UserAddDTO;
-import com.wd.system.basic.domain.dto.UserUpdateDTO;
-import com.wd.system.basic.domain.entity.User;
+import com.wd.common.core.model.PageInfo;
+import com.wd.common.core.model.SelectCombobox;
 import com.wd.common.mybatisplus.SuperService;
+import com.wd.system.basic.domain.dto.*;
+import com.wd.system.basic.domain.entity.User;
+import com.wd.system.basic.domain.vo.UserDetailVO;
+import com.wd.system.basic.domain.vo.UserInfoVO;
+import com.wd.system.basic.domain.vo.UserPageVO;
+import jakarta.validation.Valid;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -85,4 +88,34 @@ public interface UserService extends SuperService<User> {
      * 根据用户名查询
      */
     User getByUsername(String username);
+
+    /**
+     * 更新状态
+     */
+    boolean updateStatus(UserUpdateStatusDTO updateStatusDTO);
+
+    /**
+     * 修改密码
+     */
+    boolean updatePassword(UserUpdatePasswordDTO userUpdatePasswordDTO);
+
+    /**
+     * 重置密码
+     */
+    boolean resetPassword(UserResetPasswordDTO userResetPasswordDTO);
+
+    /**
+     * 用户详情
+     */
+    UserDetailVO detail(IdDTO idDTO);
+
+    /**
+     * 当前登录用户信息
+     */
+    UserInfoVO currentUserInfo();
+
+    /**
+     * 用户下拉框
+     */
+    List<SelectCombobox> userCombobox(String status);
 }

@@ -18,17 +18,11 @@ import lombok.Setter;
 @Schema(description = "用户列表查询参数")
 public class UserPageParamDTO extends BaseExportQuery<Long> {
 
-    @Schema(description = "主键ID")
-    private Long id;
-
     @Schema(description = "用户名")
     private String username;
 
     @Schema(description = "姓名")
     private String name;
-
-    @Schema(description = "用户密码")
-    private String password;
 
     @Schema(description = "状态(NORMAL:正常,DISABLE:禁用)")
     private String status;
@@ -41,7 +35,4 @@ public class UserPageParamDTO extends BaseExportQuery<Long> {
 
     @Schema(description = "邮箱")
     private String email;
-
-    @Schema(description = "删除标记，等于0表示没有删除，否则为删除")
-    private Long deleteFlag;
 }
