@@ -80,13 +80,6 @@
             <version>${project.version}</version>
         </dependency>
 
-        <!-- wd-common-satoken -->
-        <dependency>
-            <groupId>com.wd</groupId>
-            <artifactId>wd-common-satoken</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
     </dependencies>
 
     <build>

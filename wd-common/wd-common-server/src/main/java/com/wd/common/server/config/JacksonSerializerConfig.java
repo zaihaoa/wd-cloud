@@ -1,5 +1,6 @@
 package com.wd.common.server.config;
 
+import com.wd.common.core.model.FieldPermissionChecker;
 import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,9 +31,11 @@ public class JacksonSerializerConfig {
     private static final String TIME_FORMAT = "HH:mm:ss";
 
     @Bean
-    public JsonMapperBuilderCustomizer jacksonCustomizer() {
+    public JsonMapperBuilderCustomizer jacksonCustomizer(FieldPermissionChecker checker) {
 
         SimpleModule module = new SimpleModule("TOFUWINE-WORKBENCH-MODULE");
+
+        // 日期
         module
                 .addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)))
                 .addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)))
@@ -42,6 +45,9 @@ public class JacksonSerializerConfig {
 
                 .addSerializer(LocalTime.class, new LocalTimeSerializer(DateTimeFormatter.ofPattern(TIME_FORMAT)))
                 .addDeserializer(LocalTime.class, new LocalTimeDeserializer(DateTimeFormatter.ofPattern(TIME_FORMAT)));
+
+        // 字段权限
+        module.setSerializerModifier(new FieldPermissionModifier(checker));
 
         return builder -> {
             builder.enable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)

@@ -30,21 +30,21 @@ public interface RoleService extends SuperService<Role> {
     PageInfo<RolePageVO> pageList(RolePageParamDTO pageParam);
 
     /**
-     * 添加
+     * 添加角色，自动生成ID，删除标记初始化为0
      *
      * @return 添加成功数据ID
      */
     long addRole(RoleAddDTO roleAddParam);
 
     /**
-     * 更新
+     * 更新未删除角色，权限标记支持传空列表或null清空
      *
      * @return 是否更新成功
      */
     boolean updateRole(RoleUpdateDTO roleUpdateParam);
 
     /**
-     * 删除
+     * 逻辑删除角色，删除标记更新为角色ID
      *
      * @param id 数据ID
      * @return 是否删除成功
@@ -52,14 +52,14 @@ public interface RoleService extends SuperService<Role> {
     boolean deleteRoleById(IdDTO id);
 
     /**
-     * 根据ID查询
+     * 根据ID查询未删除角色，包含权限标记
      * @param id 数据ID
      * @return 数据
      */
     Role getRoleById(Serializable id);
 
     /**
-     * 根据ID查询，并断言数据存在
+     * 根据ID查询未删除角色，并断言数据存在
      * @param id 数据ID
      * @return 数据
      */

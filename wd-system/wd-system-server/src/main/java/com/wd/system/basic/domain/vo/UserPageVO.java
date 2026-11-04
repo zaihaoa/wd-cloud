@@ -1,5 +1,7 @@
 package com.wd.system.basic.domain.vo;
 
+import com.wd.common.core.annotions.FieldPermission;
+import com.wd.common.core.constants.FieldPermissionConstant;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -41,6 +43,7 @@ public class UserPageVO {
     private String typeDesc;
 
     @Schema(description = "手机号码")
+    @FieldPermission(FieldPermissionConstant.USER_PHONE)
     private String phone;
 
     @Schema(description = "邮箱")

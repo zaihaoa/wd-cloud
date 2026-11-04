@@ -1,18 +1,25 @@
 package com.wd.system.basic.service.impl;
 
 import com.alibaba.fastjson2.JSON;
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
+import com.wd.common.core.constants.CommonConstant;
 import com.wd.common.core.model.IdDTO;
 import com.wd.common.core.model.PageInfo;
 import com.wd.common.core.util.AssertUtil;
 import com.wd.common.core.util.I18nUtil;
 import com.wd.common.mybatisplus.PageUtil;
+import com.wd.common.redis.CacheRegion;
+import com.wd.common.redis.util.RedisHelper;
 import com.wd.system.basic.convert.RoleConverter;
 import com.wd.system.basic.domain.dto.RoleAddDTO;
 import com.wd.system.basic.domain.dto.RolePageDTO;
 import com.wd.system.basic.domain.dto.RolePageParamDTO;
 import com.wd.system.basic.domain.dto.RoleUpdateDTO;
 import com.wd.system.basic.domain.entity.Role;
+import com.wd.system.basic.domain.enums.RoleStatusEnum;
+import com.wd.system.basic.domain.enums.RoleTypeEnum;
 import com.wd.system.basic.domain.vo.RolePageVO;
 import com.wd.system.basic.mapper.RoleMapper;
 import com.wd.system.basic.service.RoleService;
@@ -23,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * <p>
@@ -38,6 +46,8 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
 
     @Resource
     private RoleConverter roleConverter;
+    @Resource
+    private RedisHelper redisHelper;
 
     @Override
     public PageInfo<RolePageVO> pageList(RolePageParamDTO pageParam) {
@@ -57,12 +67,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     private List<RolePageVO> convertRolePageVOList(List<RolePageDTO> dbRecords) {
         return dbRecords
                 .stream()
-                .map(dbRecord -> {
-                    RolePageVO vo = roleConverter.convertRolePageVO(dbRecord);
-
-
-                    return vo;
-                })
+                .map(roleConverter::convertRolePageVO)
                 .toList();
     }
 
@@ -71,13 +76,21 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     public long addRole(RoleAddDTO roleAddParam) {
         log.info("新增角色,参数:{}", JSON.toJSONString(roleAddParam));
 
+        checkUnique(roleAddParam.getCode(), roleAddParam.getName(), null);
+
         Role role = new Role();
 
-        role.setId(roleAddParam.getId());
+        role.setId(IdWorker.getId());
+        role.setCode(roleAddParam.getCode());
         role.setName(roleAddParam.getName());
-        role.setStatus(roleAddParam.getStatus());
-        role.setType(roleAddParam.getType());
-        role.setDeleteFlag(roleAddParam.getDeleteFlag());
+        role.setStatus(Optional.ofNullable(roleAddParam.getStatus()).orElse(RoleStatusEnum.ENABLED.getCode()));
+        role.setType(Optional.ofNullable(roleAddParam.getType()).orElse(RoleTypeEnum.NORMAL.getCode()));
+        role.setRemark(Optional.ofNullable(roleAddParam.getRemark()).orElse(""));
+        role.setPermissionFlag(roleAddParam.getPermissionFlag());
+        role.setDeleteFlag(CommonConstant.NOT_DELETE_FLAG);
+
+        AssertUtil.isTrue(baseMapper.insert(role) > 0, "新增角色失败");
+        clearPermissionCache();
 
         return role.getId();
     }
@@ -86,7 +99,22 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     @Override
     public boolean updateRole(RoleUpdateDTO roleUpdateParam) {
         log.info("更新角色,参数:{}", JSON.toJSONString(roleUpdateParam));
-        return true;
+
+        Role role = getRoleByIdAssertExist(roleUpdateParam.getId());
+        checkUnique(roleUpdateParam.getCode(), roleUpdateParam.getName(), role.getId());
+
+        role.setCode(roleUpdateParam.getCode());
+        role.setName(roleUpdateParam.getName());
+        role.setStatus(Optional.ofNullable(roleUpdateParam.getStatus()).orElse(RoleStatusEnum.ENABLED.getCode()));
+        role.setType(Optional.ofNullable(roleUpdateParam.getType()).orElse(RoleTypeEnum.NORMAL.getCode()));
+        role.setRemark(Optional.ofNullable(roleUpdateParam.getRemark()).orElse(""));
+        role.setPermissionFlag(roleUpdateParam.getPermissionFlag());
+
+        boolean success = baseMapper.updateById(role) > 0;
+        if (success) {
+            clearPermissionCache();
+        }
+        return success;
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -96,9 +124,13 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         Long id = idParam.getId();
 
         // 判断数据是否存在
-        getRoleByIdAssertExist(id);
+        Role role = getRoleByIdAssertExist(id);
 
-        boolean success = baseMapper.deleteById(id) > 0;
+        // 逻辑删除使用角色ID作为删除标记，允许重新使用已删除角色的编码和名称。
+        boolean success = baseMapper.deleteById(role) > 0;
+        if (success) {
+            clearPermissionCache();
+        }
 
         return success;
     }
@@ -116,5 +148,21 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         Role record = getRoleById(id);
         AssertUtil.notNull(record, () -> I18nUtil.message("data.not.exist"));
         return record;
+    }
+
+    private void checkUnique(String code, String name, Long excludeId) {
+        long codeCount = baseMapper.selectCount(Wrappers.<Role>lambdaQuery()
+                .eq(Role::getCode, code)
+                .ne(excludeId != null, Role::getId, excludeId));
+        AssertUtil.isTrue(codeCount == 0, "角色编码已存在");
+
+        long nameCount = baseMapper.selectCount(Wrappers.<Role>lambdaQuery()
+                .eq(Role::getName, name)
+                .ne(excludeId != null, Role::getId, excludeId));
+        AssertUtil.isTrue(nameCount == 0, "角色名称已存在");
+    }
+
+    private void clearPermissionCache() {
+        redisHelper.deleteByCacheRegion(CacheRegion.PERMISSION);
     }
 }

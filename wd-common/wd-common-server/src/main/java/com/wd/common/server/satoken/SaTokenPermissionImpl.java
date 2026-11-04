@@ -1,6 +1,8 @@
-package com.kvc.common.satoken;
+package com.wd.common.server.satoken;
 
 import cn.dev33.satoken.stp.StpInterface;
+import cn.hutool.core.collection.CollUtil;
+import com.google.common.collect.Lists;
 import com.wd.common.core.util.ResponseUtil;
 import com.wd.common.redis.CacheRegion;
 import com.wd.common.redis.RedisKey;
@@ -41,23 +43,31 @@ public class SaTokenPermissionImpl implements StpInterface {
         // 缓存获取,则调用feign接口获取
         String key = RedisHelper.joinKey(RedisKey.USER_PERMISSION, userId);
 
-        UserPermissionDTO cache = redisHelper.get(CacheRegion.PERMISSION, key, new TypeReference<>() {
+        UserPermissionDTO userPermission = redisHelper.get(CacheRegion.PERMISSION, key, new TypeReference<>() {
         });
 
-        if (Objects.nonNull(cache)) {
-            if (cache.getAdminRole()) {
-                return List.of("*");
-            }
-            return cache.getAuthMenuPermissionList();
+        if (Objects.isNull(userPermission)) {
+            // 调用接口获取权限
+            userPermission = ResponseUtil.assertSuccessGetData(permissionApi.getUserPermission(userId));
         }
 
-        // 用户权限
-        UserPermissionDTO userPermission = ResponseUtil.assertSuccessGetData(permissionApi.getUserPermission(userId));
+        if (Objects.isNull(userPermission)) {
+            // 没有权限
+            return Lists.newArrayList();
+        }
+
         if (userPermission.getAdminRole()) {
             return List.of("*");
         }
 
-        return userPermission.getAuthMenuPermissionList();
+        List<String> permissionList = Lists.newArrayList();
+        if (CollUtil.isNotEmpty(userPermission.getAuthMenuPermissionList())) {
+            permissionList.addAll(userPermission.getAuthMenuPermissionList());
+        }
+        if (CollUtil.isNotEmpty(userPermission.getAuthFieldPermissionList())) {
+            permissionList.addAll(userPermission.getAuthFieldPermissionList());
+        }
+        return permissionList;
     }
 
     /**

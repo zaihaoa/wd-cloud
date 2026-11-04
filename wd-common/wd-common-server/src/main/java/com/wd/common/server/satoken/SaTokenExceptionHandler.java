@@ -1,4 +1,4 @@
-package com.kvc.common.satoken;
+package com.wd.common.server.satoken;
 
 import cn.dev33.satoken.exception.NotPermissionException;
 import com.wd.common.core.enums.ResponseCodeEnum;

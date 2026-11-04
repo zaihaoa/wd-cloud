@@ -26,6 +26,6 @@ public class RedisKey {
     /**
      * 菜单
      */
-    public static final String MENU_LIST = "list";
+    public static final String MENU_LIST = "list:v2";
 
 }

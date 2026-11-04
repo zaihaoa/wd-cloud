@@ -1,4 +1,4 @@
-package com.kvc.common.satoken;
+package com.wd.common.server.satoken;
 
 import cn.dev33.satoken.interceptor.SaInterceptor;
 import org.springframework.context.annotation.Configuration;

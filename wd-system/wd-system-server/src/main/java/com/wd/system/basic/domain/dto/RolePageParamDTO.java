@@ -2,6 +2,7 @@ package com.wd.system.basic.domain.dto;
 
 import com.wd.common.core.model.BaseQuery;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,12 +19,20 @@ import lombok.Setter;
 @Schema(description = "角色列表查询参数")
 public class RolePageParamDTO extends BaseQuery {
 
+    @Schema(description = "主键ID")
+    private Long id;
+
+    @Schema(description = "角色编码")
+    @Size(max = 100, message = "角色编码长度不能超过100")
+    private String code;
+
     @Schema(description = "角色名称")
+    @Size(max = 100, message = "角色名称长度不能超过100")
     private String name;
 
-    @Schema(description = "状态(NORMAL:正常,DISABLE:禁用)")
+    @Schema(description = "状态(ENABLED:启用,DISABLED:禁用)")
     private String status;
 
-    @Schema(description = "类型(NORMAL:普通,MANAGER:管理员,ADMIN:系统超级管理员)")
+    @Schema(description = "类型(NORMAL:普通,BUILT_IN:内置)")
     private String type;
 }

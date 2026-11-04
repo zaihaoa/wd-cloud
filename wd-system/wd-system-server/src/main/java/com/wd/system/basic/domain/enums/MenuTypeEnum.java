@@ -13,7 +13,6 @@ import lombok.Getter;
 public enum MenuTypeEnum implements CodeDescEnum {
     DIRECTORY("DIRECTORY", "目录"),
     MENU("MENU", "菜单"),
-    BUTTON("BUTTON", "按钮"),
     ;
 
     private final String code;

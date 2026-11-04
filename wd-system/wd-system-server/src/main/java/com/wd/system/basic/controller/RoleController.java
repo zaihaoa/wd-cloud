@@ -30,7 +30,7 @@ public class RoleController {
 
     @Operation(summary = "列表查询")
     @PostMapping("/page")
-    public R<PageInfo<RolePageVO>> pageList(@RequestBody RolePageParamDTO pageParam) {
+    public R<PageInfo<RolePageVO>> pageList(@RequestBody @Valid RolePageParamDTO pageParam) {
         return R.success(roleService.pageList(pageParam));
     }
 

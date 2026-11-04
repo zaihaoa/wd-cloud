@@ -20,6 +20,7 @@ import com.wd.system.basic.domain.dto.MenuAddDTO;
 import com.wd.system.basic.domain.dto.MenuUpdateDTO;
 import com.wd.system.basic.domain.entity.Menu;
 import com.wd.system.basic.domain.enums.CommonLogBusinessTypeEnum;
+import com.wd.system.basic.domain.enums.MenuStatusEnum;
 import com.wd.system.basic.domain.enums.MenuTypeEnum;
 import com.wd.system.basic.domain.vo.MenuDetailVO;
 import com.wd.system.basic.domain.vo.MenuTreeVO;
@@ -70,31 +71,44 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             AssertUtil.isTrue(parentIdCount > 0, "父级菜单不存在");
         }
 
-        String path = menuAddDTO.getPath();
-        if (StringUtils.isNotBlank(path)) {
-            long pathCount = baseMapper.selectCount(Wrappers.<Menu>lambdaQuery().eq(Menu::getPath, path));
-            AssertUtil.isTrue(pathCount <= 0, "路由地址已存在");
+        String routePath = Optional.ofNullable(menuAddDTO.getRoutePath()).orElse("");
+        if (StringUtils.isNotBlank(routePath)) {
+            long routePathCount = baseMapper.selectCount(Wrappers.<Menu>lambdaQuery().eq(Menu::getRoutePath, routePath));
+            AssertUtil.isTrue(routePathCount <= 0, "路由路径已存在");
         }
 
         Menu menu = new Menu();
         long id = IdWorker.getId();
         menu.setId(id);
-        String name = menuAddDTO.getName();
-        menu.setName(name);
+        menu.setMenuName(menuAddDTO.getMenuName());
         menu.setParentId(Optional.ofNullable(parentId).orElse(CommonConstant.ZERO_LONG));
         menu.setSortNumber(Optional.ofNullable(menuAddDTO.getSortNumber()).orElse(0));
         menu.setMenuType(menuAddDTO.getMenuType());
-        menu.setPath(path);
+        menu.setRoutePath(routePath);
         menu.setPermission(Optional.ofNullable(menuAddDTO.getPermission()).orElse(""));
         menu.setIcon(Optional.ofNullable(menuAddDTO.getIcon()).orElse(""));
+        menu.setStatus(StringUtils.isBlank(menuAddDTO.getStatus()) ? MenuStatusEnum.ENABLED.getCode() : menuAddDTO.getStatus());
+        menu.setRouteName(menuAddDTO.getRouteName());
+        menu.setRoutePathParam(menuAddDTO.getRoutePathParam());
+        menu.setLayout(menuAddDTO.getLayout());
+        menu.setComponent(Optional.ofNullable(menuAddDTO.getComponent()).orElse(""));
+        menu.setI18nKey(Optional.ofNullable(menuAddDTO.getI18nKey()).orElse(""));
+        menu.setIconType(Optional.ofNullable(menuAddDTO.getIconType()).orElse(""));
+        menu.setCacheRoute(Optional.ofNullable(menuAddDTO.getCacheRoute()).orElse(false));
+        menu.setConstantRoute(Optional.ofNullable(menuAddDTO.getConstantRoute()).orElse(false));
+        menu.setHideRoute(Optional.ofNullable(menuAddDTO.getHideRoute()).orElse(false));
+        menu.setHighlightRouteName(menuAddDTO.getHighlightRouteName());
+        menu.setExternalLink(Optional.ofNullable(menuAddDTO.getExternalLink()).orElse(""));
+        menu.setRouteParam(menuAddDTO.getRouteParam());
+        menu.setButton(menuAddDTO.getButton());
 
         baseMapper.insert(menu);
 
-        // 清除缓存
-        clearMenuCache();
-
         // 添加日志
         addLog(id, "新增", "新增菜单");
+
+        // 清除缓存
+        clearMenuCache();
 
         return id;
     }
@@ -117,7 +131,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         Long menuId = menuUpdateDTO.getId();
         Menu menu = baseMapper.selectById(menuId);
         AssertUtil.notNull(menu, "菜单不存在");
-        String menuName = menu.getName();
+        String menuName = menu.getMenuName();
 
         Long parentId = menuUpdateDTO.getParentId();
         if (Objects.nonNull(parentId) && !Objects.equals(parentId, CommonConstant.ZERO_LONG)) {
@@ -125,31 +139,62 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             AssertUtil.isTrue(parentIdCount > 0, "父级菜单不存在");
         }
 
-        String path = menuUpdateDTO.getPath();
-        if (StringUtils.isNotBlank(path)) {
-            long pathCount = baseMapper.selectCount(Wrappers.<Menu>lambdaQuery()
-                    .eq(Menu::getPath, path)
+        String routePath = StringUtils.isBlank(menuUpdateDTO.getRoutePath()) ? null : menuUpdateDTO.getRoutePath();
+        if (StringUtils.isNotBlank(routePath)) {
+            long routePathCount = baseMapper.selectCount(Wrappers.<Menu>lambdaQuery()
+                    .eq(Menu::getRoutePath, routePath)
                     .ne(Menu::getId, menuId));
-            AssertUtil.isTrue(pathCount <= 0, "路由地址已存在");
+            AssertUtil.isTrue(routePathCount <= 0, "路由路径已存在");
         }
+
+        // 先应用实际写入的默认值，确保变更日志与落库结果一致。
+        menuUpdateDTO.setParentId(Optional.ofNullable(parentId).orElse(CommonConstant.ZERO_LONG));
+        menuUpdateDTO.setSortNumber(Optional.ofNullable(menuUpdateDTO.getSortNumber()).orElse(0));
+        menuUpdateDTO.setRoutePath(routePath);
+        menuUpdateDTO.setPermission(Optional.ofNullable(menuUpdateDTO.getPermission()).orElse(""));
+        menuUpdateDTO.setIcon(Optional.ofNullable(menuUpdateDTO.getIcon()).orElse(""));
+        menuUpdateDTO.setStatus(StringUtils.isBlank(menuUpdateDTO.getStatus()) ? MenuStatusEnum.ENABLED.getCode() : menuUpdateDTO.getStatus());
+        menuUpdateDTO.setComponent(Optional.ofNullable(menuUpdateDTO.getComponent()).orElse(""));
+        menuUpdateDTO.setI18nKey(Optional.ofNullable(menuUpdateDTO.getI18nKey()).orElse(""));
+        menuUpdateDTO.setIconType(Optional.ofNullable(menuUpdateDTO.getIconType()).orElse(""));
+        menuUpdateDTO.setCacheRoute(Optional.ofNullable(menuUpdateDTO.getCacheRoute()).orElse(false));
+        menuUpdateDTO.setConstantRoute(Optional.ofNullable(menuUpdateDTO.getConstantRoute()).orElse(false));
+        menuUpdateDTO.setHideRoute(Optional.ofNullable(menuUpdateDTO.getHideRoute()).orElse(false));
+        menuUpdateDTO.setExternalLink(Optional.ofNullable(menuUpdateDTO.getExternalLink()).orElse(""));
 
         String compareLog = ObjectCompareUtil.compareLog(menu, menuUpdateDTO);
 
-        menu.setName(menuUpdateDTO.getName());
-        menu.setParentId(Optional.ofNullable(parentId).orElse(CommonConstant.ZERO_LONG));
-        menu.setSortNumber(Optional.ofNullable(menuUpdateDTO.getSortNumber()).orElse(0));
+        menu.setMenuName(menuUpdateDTO.getMenuName());
+        menu.setParentId(menuUpdateDTO.getParentId());
+        menu.setSortNumber(menuUpdateDTO.getSortNumber());
         menu.setMenuType(menuUpdateDTO.getMenuType());
-        menu.setPath(path);
-        menu.setPermission(Optional.ofNullable(menuUpdateDTO.getPermission()).orElse(""));
-        menu.setIcon(Optional.ofNullable(menuUpdateDTO.getIcon()).orElse(""));
+        menu.setRoutePath(routePath);
+        menu.setPermission(menuUpdateDTO.getPermission());
+        menu.setIcon(menuUpdateDTO.getIcon());
+        menu.setStatus(menuUpdateDTO.getStatus());
+        menu.setRouteName(menuUpdateDTO.getRouteName());
+        menu.setRoutePathParam(menuUpdateDTO.getRoutePathParam());
+        menu.setLayout(menuUpdateDTO.getLayout());
+        menu.setComponent(menuUpdateDTO.getComponent());
+        menu.setI18nKey(menuUpdateDTO.getI18nKey());
+        menu.setIconType(menuUpdateDTO.getIconType());
+        menu.setCacheRoute(menuUpdateDTO.getCacheRoute());
+        menu.setConstantRoute(menuUpdateDTO.getConstantRoute());
+        menu.setHideRoute(menuUpdateDTO.getHideRoute());
+        menu.setHighlightRouteName(menuUpdateDTO.getHighlightRouteName());
+        menu.setExternalLink(menuUpdateDTO.getExternalLink());
+        menu.setRouteParam(menuUpdateDTO.getRouteParam());
+        menu.setButton(menuUpdateDTO.getButton());
 
-        boolean success = baseMapper.updateById(menu) > 0;
+        boolean success = baseMapper.alwaysUpdateSomeColumnById(menu) > 0;
+
+        // 添加日志
+        if (StringUtils.isNotBlank(compareLog)) {
+            addLog(menuId, "编辑", compareLog);
+        }
 
         // 清除缓存
         clearMenuCache();
-
-        // 添加日志
-        addLog(menuId, "编辑", "编辑菜单：" + menuName + (StringUtils.isNotBlank(compareLog) ? ("，" + compareLog) : ""));
 
         return success;
     }
@@ -165,11 +210,11 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
 
         int deleted = baseMapper.deleteById(id);
 
+        // 添加日志
+        addLog(id, "删除", "删除菜单：" + menu.getMenuName());
+
         // 清除缓存
         clearMenuCache();
-
-        // 添加日志
-        addLog(id, "删除", "删除菜单：" + menu.getName());
 
         return deleted > 0;
     }
@@ -177,7 +222,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     @Override
     public List<MenuTreeVO> userPermissionMenuTree() {
 
-        // 正常状态的菜单,排除按钮
+        // 菜单列表沿用现有查询规则
         List<Menu> menuList = menuList();
 
         return getNormalMenuTree(menuList);
@@ -270,6 +315,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
 
     private void clearMenuCache() {
         redisHelper.deleteByCacheRegion(CacheRegion.MENU);
+        redisHelper.deleteByCacheRegion(CacheRegion.PERMISSION);
     }
 
     @Override
@@ -284,7 +330,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         MenuDetailVO vo = menuConverter.convertMenuDetailVO(menu);
         vo.setMenuTypeDesc(CodeDescEnumUtil.getDescByCode(MenuTypeEnum.class, vo.getMenuType()));
 
-        Map<Long, String> userIdNameMap = userService.getUserIdNameMap(List.of(vo.getCreateUserId(), vo.getUpdateUserId()));
+        Map<Long, String> userIdNameMap = userService.getUserIdNameMap();
         vo.setCreateUserName(userIdNameMap.get(vo.getCreateUserId()));
         vo.setUpdateUserName(userIdNameMap.get(vo.getUpdateUserId()));
 

@@ -2,6 +2,20 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.wd.system.basic.mapper.RoleMapper">
 
+    <resultMap id="RolePageResultMap" type="com.wd.system.basic.domain.dto.RolePageDTO">
+        <id column="id" property="id"/>
+        <result column="code" property="code"/>
+        <result column="name" property="name"/>
+        <result column="status" property="status"/>
+        <result column="type" property="type"/>
+        <result column="remark" property="remark"/>
+        <result column="permission_flag" property="permissionFlag" typeHandler="com.wd.common.mybatisplus.handler.ListStringHandler"/>
+        <result column="delete_flag" property="deleteFlag"/>
+        <result column="create_user_id" property="createUserId"/>
+        <result column="update_user_id" property="updateUserId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
 
     <select id="pageCount" resultType="java.lang.Integer">
         select count(*)
@@ -9,27 +23,52 @@
         <include refid="Page_Condition"/>
     </select>
 
-    <select id="pageList" resultType="com.wd.system.basic.domain.dto.RolePageDTO">
+    <select id="pageList" resultMap="RolePageResultMap">
         select
-            id as id,
-            name as name,
-            status as status,
-            type as type,
-            delete_flag as deleteFlag
+            id,
+            code,
+            name,
+            status,
+            type,
+            remark,
+            permission_flag,
+            delete_flag,
+            create_user_id,
+            update_user_id,
+            create_time,
+            update_time
         from sys_role
         <include refid="Page_Condition"/>
 
-        <if test="param.sort != null and param.sort != ''">
-            ORDER BY ${param.sort} ${param.order}
-        </if>
+        ORDER BY
+        <choose>
+            <when test="param.sort == 'code'">`code`</when>
+            <when test="param.sort == 'name'">`name`</when>
+            <when test="param.sort == 'status'">`status`</when>
+            <when test="param.sort == 'type'">`type`</when>
+            <when test="param.sort == 'remark'">`remark`</when>
+            <when test="param.sort == 'create_user_id' or param.sort == 'createUserId'">`create_user_id`</when>
+            <when test="param.sort == 'update_user_id' or param.sort == 'updateUserId'">`update_user_id`</when>
+            <when test="param.sort == 'create_time' or param.sort == 'createTime'">`create_time`</when>
+            <when test="param.sort == 'update_time' or param.sort == 'updateTime'">`update_time`</when>
+            <otherwise>`id`</otherwise>
+        </choose>
+        <choose>
+            <when test="param.order != null and param.order.equalsIgnoreCase('DESC')">DESC</when>
+            <otherwise>ASC</otherwise>
+        </choose>
         <bind name="limitStart" value="(param.current lte 1) ? 0 : ((param.current - 1) * param.size)"/>
         LIMIT #{limitStart}, #{param.size}
     </select>
 
     <sql id="Page_Condition">
         <where>
+            `delete_flag` = 0
             <if test="param.id != null">
                 and `id` = #{param.id}
+            </if>
+            <if test="param.code != null and param.code != ''">
+                and `code` = #{param.code}
             </if>
             <if test="param.name != null and param.name != ''">
                 and `name` = #{param.name}
@@ -39,9 +78,6 @@
             </if>
             <if test="param.type != null and param.type != ''">
                 and `type` = #{param.type}
-            </if>
-            <if test="param.deleteFlag != null">
-                and `delete_flag` = #{param.deleteFlag}
             </if>
         </where>
     </sql>

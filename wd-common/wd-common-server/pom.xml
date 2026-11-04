@@ -111,6 +111,38 @@
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
         </dependency>
+
+        <!-- Sa-Token权限认证 -->
+        <dependency>
+            <groupId>cn.dev33</groupId>
+            <artifactId>sa-token-spring-boot4-starter</artifactId>
+        </dependency>
+
+        <!-- sa-token-jwt -->
+        <dependency>
+            <groupId>cn.dev33</groupId>
+            <artifactId>sa-token-jwt</artifactId>
+        </dependency>
+
+        <!-- sa-token-redis-jackson -->
+        <dependency>
+            <groupId>cn.dev33</groupId>
+            <artifactId>sa-token-redis-jackson</artifactId>
+        </dependency>
+
+        <!-- wd-common-redis -->
+        <dependency>
+            <groupId>com.wd</groupId>
+            <artifactId>wd-common-redis</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- wd-system-api -->
+        <dependency>
+            <groupId>com.wd</groupId>
+            <artifactId>wd-system-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>
