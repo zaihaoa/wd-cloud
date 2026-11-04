@@ -46,8 +46,6 @@
         <mybatis-spring-boot-starter.version>4.1.0</mybatis-spring-boot-starter.version>
         <!-- p6spy-spring-boot-starter -->
         <p6spy-spring-boot-starter.version>2.0.1</p6spy-spring-boot-starter.version>
-        <!-- velocity-engine-core -->
-        <velocity-engine-core.version>2.4.1</velocity-engine-core.version>
         <!-- swagger3-annotations -->
         <swagger3-annotations.version>2.2.55</swagger3-annotations.version>
         <!-- excel -->
@@ -166,13 +164,6 @@
                 <groupId>com.github.gavlyukovskiy</groupId>
                 <artifactId>p6spy-spring-boot-starter</artifactId>
                 <version>${p6spy-spring-boot-starter.version}</version>
-            </dependency>
-
-            <!-- velocity-engine-core -->
-            <dependency>
-                <groupId>org.apache.velocity</groupId>
-                <artifactId>velocity-engine-core</artifactId>
-                <version>${velocity-engine-core.version}</version>
             </dependency>
 
             <!-- swagger3注解 -->

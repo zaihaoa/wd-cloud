@@ -42,17 +42,6 @@
             <artifactId>mysql-connector-j</artifactId>
         </dependency>
 
-        <!-- velocity-engine-core -->
-        <dependency>
-            <groupId>org.apache.velocity</groupId>
-            <artifactId>velocity-engine-core</artifactId>
-        </dependency>
-
-        <!--freemarker-->
-        <dependency>
-            <groupId>org.freemarker</groupId>
-            <artifactId>freemarker</artifactId>
-        </dependency>
     </dependencies>
 
 </project>
