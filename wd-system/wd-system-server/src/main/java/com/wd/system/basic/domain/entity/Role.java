@@ -56,7 +56,7 @@ public class Role extends BaseUserTimeEntity implements Serializable {
     private String remark;
 
     @Schema(description = "权限标记")
-    @TableField(value = "permission_flag", typeHandler = ListStringHandler.class, updateStrategy = FieldStrategy.ALWAYS)
+    @TableField(value = "permission_flag", typeHandler = ListStringHandler.class)
     private List<String> permissionFlag;
 
     @Schema(description = "删除标记，等于0表示没有删除，否则为删除")

@@ -3,6 +3,9 @@ package com.wd.system.basic.service;
 import com.wd.common.core.model.PageInfo;
 import com.wd.common.core.model.IdDTO;
 import com.wd.system.basic.domain.dto.RolePageParamDTO;
+import com.wd.system.basic.domain.dto.RoleAuthorizeAllDTO;
+import com.wd.system.basic.domain.dto.RoleAuthorizeDTO;
+import com.wd.system.basic.domain.vo.RoleDetailVO;
 import com.wd.system.basic.domain.vo.RolePageVO;
 import com.wd.system.basic.domain.dto.RoleAddDTO;
 import com.wd.system.basic.domain.dto.RoleUpdateDTO;
@@ -64,4 +67,19 @@ public interface RoleService extends SuperService<Role> {
      * @return 数据
      */
     Role getRoleByIdAssertExist(Serializable id);
+
+    /**
+     * 获取未删除角色详情及已保存的三类具体授权。
+     */
+    RoleDetailVO detail(Long id);
+
+    /**
+     * 添加或移除全部权限标记，保留其他标记及具体授权。
+     */
+    boolean authorizeAll(RoleAuthorizeAllDTO dto);
+
+    /**
+     * 覆盖保存当前授权类型，空集合清空，保留其他类型及全部权限标记。
+     */
+    boolean authorize(RoleAuthorizeDTO dto);
 }

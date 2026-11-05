@@ -1,6 +1,7 @@
 package com.wd.system.basic.domain.dto;
 
 import com.wd.common.core.annotions.EnumCodeExist;
+import com.wd.system.basic.domain.enums.RolePermissionFlagEnum;
 import com.wd.system.basic.domain.enums.RoleStatusEnum;
 import com.wd.system.basic.domain.enums.RoleTypeEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -49,5 +50,6 @@ public class RoleAddDTO {
     private String remark;
 
     @Schema(description = "权限标记")
+    @EnumCodeExist(message = "权限标记不正确", enumClass = RolePermissionFlagEnum.class)
     private List<@NotBlank(message = "权限标记不能为空") String> permissionFlag;
 }

@@ -3,9 +3,13 @@ package com.wd.system.basic.domain.dto;
 import com.wd.common.core.objectcompare.ObjectCompare;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
 
 /**
  * <p>
@@ -41,4 +45,8 @@ public class UserUpdateDTO {
     @Schema(description = "邮箱")
     @ObjectCompare("邮箱")
     private String email;
+
+    @Schema(description = "角色ID集合，必填且至少包含一个角色，覆盖设置用户角色")
+    @NotEmpty(message = "角色ID集合不能为空")
+    private List<@NotNull(message = "角色ID不能为空") @Positive(message = "角色ID必须为正数") Long> roleIds;
 }

@@ -39,6 +39,11 @@ public class CommonConstant {
     public static final String SYSTEM_USER_NAME = "System";
 
     /**
+     * Admin用户ID
+     */
+    public static final long ADMIN_USER_ID = 0L;
+
+    /**
      * 默认值0
      */
     public static final Long ZERO_LONG = 0L;

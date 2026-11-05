@@ -18,19 +18,25 @@ import com.wd.common.core.util.AssertUtil;
 import com.wd.common.core.util.CodeDescEnumUtil;
 import com.wd.common.core.util.I18nUtil;
 import com.wd.common.mybatisplus.PageUtil;
+import com.wd.common.mybatisplus.SuperMapper;
 import com.wd.common.redis.CacheRegion;
 import com.wd.common.redis.RedisKey;
 import com.wd.common.redis.util.RedisHelper;
 import com.wd.system.basic.convert.UserConverter;
 import com.wd.system.basic.domain.dto.*;
 import com.wd.system.basic.domain.entity.User;
+import com.wd.system.basic.domain.entity.Role;
+import com.wd.system.basic.domain.entity.UserRoleRelevance;
 import com.wd.system.basic.domain.enums.CommonLogBusinessTypeEnum;
 import com.wd.system.basic.domain.enums.UserStatusEnum;
 import com.wd.system.basic.domain.enums.UserTypeEnum;
 import com.wd.system.basic.domain.vo.UserDetailVO;
 import com.wd.system.basic.domain.vo.UserInfoVO;
 import com.wd.system.basic.domain.vo.UserPageVO;
+import com.wd.system.system.api.basic.vo.UserRoleVO;
 import com.wd.system.basic.mapper.UserMapper;
+import com.wd.system.basic.mapper.RoleMapper;
+import com.wd.system.basic.mapper.UserRoleRelevanceMapper;
 import com.wd.system.basic.service.CommonLogService;
 import com.wd.system.basic.service.UserService;
 import com.wd.system.basic.util.UserHelper;
@@ -39,6 +45,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 import tools.jackson.core.type.TypeReference;
 
@@ -65,6 +73,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private RedisHelper redisHelper;
     @Resource
     private CommonLogService commonLogService;
+    @Resource
+    private RoleMapper roleMapper;
+    @Resource
+    private UserRoleRelevanceMapper userRoleRelevanceMapper;
 
     @Override
     public PageInfo<UserPageVO> pageList(UserPageParamDTO pageParam) {
@@ -84,6 +96,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private List<UserPageVO> convertUserPageVOList(List<UserPageDTO> dbRecords) {
 
         Map<Long, String> userIdNameMap = getUserIdNameMap();
+        Map<Long, List<UserRoleVO>> userRoleMap = getUserRoleMap(dbRecords.stream().map(UserPageDTO::getId).toList());
 
         return dbRecords
                 .stream()
@@ -94,6 +107,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
                     vo.setCreateUserName(userIdNameMap.get(vo.getCreateUserId()));
                     vo.setUpdateUserName(userIdNameMap.get(vo.getUpdateUserId()));
+                    vo.setRoles(userRoleMap.getOrDefault(vo.getId(), List.of()));
 
                     return vo;
                 })
@@ -104,6 +118,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public long addUser(UserAddDTO userAddParam) {
 
+        List<Long> roleIds = validateRoleIds(userAddParam.getRoleIds());
         String username = userAddParam.getUsername();
         String name = userAddParam.getName();
         String password = userAddParam.getPassword();
@@ -141,12 +156,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setDeleteFlag(CommonConstant.NOT_DELETE_FLAG);
 
         baseMapper.insert(user);
+        replaceUserRoles(id, roleIds);
 
         // 添加日志
         addLog(id, "新增", "新增用户");
 
         // 清除缓存
-        clearUserCache();
+        clearUserCacheAfterCommit();
 
         return id;
     }
@@ -156,13 +172,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public boolean updateUser(UserUpdateDTO userUpdateParam) {
         log.info("更新用户,参数:{}", JSON.toJSONString(userUpdateParam));
 
+        List<Long> roleIds = validateRoleIds(userUpdateParam.getRoleIds());
         Long id = userUpdateParam.getId();
         String username = userUpdateParam.getUsername();
         String name = userUpdateParam.getName();
         String phone = userUpdateParam.getPhone();
         String email = userUpdateParam.getEmail();
 
-        User user = getUserByIdAssertExist(id);
+        // 用户行锁串行化同一用户的资料和角色覆盖保存。
+        User user = baseMapper.selectOne(Wrappers.<User>lambdaQuery()
+                .eq(User::getId, id)
+                .last("FOR UPDATE"));
+        AssertUtil.notNull(user, () -> I18nUtil.message("data.not.exist"));
 
         Long usernameCount = baseMapper.selectCount(Wrappers.<User>lambdaQuery().eq(User::getUsername, username).ne(User::getId, id));
         Assert.isTrue(usernameCount <= 0, "用户名已存在");
@@ -181,12 +202,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         String compareLog = ObjectCompareUtil.compareLog(user, userUpdateParam);
 
-        boolean success = baseMapper.update(Wrappers.<User>lambdaUpdate()
+        baseMapper.update(Wrappers.<User>lambdaUpdate()
                 .set(User::getUsername, username)
                 .set(User::getName, name)
                 .set(User::getPhone, Optional.ofNullable(phone).orElse(""))
                 .set(User::getEmail, Optional.ofNullable(email).orElse(""))
-                .eq(User::getId, id)) > 0;
+                .eq(User::getId, id));
+        replaceUserRoles(id, roleIds);
 
         // 添加日志
         if (StringUtils.isNotBlank(compareLog)) {
@@ -194,9 +216,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         // 清除缓存
-        clearUserCache();
+        clearUserCacheAfterCommit();
 
-        return success;
+        return true;
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -314,6 +336,72 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         redisHelper.deleteByCacheRegion(CacheRegion.PERMISSION);
     }
 
+    private void clearUserCacheAfterCommit() {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            clearUserCache();
+            return;
+        }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                clearUserCache();
+            }
+        });
+    }
+
+    private List<Long> validateRoleIds(List<Long> roleIds) {
+        AssertUtil.notEmpty(roleIds, "角色ID集合不能为空");
+        List<Long> ids = new ArrayList<>(new LinkedHashSet<>(roleIds));
+        AssertUtil.isTrue(ids.stream().allMatch(id -> id != null && id > 0), "角色ID必须为正数");
+        long count = roleMapper.selectCount(Wrappers.<Role>lambdaQuery().in(Role::getId, ids));
+        AssertUtil.isTrue(count == ids.size(), "角色不存在或已删除");
+        return ids;
+    }
+
+    private void replaceUserRoles(Long userId, List<Long> roleIds) {
+        userRoleRelevanceMapper.delete(Wrappers.<UserRoleRelevance>lambdaQuery()
+                .eq(UserRoleRelevance::getUserId, userId));
+        List<UserRoleRelevance> links = new ArrayList<>(roleIds.size());
+        for (Long roleId : roleIds) {
+            UserRoleRelevance link = new UserRoleRelevance();
+            link.setId(IdWorker.getId());
+            link.setUserId(userId);
+            link.setRoleId(roleId);
+            links.add(link);
+        }
+        for (List<UserRoleRelevance> batch : CollUtil.split(links, SuperMapper.DEFAULT_BATCH_SIZE)) {
+            AssertUtil.isTrue(userRoleRelevanceMapper.insertBatchSomeColumn(batch) == batch.size(), "保存用户角色失败");
+        }
+    }
+
+    private Map<Long, List<UserRoleVO>> getUserRoleMap(Collection<Long> userIds) {
+        if (CollUtil.isEmpty(userIds)) {
+            return Map.of();
+        }
+        List<UserRoleRelevance> links = userRoleRelevanceMapper.selectList(Wrappers.<UserRoleRelevance>lambdaQuery()
+                .in(UserRoleRelevance::getUserId, new LinkedHashSet<>(userIds))
+                .select(UserRoleRelevance::getUserId, UserRoleRelevance::getRoleId)
+                .orderByAsc(UserRoleRelevance::getRoleId));
+        if (links.isEmpty()) {
+            return Map.of();
+        }
+        List<Long> roleIds = links.stream().map(UserRoleRelevance::getRoleId).distinct().toList();
+        Map<Long, UserRoleVO> roles = new HashMap<>();
+        for (Role role : roleMapper.selectList(Wrappers.<Role>lambdaQuery()
+                .in(Role::getId, roleIds)
+                .select(Role::getId, Role::getCode, Role::getName))) {
+            roles.put(role.getId(), userConverter.convertUserRoleVO(role));
+        }
+        Map<Long, LinkedHashSet<Long>> groupedRoleIds = new HashMap<>();
+        for (UserRoleRelevance link : links) {
+            groupedRoleIds.computeIfAbsent(link.getUserId(), ignored -> new LinkedHashSet<>()).add(link.getRoleId());
+        }
+        Map<Long, List<UserRoleVO>> result = new HashMap<>();
+        groupedRoleIds.forEach((userId, ids) -> result.put(userId,
+                ids.stream().map(roles::get).filter(Objects::nonNull).toList()));
+        return result;
+    }
+
     @Override
     public boolean updateStatus(UserUpdateStatusDTO updateStatusDTO) {
         log.info("更新状态,参数:{}", JSON.toJSONString(updateStatusDTO));
@@ -417,6 +505,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         vo.setCreateUserName(userIdNameMap.get(vo.getCreateUserId()));
         vo.setUpdateUserName(userIdNameMap.get(vo.getUpdateUserId()));
+        vo.setRoles(getUserRoleMap(List.of(vo.getId())).getOrDefault(vo.getId(), List.of()));
 
         return vo;
     }

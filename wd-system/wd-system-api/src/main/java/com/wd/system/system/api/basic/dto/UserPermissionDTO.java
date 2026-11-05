@@ -1,11 +1,14 @@
 package com.wd.system.system.api.basic.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.wd.common.core.constants.CommonConstant;
+import com.wd.system.system.api.basic.vo.UserRoleVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author huangwenda
@@ -44,28 +47,36 @@ public class UserPermissionDTO {
     @Schema(description = "是否是ADMIN角色")
     private Boolean adminRole;
 
-    @Schema(description = "角色ID集合")
-    private List<Long> roleIds;
+    @Schema(description = "角色集合")
+    private List<UserRoleVO> roleList;
 
-    @Schema(description = "数据权限ID集合")
-    private List<Long> dataPermissionIds;
-
-    @Schema(description = "有权限的菜单ID权限(返回有的权限集合,没有权限返回null或者空数组)")
+    @Schema(description = "有权限的菜单ID权限(返回有的权限集合,没有权限返回空数组)")
     private List<Long> authMenuIds;
 
-    @Schema(description = "有权限的菜单按钮权限(返回有的权限集合,没有权限返回null或者空数组)")
+    @Schema(description = "有权限的菜单按钮权限(返回有的权限集合,没有权限返回空数组)")
     private List<String> authMenuPermissionList;
 
-    @Schema(description = "有权限的字段权限(返回有的权限集合,没有权限返回null或者空数组)")
+    @Schema(description = "有权限的字段权限(返回有的权限集合,没有权限返回空数组)")
     private List<String> authFieldPermissionList;
+
+    @Schema(description = "有权限的用户ID权限(所有权限返回null,没有权限返回-1)")
+    private List<Long> authUserIds;
 
 
     /**
-     * 是否拥有所有菜单权限
+     * 是否拥有所有用户权限
      */
-    public boolean allMenuPermission() {
-        List<Long> menuIds = getAuthMenuIds();
-        return menuIds == null || menuIds.isEmpty();
+    public boolean allUserIdPermission() {
+        return getAuthUserIds() == null;
+    }
+
+    /**
+     * 是否没有用户权限
+     */
+    public boolean notUserIdPermission() {
+        List<Long> userIds = getAuthUserIds();
+        return Objects.nonNull(userIds) && Objects.equals(userIds.size(), 1)
+                && Objects.equals(userIds.get(0), CommonConstant.NOT_PERMISSION_FLAG);
     }
 
 }

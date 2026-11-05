@@ -1,10 +1,12 @@
 package com.wd.system.basic.domain.vo;
 
+import com.wd.system.system.api.basic.vo.UserRoleVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * <p>
@@ -63,4 +65,7 @@ public class UserInfoVO {
 
     @Schema(description = "更新时间")
     private LocalDateTime updateTime;
+
+    @Schema(description = "用户绑定的角色集合")
+    private List<UserRoleVO> roles;
 }

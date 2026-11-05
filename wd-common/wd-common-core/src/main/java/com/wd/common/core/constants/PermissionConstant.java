@@ -21,16 +21,8 @@ public class PermissionConstant {
      */
     public static final String ROLE_ADD = "role:add";
     public static final String ROLE_UPDATE = "role:update";
-    public static final String ROLE_AUTH = "role:auth";
     public static final String ROLE_DELETE = "role:delete";
-
-    /**
-     * 数据权限
-     */
-    public static final String DATA_PERMISSION_ADD = "data-permission:add";
-    public static final String DATA_PERMISSION_UPDATE = "data-permission:update";
-    public static final String DATA_PERMISSION_AUTH = "data-permission:auth";
-    public static final String DATA_PERMISSION_DELETE = "data-permission:delete";
+    public static final String ROLE_AUTH = "role:auth";
 
     /**
      * 菜单

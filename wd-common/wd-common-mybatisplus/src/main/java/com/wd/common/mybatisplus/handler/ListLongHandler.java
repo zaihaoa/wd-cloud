@@ -17,7 +17,7 @@ public class ListLongHandler extends Jackson3TypeHandler {
 
     @Override
     public Object parse(String json) {
-        return Jackson3TypeHandler.getObjectMapper().readValue(json, new TypeReference<List<Long>>() {
+        return getObjectMapper().readValue(json, new TypeReference<List<Long>>() {
         });
     }
 }

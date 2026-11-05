@@ -1,12 +1,17 @@
 package com.wd.system.basic.controller;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.wd.common.core.constants.PermissionConstant;
 import com.wd.common.core.model.IdDTO;
 import com.wd.common.core.model.PageInfo;
 import com.wd.common.core.model.R;
 import com.wd.system.basic.domain.dto.RoleAddDTO;
+import com.wd.system.basic.domain.dto.RoleAuthorizeAllDTO;
+import com.wd.system.basic.domain.dto.RoleAuthorizeDTO;
 import com.wd.system.basic.domain.dto.RolePageParamDTO;
 import com.wd.system.basic.domain.dto.RoleUpdateDTO;
 import com.wd.system.basic.domain.vo.RolePageVO;
+import com.wd.system.basic.domain.vo.RoleDetailVO;
 import com.wd.system.basic.service.RoleService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
@@ -35,21 +40,43 @@ public class RoleController {
     }
 
     @Operation(summary = "新增角色")
+    @SaCheckPermission(PermissionConstant.ROLE_ADD)
     @PostMapping("/add")
     public R<Long> addRole(@RequestBody @Valid RoleAddDTO roleAddParam) {
         return R.success(roleService.addRole(roleAddParam));
     }
 
     @Operation(summary = "更新角色")
+    @SaCheckPermission(PermissionConstant.ROLE_UPDATE)
     @PutMapping("/update")
     public R<Boolean> updateRole(@RequestBody @Valid RoleUpdateDTO roleUpdateParam) {
         return R.success(roleService.updateRole(roleUpdateParam));
     }
 
     @Operation(summary = "删除角色")
+    @SaCheckPermission(PermissionConstant.ROLE_DELETE)
     @DeleteMapping("/delete")
     public R<Boolean> deleteRoleById(@RequestBody @Valid IdDTO id) {
         return R.success(roleService.deleteRoleById(id));
     }
 
+    @Operation(summary = "获取角色详情及授权")
+    @GetMapping("/detail")
+    public R<RoleDetailVO> detail(@RequestParam("id") Long id) {
+        return R.success(roleService.detail(id));
+    }
+
+    @Operation(summary = "授权或取消角色全部权限标记")
+    @SaCheckPermission(PermissionConstant.ROLE_AUTH)
+    @PutMapping("/authorize-all")
+    public R<Boolean> authorizeAll(@RequestBody @Valid RoleAuthorizeAllDTO dto) {
+        return R.success(roleService.authorizeAll(dto));
+    }
+
+    @Operation(summary = "覆盖保存角色指定类型的授权")
+    @SaCheckPermission(PermissionConstant.ROLE_AUTH)
+    @PutMapping("/authorize")
+    public R<Boolean> authorize(@RequestBody @Valid RoleAuthorizeDTO dto) {
+        return R.success(roleService.authorize(dto));
+    }
 }
