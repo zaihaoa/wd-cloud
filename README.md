@@ -21,11 +21,9 @@ Spring Cloud Alibaba 2023.0.3.2
 日志收集分析：腾讯云日志
 
 ## API文档
-API文档工具：Apifox  
-地址：https://app.apifox.com
+API文档工具：Apifox（推荐安装Idea插件生成文档到Apifox项目中）
 
-推荐安装Idea插件生成文档到Apifox项目中，不需要手动在Apifox中维护文档  
-Idea插件帮助文档：https://docs.apifox.com/5743620m0
+地址：https://app.apifox.com
 
 ## 服务划分
 

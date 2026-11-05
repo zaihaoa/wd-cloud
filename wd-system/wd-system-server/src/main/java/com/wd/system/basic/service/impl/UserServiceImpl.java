@@ -247,7 +247,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         StpUtil.logout(id);
 
         // 清除缓存
-        clearUserCache();
+        clearUserCacheAfterCommit();
 
         return success;
     }

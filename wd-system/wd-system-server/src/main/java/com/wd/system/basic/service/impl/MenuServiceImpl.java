@@ -33,6 +33,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import tools.jackson.core.type.TypeReference;
 
 import java.util.*;
@@ -108,7 +110,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         addLog(id, "新增", "新增菜单");
 
         // 清除缓存
-        clearMenuCache();
+        clearMenuCacheAfterCommit();
 
         return id;
     }
@@ -194,7 +196,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         }
 
         // 清除缓存
-        clearMenuCache();
+        clearMenuCacheAfterCommit();
 
         return success;
     }
@@ -214,7 +216,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         addLog(id, "删除", "删除菜单：" + menu.getMenuName());
 
         // 清除缓存
-        clearMenuCache();
+        clearMenuCacheAfterCommit();
 
         return deleted > 0;
     }
@@ -316,6 +318,19 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     private void clearMenuCache() {
         redisHelper.deleteByCacheRegion(CacheRegion.MENU);
         redisHelper.deleteByCacheRegion(CacheRegion.PERMISSION);
+    }
+
+    private void clearMenuCacheAfterCommit() {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            clearMenuCache();
+            return;
+        }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                clearMenuCache();
+            }
+        });
     }
 
     @Override

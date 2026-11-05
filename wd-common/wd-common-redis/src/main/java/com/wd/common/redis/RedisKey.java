@@ -22,10 +22,12 @@ public class RedisKey {
      * 权限
      */
     public static final String USER_PERMISSION = "user_permission";
+    // 位于权限缓存区域之外，清理 permission:* 时不会删除锁本身。
+    public static final String PERMISSION_CACHE_LOCK = "lock:permission_cache";
 
     /**
      * 菜单
      */
-    public static final String MENU_LIST = "list:v2";
+    public static final String MENU_LIST = "list";
 
 }

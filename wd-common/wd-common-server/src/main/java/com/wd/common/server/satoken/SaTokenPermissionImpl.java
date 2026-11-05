@@ -56,7 +56,7 @@ public class SaTokenPermissionImpl implements StpInterface {
             return Lists.newArrayList();
         }
 
-        if (userPermission.getAdminRole()) {
+        if (Boolean.TRUE.equals(userPermission.getAdminUser()) || Boolean.TRUE.equals(userPermission.getAdminRole())) {
             return List.of("*");
         }
 

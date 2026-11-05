@@ -250,7 +250,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         role.setDeleteFlag(CommonConstant.NOT_DELETE_FLAG);
 
         AssertUtil.isTrue(baseMapper.insert(role) > 0, "新增角色失败");
-        clearPermissionCache();
+        clearPermissionCacheAfterCommit();
 
         return role.getId();
     }
@@ -272,7 +272,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
 
         boolean success = baseMapper.updateById(role) > 0;
         if (success) {
-            clearPermissionCache();
+            clearPermissionCacheAfterCommit();
         }
         return success;
     }
@@ -289,7 +289,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         // 逻辑删除使用角色ID作为删除标记，允许重新使用已删除角色的编码和名称。
         boolean success = baseMapper.deleteById(role) > 0;
         if (success) {
-            clearPermissionCache();
+            clearPermissionCacheAfterCommit();
         }
 
         return success;

@@ -5,9 +5,12 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.wd.common.redis.CacheRegion;
+import com.wd.common.redis.RedisKey;
 import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Component;
 import tools.jackson.core.type.TypeReference;
@@ -17,6 +20,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -47,6 +51,8 @@ public class RedisHelper {
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+    @Resource
+    private RedissonClient redissonClient;
 
 
     public static JsonMapper redisSerializationJsonMapper() {
@@ -195,11 +201,35 @@ public class RedisHelper {
     }
 
     public long deleteByCacheRegion(CacheRegion cacheRegion) {
-        return deleteByPattern(cacheRegion.getCode() + ":*");
+        return deleteCacheRegion(cacheRegion, cacheRegion.getCode() + ":*");
     }
 
     public long deleteByCacheRegion(CacheRegion cacheRegion, String keyPrefix) {
-        return deleteByPattern(regionJoinKey(cacheRegion, keyPrefix) + "*");
+        return deleteCacheRegion(cacheRegion, regionJoinKey(cacheRegion, keyPrefix) + "*");
+    }
+
+    /**
+     * 权限查询到缓存回填期间持有共享读锁，失效持有同一把锁的写锁。
+     */
+    public <T> T withPermissionCacheReadLock(Supplier<T> action) {
+        return withLock(redissonClient.getReadWriteLock(RedisKey.PERMISSION_CACHE_LOCK).readLock(), action);
+    }
+
+    private long deleteCacheRegion(CacheRegion cacheRegion, String pattern) {
+        if (cacheRegion == CacheRegion.PERMISSION) {
+            return withLock(redissonClient.getReadWriteLock(RedisKey.PERMISSION_CACHE_LOCK).writeLock(),
+                    () -> deleteByPattern(pattern));
+        }
+        return deleteByPattern(pattern);
+    }
+
+    private <T> T withLock(RLock lock, Supplier<T> action) {
+        lock.lock();
+        try {
+            return action.get();
+        } finally {
+            lock.unlock();
+        }
     }
 
     private long deleteByPattern(String pattern) {

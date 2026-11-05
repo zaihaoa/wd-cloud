@@ -41,7 +41,7 @@ public class CommonConstant {
     /**
      * Admin用户ID
      */
-    public static final long ADMIN_USER_ID = 0L;
+    public static final long ADMIN_USER_ID = 1L;
 
     /**
      * 默认值0

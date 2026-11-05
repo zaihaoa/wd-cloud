@@ -1,6 +1,7 @@
 package com.wd.system.basic.controller;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.wd.common.core.annotions.ApifoxFolder;
 import com.wd.common.core.constants.PermissionConstant;
 import com.wd.common.core.model.IdDTO;
 import com.wd.common.core.model.R;
@@ -24,6 +25,7 @@ import java.util.List;
  * @author huangwenda
  * @since 2025-07-08
  */
+@ApifoxFolder("菜单")
 @RestController
 @RequestMapping("/menu")
 public class MenuController {
