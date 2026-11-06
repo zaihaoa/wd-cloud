@@ -76,7 +76,7 @@ public class PermissionServiceImpl implements PermissionService {
 
         User user = userMapper.selectById(userId);
         AssertUtil.notNull(user, "用户不存在或已删除");
-        AssertUtil.isTrue(UserStatusEnum.NORMAL.getCode().equals(user.getStatus()), "用户已被禁用");
+        AssertUtil.isTrue(UserStatusEnum.ENABLED.getCode().equals(user.getStatus()), "用户已被禁用");
 
         List<Role> roles = effectiveRoles(userId);
         UserPermissionDTO result = userConverter.convertUserPermissionDTO(user);

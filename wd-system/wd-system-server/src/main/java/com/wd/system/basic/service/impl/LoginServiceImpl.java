@@ -36,7 +36,7 @@ public class LoginServiceImpl implements LoginService {
 
         User user = userService.getByUsername(username);
         AssertUtil.notNull(user, "用户不存在");
-        Assert.isTrue(UserStatusEnum.NORMAL.getCode().equals(user.getStatus()), "用户已被禁用");
+        Assert.isTrue(UserStatusEnum.ENABLED.getCode().equals(user.getStatus()), "用户已被禁用");
 
         String password = loginParam.getPassword();
         Assert.isTrue(UserHelper.checkPassword(password, user.getPassword()), "密码不正确");

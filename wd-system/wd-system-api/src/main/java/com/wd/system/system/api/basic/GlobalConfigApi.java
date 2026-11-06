@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  **/
 @FeignClient(
         name = "system-server",
-        contextId = "userApi",
+        contextId = "globalConfigApi",
         path = "/feign/global-config")
 public interface GlobalConfigApi {
 

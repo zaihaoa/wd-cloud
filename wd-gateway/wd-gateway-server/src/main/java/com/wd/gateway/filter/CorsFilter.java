@@ -59,7 +59,7 @@ public class CorsFilter implements WebFilter {
         long start = System.currentTimeMillis();
 
         // 路径
-        String path = RequestUtil.getPathTemplate(request);
+        String path =  request.getPath().value();
 
         // traceId
         ThreadLocalRandom random = ThreadLocalRandom.current();

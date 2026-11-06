@@ -21,8 +21,8 @@ import java.util.List;
 @Schema(description = "用户信息VO")
 public class UserInfoVO {
 
-    @Schema(description = "主键ID")
-    private Long id;
+    @Schema(description = "用户ID")
+    private Long userId;
 
     @Schema(description = "用户名")
     private String username;
@@ -54,12 +54,6 @@ public class UserInfoVO {
     @Schema(description = "更新人ID")
     private Long updateUserId;
 
-    @Schema(description = "创建人姓名")
-    private String createUserName;
-
-    @Schema(description = "更新人姓名")
-    private String updateUserName;
-
     @Schema(description = "创建时间")
     private LocalDateTime createTime;
 
@@ -68,4 +62,23 @@ public class UserInfoVO {
 
     @Schema(description = "用户绑定的角色集合")
     private List<UserRoleVO> roles;
+
+    @Schema(description = "是否为ADMIN用户")
+    private Boolean adminUser;
+
+    @Schema(description = "是否是ADMIN角色")
+    private Boolean adminRole;
+
+    @Schema(description = "有权限的菜单ID权限(返回有的权限集合,没有权限返回空数组)")
+    private List<Long> authMenuIds;
+
+    @Schema(description = "有权限的菜单按钮权限(返回有的权限集合,没有权限返回空数组)")
+    private List<String> authMenuPermissionList;
+
+    @Schema(description = "有权限的字段权限(返回有的权限集合,没有权限返回空数组)")
+    private List<String> authFieldPermissionList;
+
+    @Schema(description = "有权限的菜单")
+    private List<MenuTreeVO> authMenuList;
+
 }

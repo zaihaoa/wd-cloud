@@ -27,7 +27,9 @@ import com.wd.system.basic.domain.vo.MenuTreeVO;
 import com.wd.system.basic.mapper.MenuMapper;
 import com.wd.system.basic.service.CommonLogService;
 import com.wd.system.basic.service.MenuService;
+import com.wd.system.basic.service.PermissionService;
 import com.wd.system.basic.service.UserService;
+import com.wd.system.system.api.basic.dto.UserPermissionDTO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -61,6 +63,8 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     private UserService userService;
     @Resource
     private CommonLogService commonLogService;
+    @Resource
+    private PermissionService permissionService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -223,9 +227,24 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
 
     @Override
     public List<MenuTreeVO> userPermissionMenuTree() {
+        // 登录过滤个人权限
+        UserPermissionDTO userPermission = permissionService.getCurrentUserPermission();
+
+        List<Long> authMenuIds = userPermission.getAuthMenuIds();
+
+        // 没有菜单权限
+        if (CollUtil.isEmpty(authMenuIds)) {
+            return Lists.newArrayList();
+        }
 
         // 菜单列表沿用现有查询规则
         List<Menu> menuList = menuList();
+
+        // 过滤拥有的权限
+        menuList = menuList
+                .stream()
+                .filter(v -> authMenuIds.contains(v.getId()))
+                .toList();
 
         return getNormalMenuTree(menuList);
     }

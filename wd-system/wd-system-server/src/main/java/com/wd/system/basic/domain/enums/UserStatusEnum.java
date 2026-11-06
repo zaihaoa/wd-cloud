@@ -11,7 +11,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum UserStatusEnum implements CodeDescEnum {
-    NORMAL("NORMAL", "启用"),
+    ENABLED("ENABLED", "启用"),
     DISABLE("DISABLE", "禁用"),
     ;
 

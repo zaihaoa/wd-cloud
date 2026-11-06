@@ -45,7 +45,7 @@ public class SaTokenFilter {
                         // 系统上下文
                         SystemContext.set(commonParam);
 
-                        // 用户ID
+                        // 用户id
                         long userId = StpUtil.getLoginIdAsLong();
                         commonParam.setUserId(userId);
                         MDC.put(CommonConstant.USER_ID, String.valueOf(userId));
@@ -58,7 +58,7 @@ public class SaTokenFilter {
 
                     // 校验是否登录
                     SaRouter.match("/**")
-                            .notMatch(routeProperties.getExcludePaths())
+                            .notMatch(routeProperties.getActualExcludeList())
                             .check(r -> StpUtil.checkLogin());
                 })
 

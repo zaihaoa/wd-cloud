@@ -33,6 +33,9 @@ import com.wd.system.basic.domain.enums.UserTypeEnum;
 import com.wd.system.basic.domain.vo.UserDetailVO;
 import com.wd.system.basic.domain.vo.UserInfoVO;
 import com.wd.system.basic.domain.vo.UserPageVO;
+import com.wd.system.basic.service.MenuService;
+import com.wd.system.basic.service.PermissionService;
+import com.wd.system.system.api.basic.dto.UserPermissionDTO;
 import com.wd.system.system.api.basic.vo.UserRoleVO;
 import com.wd.system.basic.mapper.UserMapper;
 import com.wd.system.basic.mapper.RoleMapper;
@@ -77,6 +80,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private RoleMapper roleMapper;
     @Resource
     private UserRoleRelevanceMapper userRoleRelevanceMapper;
+    @Resource
+    private PermissionService permissionService;
+    @Resource
+    private MenuService menuService;
 
     @Override
     public PageInfo<UserPageVO> pageList(UserPageParamDTO pageParam) {
@@ -149,7 +156,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setUsername(username);
         user.setName(name);
         user.setPassword(UserHelper.encryptPassword(password));
-        user.setStatus(UserStatusEnum.NORMAL.getCode());
+        user.setStatus(UserStatusEnum.ENABLED.getCode());
         user.setType(UserTypeEnum.NORMAL.getCode());
         user.setPhone(Optional.ofNullable(phone).orElse(""));
         user.setEmail(Optional.ofNullable(email).orElse(""));
@@ -423,7 +430,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             addLog(userId, "编辑", CodeDescEnumUtil.getDescByCode(UserStatusEnum.class, status) + "用户");
         }
 
-        if (!UserStatusEnum.NORMAL.getCode().equals(status)) {
+        if (!UserStatusEnum.ENABLED.getCode().equals(status)) {
             // 登出系统
             StpUtil.logout(userId);
         }
@@ -512,11 +519,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public UserInfoVO currentUserInfo() {
-        UserDetailVO userDetail = detail(new IdDTO(SystemContext.getUserIdAssertExist()));
+        UserPermissionDTO userPermission = permissionService.getCurrentUserPermission();
 
-        UserInfoVO userInfoVO = userConverter.convertUserInfoVO(userDetail);
+        UserInfoVO vo = userConverter.convertUserInfoVO(userPermission);
+        vo.setStatusDesc(CodeDescEnumUtil.getDescByCode(UserStatusEnum.class, vo.getStatus()));
+        vo.setTypeDesc(CodeDescEnumUtil.getDescByCode(UserTypeEnum.class, vo.getType()));
 
-        return userInfoVO;
+        vo.setAuthMenuList(menuService.userPermissionMenuTree());
+
+        return vo;
     }
 
     @Override

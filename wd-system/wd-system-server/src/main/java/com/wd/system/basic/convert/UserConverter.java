@@ -21,7 +21,7 @@ public interface UserConverter {
     @Mapping(target = "roles", ignore = true)
     UserDetailVO convertUserDetailVO(User user);
 
-    UserInfoVO convertUserInfoVO(UserDetailVO userDetail);
+    UserInfoVO convertUserInfoVO(UserPermissionDTO userPermission);
 
     @Mapping(target = "ruleId", source = "id")
     @Mapping(target = "ruleCode", source = "code")

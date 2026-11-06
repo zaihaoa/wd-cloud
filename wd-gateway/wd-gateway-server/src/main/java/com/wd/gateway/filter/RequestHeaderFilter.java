@@ -49,7 +49,6 @@ public class RequestHeaderFilter implements WebFilter {
                     String requestIp = responseHeaders.getFirst(CommonConstant.HEADER_REQUEST_IP);
                     headers.set(CommonConstant.HEADER_REQUEST_IP, requestIp);
 
-
                     // 用户ID
                     Long userId = SystemContext.getUserId();
                     if (Objects.nonNull(userId)) {

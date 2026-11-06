@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -41,14 +42,26 @@ public class UserPermissionDTO {
     @Schema(description = "邮箱")
     private String email;
 
+    @Schema(description = "创建人ID")
+    private Long createUserId;
+
+    @Schema(description = "更新人ID")
+    private Long updateUserId;
+
+    @Schema(description = "创建时间")
+    private LocalDateTime createTime;
+
+    @Schema(description = "更新时间")
+    private LocalDateTime updateTime;
+
+    @Schema(description = "角色集合")
+    private List<UserRoleVO> roleList;
+
     @Schema(description = "是否为ADMIN用户")
     private Boolean adminUser;
 
     @Schema(description = "是否是ADMIN角色")
     private Boolean adminRole;
-
-    @Schema(description = "角色集合")
-    private List<UserRoleVO> roleList;
 
     @Schema(description = "有权限的菜单ID权限(返回有的权限集合,没有权限返回空数组)")
     private List<Long> authMenuIds;
