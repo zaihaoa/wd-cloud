@@ -88,6 +88,8 @@
 
         <!-- springdoc-openapi -->
         <springdoc-openapi.version>3.2.0</springdoc-openapi.version>
+        <!-- freemarker -->
+        <freemarker.version>2.3.35</freemarker.version>
 
     </properties>
 
@@ -334,10 +336,18 @@
                 <version>${transmittable-thread-local.version}</version>
             </dependency>
 
+            <!-- springdoc-openapi -->
             <dependency>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
                 <version>${springdoc-openapi.version}</version>
+            </dependency>
+
+            <!-- freemarker -->
+            <dependency>
+                <groupId>org.freemarker</groupId>
+                <artifactId>freemarker</artifactId>
+                <version>${freemarker.version}</version>
             </dependency>
 
         </dependencies>

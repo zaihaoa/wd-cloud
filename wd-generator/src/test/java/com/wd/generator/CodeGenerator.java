@@ -27,7 +27,7 @@ public class CodeGenerator {
         String password = "huang123456";
 
         // 当前要生成的表
-        String[] generateTableName = {"sys_role_permission_relevance"};
+        String[] generateTableName = {"sys_user_config"};
         // 表前缀
         String tablePrefix = "sys_";
 
