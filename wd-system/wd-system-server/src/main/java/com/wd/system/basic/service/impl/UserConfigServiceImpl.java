@@ -121,15 +121,13 @@ public class UserConfigServiceImpl extends ServiceImpl<UserConfigMapper, UserCon
                 .eq(UserConfig::getUserId, SystemContext.getUserIdAssertExist())
                 .eq(UserConfig::getType, type)
                 .eq(UserConfig::getCode, code));
-        log.info("");
+        log.info("存在的数据:{}", JSON.toJSONString(existRecord));
         if (existRecord == null) {
             return false;
         }
 
         int delete = baseMapper.delete(Wrappers.<UserConfig>lambdaQuery()
-                .eq(UserConfig::getUserId, SystemContext.getUserIdAssertExist())
-                .eq(UserConfig::getType, type)
-                .eq(UserConfig::getCode, code));
+                .eq(UserConfig::getId, existRecord.getId()));
         return delete > 0;
     }
 }
