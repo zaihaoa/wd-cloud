@@ -45,6 +45,10 @@ public class Menu extends BaseUserTimeEntity implements Serializable {
     @TableField(value = "menu_name")
     private String menuName;
 
+    @Schema(description = "所属分类")
+    @TableField(value = "menu_group_name")
+    private String menuGroupName;
+
     @Schema(description = "状态(ENABLED:启用,DISABLED:禁用)")
     @TableField(value = "status")
     private String status;

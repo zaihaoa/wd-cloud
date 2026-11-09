@@ -79,17 +79,6 @@
             <artifactId>mapstruct-processor</artifactId>
         </dependency>
 
-        <!-- unirest-java -->
-        <dependency>
-            <groupId>com.konghq</groupId>
-            <artifactId>unirest-java</artifactId>
-        </dependency>
-        <!-- unirest-jackson -->
-        <dependency>
-            <groupId>com.konghq</groupId>
-            <artifactId>unirest-objectmapper-jackson</artifactId>
-        </dependency>
-
         <!-- spring-retry -->
         <dependency>
             <groupId>org.springframework.retry</groupId>

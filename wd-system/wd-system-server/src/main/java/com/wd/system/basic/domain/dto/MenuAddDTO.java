@@ -36,6 +36,9 @@ public class MenuAddDTO {
     @Size(max = 100, message = "菜单名称长度不能超过100")
     private String menuName;
 
+    @Schema(description = "所属分类")
+    private String menuGroupName;
+
     @Schema(description = "状态(ENABLED:启用,DISABLED:禁用)")
     @EnumCodeExist(message = "状态不正确", enumClass = MenuStatusEnum.class)
     @Size(max = 100, message = "状态长度不能超过100")

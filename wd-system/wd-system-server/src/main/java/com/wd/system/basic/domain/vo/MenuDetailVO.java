@@ -34,6 +34,9 @@ public class MenuDetailVO {
     @Schema(description = "菜单名称")
     private String menuName;
 
+    @Schema(description = "所属分类")
+    private String menuGroupName;
+
     @Schema(description = "状态(ENABLED:启用,DISABLED:禁用)")
     private String status;
 

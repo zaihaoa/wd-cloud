@@ -9,22 +9,9 @@ import com.wd.common.redis.CacheRegion;
 import com.wd.common.redis.RedisKey;
 import com.wd.common.redis.util.RedisHelper;
 import com.wd.system.basic.convert.UserConverter;
-import com.wd.system.basic.domain.entity.Menu;
-import com.wd.system.basic.domain.entity.Role;
-import com.wd.system.basic.domain.entity.RolePermissionRelevance;
-import com.wd.system.basic.domain.entity.User;
-import com.wd.system.basic.domain.entity.UserRoleRelevance;
-import com.wd.system.basic.domain.enums.MenuStatusEnum;
-import com.wd.system.basic.domain.enums.RoleBuiltInCodeEnum;
-import com.wd.system.basic.domain.enums.RolePermissionFlagEnum;
-import com.wd.system.basic.domain.enums.RolePermissionTypeEnum;
-import com.wd.system.basic.domain.enums.RoleStatusEnum;
-import com.wd.system.basic.domain.enums.UserStatusEnum;
-import com.wd.system.basic.mapper.MenuMapper;
-import com.wd.system.basic.mapper.RoleMapper;
-import com.wd.system.basic.mapper.RolePermissionRelevanceMapper;
-import com.wd.system.basic.mapper.UserMapper;
-import com.wd.system.basic.mapper.UserRoleRelevanceMapper;
+import com.wd.system.basic.domain.entity.*;
+import com.wd.system.basic.domain.enums.*;
+import com.wd.system.basic.mapper.*;
 import com.wd.system.basic.service.PermissionService;
 import com.wd.system.system.api.basic.dto.UserPermissionDTO;
 import jakarta.annotation.Resource;
@@ -63,7 +50,7 @@ public class PermissionServiceImpl implements PermissionService {
     @Override
     public UserPermissionDTO getUserPermission(Long userId) {
         AssertUtil.isTrue(userId != null && userId >= 0, "用户ID不能为空或负数");
-        return redisHelper.withPermissionCacheReadLock(() -> loadUserPermission(userId));
+        return loadUserPermission(userId);
     }
 
     private UserPermissionDTO loadUserPermission(Long userId) {
@@ -94,8 +81,8 @@ public class PermissionServiceImpl implements PermissionService {
                 || flags.contains(RolePermissionFlagEnum.ALL_PERMISSION.getCode());
         List<RolePermissionRelevance> permissions = roles.isEmpty() ? List.of()
                 : rolePermissionRelevanceMapper.selectList(Wrappers.<RolePermissionRelevance>lambdaQuery()
-                        .in(RolePermissionRelevance::getRoleId, roles.stream().map(Role::getId).toList())
-                        .orderByAsc(RolePermissionRelevance::getId));
+                .in(RolePermissionRelevance::getRoleId, roles.stream().map(Role::getId).toList())
+                .orderByAsc(RolePermissionRelevance::getId));
 
         List<Menu> menus = authorizedMenus(all || flags.contains(RolePermissionFlagEnum.ALL_MENU_PERMISSION.getCode()), permissions);
         result.setAuthMenuIds(menus.stream().map(Menu::getId).toList());
@@ -104,7 +91,7 @@ public class PermissionServiceImpl implements PermissionService {
         result.setAuthFieldPermissionList(all || flags.contains(RolePermissionFlagEnum.ALL_FIELD_PERMISSION.getCode())
                 ? Arrays.stream(FieldPermissionEnum.values()).map(FieldPermissionEnum::getCode).toList()
                 : permissions.stream().filter(p -> RolePermissionTypeEnum.FIELD.getCode().equals(p.getType()))
-                        .map(RolePermissionRelevance::getRelevanceValue).filter(StringUtils::isNotBlank).distinct().toList());
+                .map(RolePermissionRelevance::getRelevanceValue).filter(StringUtils::isNotBlank).distinct().toList());
         result.setAuthUserIds(all || flags.contains(RolePermissionFlagEnum.ALL_DATA_USER_PERMISSION.getCode())
                 ? null : authorizedUserIds(permissions));
 

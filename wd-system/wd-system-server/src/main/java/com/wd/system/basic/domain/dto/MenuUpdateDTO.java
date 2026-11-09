@@ -1,5 +1,6 @@
 package com.wd.system.basic.domain.dto;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.wd.common.core.annotions.EnumCodeExist;
 import com.wd.common.core.objectcompare.ObjectCompare;
 import com.wd.system.basic.domain.enums.MenuStatusEnum;
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -43,6 +45,14 @@ public class MenuUpdateDTO {
     @NotBlank(message = "菜单名称不能为空")
     @Size(max = 100, message = "菜单名称长度不能超过100")
     private String menuName;
+
+    @Schema(description = "所属分类，省略时保留原值，传 null 清空")
+    @ObjectCompare("所属分类")
+    private String menuGroupName;
+
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private boolean menuGroupNamePresent;
 
     @Schema(description = "状态(ENABLED:启用,DISABLED:禁用)")
     @ObjectCompare("状态")
@@ -132,4 +142,14 @@ public class MenuUpdateDTO {
     @Schema(description = "按钮")
     @ObjectCompare("按钮")
     private List<MenuButton> button;
+
+    @JsonSetter("menuGroupName")
+    public void setMenuGroupName(String menuGroupName) {
+        this.menuGroupName = menuGroupName;
+        this.menuGroupNamePresent = true;
+    }
+
+    public boolean hasMenuGroupName() {
+        return menuGroupNamePresent;
+    }
 }

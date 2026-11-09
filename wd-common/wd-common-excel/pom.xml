@@ -17,6 +17,8 @@
     <properties>
         <!-- wd-common-core -->
         <wd-common-core.version>1.0.0</wd-common-core.version>
+        <!-- wd-common-oss -->
+        <wd-common-oss.version>1.0.0</wd-common-oss.version>
     </properties>
 
     <dependencies>
@@ -25,6 +27,13 @@
             <groupId>com.wd</groupId>
             <artifactId>wd-common-core</artifactId>
             <version>${wd-common-core.version}</version>
+        </dependency>
+
+        <!-- wd-common-oss -->
+        <dependency>
+            <groupId>com.wd</groupId>
+            <artifactId>wd-common-oss</artifactId>
+            <version>${wd-common-oss.version}</version>
         </dependency>
 
         <!-- excel -->

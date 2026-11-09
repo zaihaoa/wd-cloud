@@ -51,7 +51,6 @@ public class ExcelReadListener<T> extends AnalysisEventListener<T> {
     @Override
     public void invokeHeadMap(Map<Integer, String> headMap, AnalysisContext context) {
         super.invokeHeadMap(headMap, context);
-
         this.templateHeadMap = new HashMap<>(headMap);
     }
 

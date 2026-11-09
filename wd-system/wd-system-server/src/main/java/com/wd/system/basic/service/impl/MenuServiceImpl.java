@@ -8,9 +8,9 @@ import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
 import com.wd.common.core.constants.CommonConstant;
 import com.wd.common.core.model.IdDTO;
+import com.wd.common.core.objectcompare.ObjectCompareUtil;
 import com.wd.common.core.util.AssertUtil;
 import com.wd.common.core.util.CodeDescEnumUtil;
-import com.wd.common.core.objectcompare.ObjectCompareUtil;
 import com.wd.common.redis.CacheRegion;
 import com.wd.common.redis.RedisKey;
 import com.wd.common.redis.util.RedisHelper;
@@ -41,6 +41,7 @@ import tools.jackson.core.type.TypeReference;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -54,6 +55,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements MenuService {
+
+    private static final Pattern MENU_GROUP_LINE_BREAK = Pattern.compile("\\R");
 
     @Resource
     private RedisHelper redisHelper;
@@ -72,10 +75,8 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         log.info("添加菜单,参数:{}", JSON.toJSONString(menuAddDTO));
 
         Long parentId = menuAddDTO.getParentId();
-        if (Objects.nonNull(parentId) && !Objects.equals(parentId, CommonConstant.ZERO_LONG)) {
-            long parentIdCount = baseMapper.selectCount(Wrappers.<Menu>lambdaQuery().eq(Menu::getId, parentId));
-            AssertUtil.isTrue(parentIdCount > 0, "父级菜单不存在");
-        }
+        Menu parent = getParentMenu(parentId, StringUtils.isNotBlank(menuAddDTO.getMenuGroupName()));
+        String menuGroupName = normalizeMenuGroupName(menuAddDTO.getMenuGroupName(), parent);
 
         String routePath = Optional.ofNullable(menuAddDTO.getRoutePath()).orElse("");
         if (StringUtils.isNotBlank(routePath)) {
@@ -87,6 +88,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         long id = IdWorker.getId();
         menu.setId(id);
         menu.setMenuName(menuAddDTO.getMenuName());
+        menu.setMenuGroupName(menuGroupName);
         menu.setParentId(Optional.ofNullable(parentId).orElse(CommonConstant.ZERO_LONG));
         menu.setSortNumber(Optional.ofNullable(menuAddDTO.getSortNumber()).orElse(0));
         menu.setMenuType(menuAddDTO.getMenuType());
@@ -135,14 +137,20 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         log.info("更新菜单,参数:{}", JSON.toJSONString(menuUpdateDTO));
 
         Long menuId = menuUpdateDTO.getId();
-        Menu menu = baseMapper.selectById(menuId);
+        Menu menu = getMenuForUpdate(menuId);
         AssertUtil.notNull(menu, "菜单不存在");
         String menuName = menu.getMenuName();
 
-        Long parentId = menuUpdateDTO.getParentId();
-        if (Objects.nonNull(parentId) && !Objects.equals(parentId, CommonConstant.ZERO_LONG)) {
-            long parentIdCount = baseMapper.selectCount(Wrappers.<Menu>lambdaQuery().eq(Menu::getId, parentId));
-            AssertUtil.isTrue(parentIdCount > 0, "父级菜单不存在");
+        Long parentId = Optional.ofNullable(menuUpdateDTO.getParentId()).orElse(CommonConstant.ZERO_LONG);
+        boolean preserveGroup = !menuUpdateDTO.hasMenuGroupName() && Objects.equals(menu.getParentId(), parentId);
+        String requestedGroup = preserveGroup ? menu.getMenuGroupName() : menuUpdateDTO.getMenuGroupName();
+        Menu parent = getParentMenu(parentId, StringUtils.isNotBlank(requestedGroup));
+        String menuGroupName = menuUpdateDTO.hasMenuGroupName()
+                ? normalizeMenuGroupName(requestedGroup, parent)
+                : isTopLevelDirectory(parent) ? requestedGroup : null;
+        if (!CommonConstant.ZERO_LONG.equals(parentId)
+                || !MenuTypeEnum.DIRECTORY.getCode().equals(menuUpdateDTO.getMenuType())) {
+            assertNoGroupedChildren(menu);
         }
 
         String routePath = StringUtils.isBlank(menuUpdateDTO.getRoutePath()) ? null : menuUpdateDTO.getRoutePath();
@@ -154,7 +162,8 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         }
 
         // 先应用实际写入的默认值，确保变更日志与落库结果一致。
-        menuUpdateDTO.setParentId(Optional.ofNullable(parentId).orElse(CommonConstant.ZERO_LONG));
+        menuUpdateDTO.setParentId(parentId);
+        menuUpdateDTO.setMenuGroupName(menuGroupName);
         menuUpdateDTO.setSortNumber(Optional.ofNullable(menuUpdateDTO.getSortNumber()).orElse(0));
         menuUpdateDTO.setRoutePath(routePath);
         menuUpdateDTO.setPermission(Optional.ofNullable(menuUpdateDTO.getPermission()).orElse(""));
@@ -171,6 +180,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         String compareLog = ObjectCompareUtil.compareLog(menu, menuUpdateDTO);
 
         menu.setMenuName(menuUpdateDTO.getMenuName());
+        menu.setMenuGroupName(menuGroupName);
         menu.setParentId(menuUpdateDTO.getParentId());
         menu.setSortNumber(menuUpdateDTO.getSortNumber());
         menu.setMenuType(menuUpdateDTO.getMenuType());
@@ -205,14 +215,55 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         return success;
     }
 
+    private Menu getMenuForUpdate(Long menuId) {
+        return baseMapper.selectOne(Wrappers.<Menu>lambdaQuery().eq(Menu::getId, menuId).last("FOR UPDATE"));
+    }
+
+    private Menu getParentMenu(Long parentId, boolean lockParent) {
+        if (parentId == null || CommonConstant.ZERO_LONG.equals(parentId)) {
+            return null;
+        }
+        Menu parent = lockParent ? getMenuForUpdate(parentId) : baseMapper.selectById(parentId);
+        AssertUtil.notNull(parent, "父级菜单不存在");
+        return parent;
+    }
+
+    private static boolean isTopLevelDirectory(Menu menu) {
+        return menu != null && CommonConstant.ZERO_LONG.equals(menu.getParentId())
+                && MenuTypeEnum.DIRECTORY.getCode().equals(menu.getMenuType());
+    }
+
+    private static String normalizeMenuGroupName(String value, Menu parent) {
+        String name = StringUtils.stripToNull(value);
+        if (name == null) {
+            return null;
+        }
+        AssertUtil.isTrue(name.codePointCount(0, name.length()) <= 100, "所属分类长度不能超过100");
+        AssertUtil.isTrue(!MENU_GROUP_LINE_BREAK.matcher(name).find(), "所属分类只能填写一行");
+        AssertUtil.isTrue(isTopLevelDirectory(parent), "仅一级目录的直接子菜单可设置所属分类");
+        return name;
+    }
+
+    private void assertNoGroupedChildren(Menu menu) {
+        if (!isTopLevelDirectory(menu)) {
+            return;
+        }
+        boolean hasGroupedChildren = !baseMapper.selectList(Wrappers.<Menu>lambdaQuery()
+                .eq(Menu::getParentId, menu.getId())
+                .isNotNull(Menu::getMenuGroupName)
+                .last("LIMIT 1 FOR UPDATE")).isEmpty();
+        AssertUtil.isTrue(!hasGroupedChildren, "请先清空子菜单的所属分类");
+    }
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean deleteMenuById(IdDTO idParam) {
         log.info("删除菜单,参数:{}", JSON.toJSONString(idParam));
 
         Long id = idParam.getId();
-        Menu menu = baseMapper.selectById(id);
+        Menu menu = getMenuForUpdate(id);
         AssertUtil.notNull(menu, "菜单不存在");
+        assertNoGroupedChildren(menu);
 
         int deleted = baseMapper.deleteById(id);
 
@@ -227,9 +278,11 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
 
     @Override
     public List<MenuTreeVO> userPermissionMenuTree() {
-        // 登录过滤个人权限
-        UserPermissionDTO userPermission = permissionService.getCurrentUserPermission();
+        return userPermissionMenuTree(permissionService.getCurrentUserPermission());
+    }
 
+    @Override
+    public List<MenuTreeVO> userPermissionMenuTree(UserPermissionDTO userPermission) {
         List<Long> authMenuIds = userPermission.getAuthMenuIds();
 
         // 没有菜单权限
@@ -248,7 +301,6 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
 
         return getNormalMenuTree(menuList);
     }
-
 
     @Override
     public List<MenuTreeVO> menuTree() {

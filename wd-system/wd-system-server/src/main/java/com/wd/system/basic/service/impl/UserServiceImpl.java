@@ -8,7 +8,6 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.google.common.collect.Maps;
 import com.wd.common.core.constants.CommonConstant;
-import com.wd.common.core.context.SystemContext;
 import com.wd.common.core.exception.PromptException;
 import com.wd.common.core.model.IdDTO;
 import com.wd.common.core.model.PageInfo;
@@ -24,8 +23,8 @@ import com.wd.common.redis.RedisKey;
 import com.wd.common.redis.util.RedisHelper;
 import com.wd.system.basic.convert.UserConverter;
 import com.wd.system.basic.domain.dto.*;
-import com.wd.system.basic.domain.entity.User;
 import com.wd.system.basic.domain.entity.Role;
+import com.wd.system.basic.domain.entity.User;
 import com.wd.system.basic.domain.entity.UserRoleRelevance;
 import com.wd.system.basic.domain.enums.CommonLogBusinessTypeEnum;
 import com.wd.system.basic.domain.enums.UserStatusEnum;
@@ -33,16 +32,16 @@ import com.wd.system.basic.domain.enums.UserTypeEnum;
 import com.wd.system.basic.domain.vo.UserDetailVO;
 import com.wd.system.basic.domain.vo.UserInfoVO;
 import com.wd.system.basic.domain.vo.UserPageVO;
-import com.wd.system.basic.service.MenuService;
-import com.wd.system.basic.service.PermissionService;
-import com.wd.system.system.api.basic.dto.UserPermissionDTO;
-import com.wd.system.system.api.basic.vo.UserRoleVO;
-import com.wd.system.basic.mapper.UserMapper;
 import com.wd.system.basic.mapper.RoleMapper;
+import com.wd.system.basic.mapper.UserMapper;
 import com.wd.system.basic.mapper.UserRoleRelevanceMapper;
 import com.wd.system.basic.service.CommonLogService;
+import com.wd.system.basic.service.MenuService;
+import com.wd.system.basic.service.PermissionService;
 import com.wd.system.basic.service.UserService;
 import com.wd.system.basic.util.UserHelper;
+import com.wd.system.system.api.basic.dto.UserPermissionDTO;
+import com.wd.system.system.api.basic.vo.UserRoleVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -525,7 +524,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         vo.setStatusDesc(CodeDescEnumUtil.getDescByCode(UserStatusEnum.class, vo.getStatus()));
         vo.setTypeDesc(CodeDescEnumUtil.getDescByCode(UserTypeEnum.class, vo.getType()));
 
-        vo.setAuthMenuList(menuService.userPermissionMenuTree());
+        vo.setAuthMenuList(menuService.userPermissionMenuTree(userPermission));
 
         return vo;
     }

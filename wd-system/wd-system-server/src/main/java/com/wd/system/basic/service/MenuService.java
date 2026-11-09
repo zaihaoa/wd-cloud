@@ -7,6 +7,7 @@ import com.wd.system.basic.domain.dto.MenuUpdateDTO;
 import com.wd.system.basic.domain.entity.Menu;
 import com.wd.system.basic.domain.vo.MenuDetailVO;
 import com.wd.system.basic.domain.vo.MenuTreeVO;
+import com.wd.system.system.api.basic.dto.UserPermissionDTO;
 
 import java.util.Collection;
 import java.util.List;
@@ -50,6 +51,14 @@ public interface MenuService extends SuperService<Menu> {
      * @return 过滤个人权限后的菜单列表Tree
      */
     List<MenuTreeVO> userPermissionMenuTree();
+
+    /**
+     * 所有菜单列表Tree（过滤个人用户权限）
+     *
+     * @param userPermission 用户权限
+     * @return 过滤个人权限后的菜单列表Tree
+     */
+    List<MenuTreeVO> userPermissionMenuTree(UserPermissionDTO userPermission);
 
     /**
      * 所有菜单列表Tree

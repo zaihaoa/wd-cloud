@@ -23,6 +23,7 @@
         <module>wd-common-server</module>
         <module>wd-common-openfeign</module>
         <module>wd-common-log</module>
+        <module>wd-common-oss</module>
     </modules>
 
 </project>

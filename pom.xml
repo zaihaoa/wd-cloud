@@ -17,6 +17,7 @@
         <module>wd-gateway</module>
         <module>wd-system</module>
         <module>wd-demo</module>
+        <module>wd-common/wd-common-oss</module>
     </modules>
 
     <properties>
@@ -26,10 +27,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
-        <java.version>17</java.version>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <maven.compiler.compilerVersion>17</maven.compiler.compilerVersion>
+        <java.version>25</java.version>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
+        <maven.compiler.compilerVersion>25</maven.compiler.compilerVersion>
         <maven.test.skip>true</maven.test.skip>
 
         <!-- spring-boot -->
@@ -60,8 +61,6 @@
         <sa-token.version>1.46.0</sa-token.version>
         <!-- mapstruct -->
         <mapstruct.version>1.6.3</mapstruct.version>
-        <!-- unirest-java -->
-        <unirest-java.version>3.14.5</unirest-java.version>
         <!-- okio -->
         <okio.version>3.18.2</okio.version>
         <!-- hutool -->
@@ -84,8 +83,6 @@
         <!-- cos_sts_api -->
         <cos_sts_api.version>3.1.1</cos_sts_api.version>
 
-        <!-- javacsv -->
-        <javacsv.version>2.0</javacsv.version>
         <!-- transmittable-thread-local -->
         <transmittable-thread-local.version>2.14.5</transmittable-thread-local.version>
 
@@ -254,19 +251,6 @@
                 <groupId>org.mapstruct</groupId>
                 <artifactId>mapstruct-processor</artifactId>
                 <version>${mapstruct.version}</version>
-            </dependency>
-
-            <!-- unirest-java -->
-            <dependency>
-                <groupId>com.konghq</groupId>
-                <artifactId>unirest-java</artifactId>
-                <version>${unirest-java.version}</version>
-            </dependency>
-            <!-- unirest-jackson -->
-            <dependency>
-                <groupId>com.konghq</groupId>
-                <artifactId>unirest-objectmapper-jackson</artifactId>
-                <version>${unirest-java.version}</version>
             </dependency>
             <!-- okio -->
             <dependency>
