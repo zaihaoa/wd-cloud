@@ -17,7 +17,6 @@
         <module>wd-gateway</module>
         <module>wd-system</module>
         <module>wd-demo</module>
-        <module>wd-common/wd-common-oss</module>
     </modules>
 
     <properties>
@@ -27,10 +26,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
+
         <java.version>25</java.version>
-        <maven.compiler.source>25</maven.compiler.source>
-        <maven.compiler.target>25</maven.compiler.target>
-        <maven.compiler.compilerVersion>25</maven.compiler.compilerVersion>
+        <maven.compiler.release>25</maven.compiler.release>
+        <maven.compiler.enablePreview>true</maven.compiler.enablePreview>
         <maven.test.skip>true</maven.test.skip>
 
         <!-- spring-boot -->
@@ -354,12 +353,36 @@
     </dependencyManagement>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.16.0</version>
+                    <configuration>
+                        <release>${java.version}</release>
+                        <enablePreview>true</enablePreview>
+                        <encoding>${maven.compiler.encoding}</encoding>
+                        <parameters>true</parameters>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.6.1</version>
+                    <configuration>
+                        <argLine>--enable-preview -XX:+UseCompactObjectHeaders</argLine>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot.version}</version>
                 <configuration>
+                    <jvmArguments>--enable-preview -XX:+UseCompactObjectHeaders</jvmArguments>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>

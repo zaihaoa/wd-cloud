@@ -182,21 +182,20 @@ CREATE TABLE `sys_global_config` (
 ) ENGINE=InnoDB COMMENT='全局配置';
 
 -- 用户配置
-DROP TABLE IF EXISTS `sys_user_config`;
+drop table if exists `sys_user_config`;
 CREATE TABLE `sys_user_config` (
-    `id` bigint unsigned NOT NULL COMMENT '主键ID',
-    `user_id` bigint unsigned NOT NULL COMMENT '用户ID',
-    `type` varchar(100) NOT NULL COMMENT '类型',
-    `code` varchar(500) NOT NULL COMMENT '编码',
-    `content` mediumtext NOT NULL COMMENT '内容',
-    `create_user_id` bigint NOT NULL COMMENT '创建人用户ID',
-    `update_user_id` bigint NOT NULL COMMENT '更新人用户ID',
-    `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_user_config` (`user_id`, `type`, `code`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='用户配置';
-
+                                   `id` bigint unsigned NOT NULL COMMENT '主键ID',
+                                   `user_id` bigint NOT NULL COMMENT '用户ID',
+                                   `type` varchar(100) NOT NULL DEFAULT '' COMMENT '类型(CUSTOM_COLUMN:自定义列,QUERY:查询条件)',
+                                   `code` varchar(500) NOT NULL DEFAULT '' COMMENT '编码',
+                                   `content` text COMMENT '内容',
+                                   `create_user_id` bigint NOT NULL COMMENT '创建人用户ID',
+                                   `update_user_id` bigint NOT NULL COMMENT '更新人用户ID',
+                                   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                                   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+                                   PRIMARY KEY (`id`),
+                                   UNIQUE KEY `uk_user_type_code` (`user_id`,`type`,`code`) USING BTREE
+) ENGINE=InnoDB COMMENT='用户配置';
 
 -- 数据
 
