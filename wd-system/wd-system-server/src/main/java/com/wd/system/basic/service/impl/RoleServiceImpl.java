@@ -23,6 +23,7 @@ import com.wd.system.basic.domain.dto.RoleAuthorizeDTO;
 import com.wd.system.basic.domain.dto.RolePageDTO;
 import com.wd.system.basic.domain.dto.RolePageParamDTO;
 import com.wd.system.basic.domain.dto.RoleUpdateDTO;
+import com.wd.system.basic.domain.dto.RoleUpdateStatusDTO;
 import com.wd.system.basic.domain.entity.Role;
 import com.wd.system.basic.domain.entity.Menu;
 import com.wd.system.basic.domain.entity.User;
@@ -38,6 +39,7 @@ import com.wd.system.basic.mapper.MenuMapper;
 import com.wd.system.basic.mapper.UserMapper;
 import com.wd.system.basic.mapper.RolePermissionRelevanceMapper;
 import com.wd.system.basic.service.RoleService;
+import com.wd.system.basic.service.UserService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -47,12 +49,7 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * <p>
@@ -76,6 +73,8 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     private MenuMapper menuMapper;
     @Resource
     private UserMapper userMapper;
+    @Resource
+    private UserService userService;
 
     @Override
     public PageInfo<RolePageVO> pageList(RolePageParamDTO pageParam) {
@@ -93,9 +92,21 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     }
 
     private List<RolePageVO> convertRolePageVOList(List<RolePageDTO> dbRecords) {
+        Map<Long, String> userIdNameMap = userService.getUserIdNameMap();
+
         return dbRecords
                 .stream()
-                .map(roleConverter::convertRolePageVO)
+                .map(record -> {
+                    RolePageVO vo = roleConverter.convertRolePageVO(record);
+
+                    vo.setTypeDesc(CodeDescEnumUtil.getDescByCode(RoleTypeEnum.class, vo.getType()));
+                    vo.setStatusDesc(CodeDescEnumUtil.getDescByCode(RoleStatusEnum.class, vo.getStatus()));
+
+                    vo.setCreateUserName(userIdNameMap.get(vo.getCreateUserId()));
+                    vo.setUpdateUserName(userIdNameMap.get(vo.getUpdateUserId()));
+
+                    return vo;
+                })
                 .toList();
     }
 
@@ -106,6 +117,15 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
             return null;
         }
         RoleDetailVO vo = roleConverter.convertRoleDetailVO(role);
+
+        vo.setTypeDesc(CodeDescEnumUtil.getDescByCode(RoleTypeEnum.class, vo.getType()));
+        vo.setStatusDesc(CodeDescEnumUtil.getDescByCode(RoleStatusEnum.class, vo.getStatus()));
+
+        Map<Long, String> userIdNameMap = userService.getUserIdNameMap();
+
+        vo.setCreateUserName(userIdNameMap.get(vo.getCreateUserId()));
+        vo.setUpdateUserName(userIdNameMap.get(vo.getUpdateUserId()));
+
         vo.setPermissionFlag(role.getPermissionFlag() == null ? List.of() : new ArrayList<>(role.getPermissionFlag()));
 
         List<RolePermissionRelevance> permissions = rolePermissionRelevanceMapper.selectList(
@@ -243,13 +263,14 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         role.setId(IdWorker.getId());
         role.setCode(roleAddParam.getCode());
         role.setName(roleAddParam.getName());
-        role.setStatus(Optional.ofNullable(roleAddParam.getStatus()).orElse(RoleStatusEnum.ENABLED.getCode()));
-        role.setType(Optional.ofNullable(roleAddParam.getType()).orElse(RoleTypeEnum.NORMAL.getCode()));
+        role.setStatus(RoleStatusEnum.ENABLED.getCode());
+        role.setType(RoleTypeEnum.NORMAL.getCode());
         role.setRemark(Optional.ofNullable(roleAddParam.getRemark()).orElse(""));
-        role.setPermissionFlag(roleAddParam.getPermissionFlag());
+        role.setPermissionFlag(null);
         role.setDeleteFlag(CommonConstant.NOT_DELETE_FLAG);
 
         AssertUtil.isTrue(baseMapper.insert(role) > 0, "新增角色失败");
+
         clearPermissionCacheAfterCommit();
 
         return role.getId();
@@ -263,14 +284,31 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         Role role = getRoleByIdAssertExist(roleUpdateParam.getId());
         checkUnique(roleUpdateParam.getCode(), roleUpdateParam.getName(), role.getId());
 
-        role.setCode(roleUpdateParam.getCode());
-        role.setName(roleUpdateParam.getName());
-        role.setStatus(Optional.ofNullable(roleUpdateParam.getStatus()).orElse(RoleStatusEnum.ENABLED.getCode()));
-        role.setType(Optional.ofNullable(roleUpdateParam.getType()).orElse(RoleTypeEnum.NORMAL.getCode()));
-        role.setRemark(Optional.ofNullable(roleUpdateParam.getRemark()).orElse(""));
-        role.setPermissionFlag(roleUpdateParam.getPermissionFlag());
+        baseMapper.update(Wrappers.<Role>lambdaUpdate()
+                .set(Role::getCode, roleUpdateParam.getCode())
+                .set(Role::getName, roleUpdateParam.getName())
+                .set(Role::getRemark,Optional.ofNullable(roleUpdateParam.getRemark()).orElse(""))
+                .eq(Role::getId, role.getId()));
 
-        boolean success = baseMapper.updateById(role) > 0;
+        clearPermissionCacheAfterCommit();
+
+        return true;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public boolean updateStatus(RoleUpdateStatusDTO updateStatusDTO) {
+        log.info("更新角色状态,参数:{}", JSON.toJSONString(updateStatusDTO));
+
+        Role role = getRoleByIdAssertExist(updateStatusDTO.getId());
+        String status = updateStatusDTO.getStatus();
+        if (Objects.equals(role.getStatus(), status)) {
+            return true;
+        }
+
+        boolean success = baseMapper.update(Wrappers.<Role>lambdaUpdate()
+                .set(Role::getStatus, status)
+                .eq(Role::getId, role.getId())) > 0;
         if (success) {
             clearPermissionCacheAfterCommit();
         }

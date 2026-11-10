@@ -9,6 +9,7 @@ import com.wd.system.basic.domain.vo.RoleDetailVO;
 import com.wd.system.basic.domain.vo.RolePageVO;
 import com.wd.system.basic.domain.dto.RoleAddDTO;
 import com.wd.system.basic.domain.dto.RoleUpdateDTO;
+import com.wd.system.basic.domain.dto.RoleUpdateStatusDTO;
 import com.wd.system.basic.domain.entity.Role;
 import com.wd.common.mybatisplus.SuperService;
 
@@ -45,6 +46,11 @@ public interface RoleService extends SuperService<Role> {
      * @return 是否更新成功
      */
     boolean updateRole(RoleUpdateDTO roleUpdateParam);
+
+    /**
+     * 启用或禁用未删除的角色。
+     */
+    boolean updateStatus(RoleUpdateStatusDTO updateStatusDTO);
 
     /**
      * 逻辑删除角色，删除标记更新为角色ID

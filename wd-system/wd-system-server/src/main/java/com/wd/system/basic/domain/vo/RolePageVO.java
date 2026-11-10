@@ -32,8 +32,14 @@ public class RolePageVO {
     @Schema(description = "状态(ENABLED:启用,DISABLED:禁用)")
     private String status;
 
+    @Schema(description = "状态描述(ENABLED:启用,DISABLED:禁用)")
+    private String statusDesc;
+
     @Schema(description = "类型(NORMAL:普通,BUILT_IN:内置)")
     private String type;
+
+    @Schema(description = "类型描述(NORMAL:普通,BUILT_IN:内置)")
+    private String typeDesc;
 
     @Schema(description = "备注")
     private String remark;
@@ -41,14 +47,17 @@ public class RolePageVO {
     @Schema(description = "权限标记")
     private List<String> permissionFlag;
 
-    @Schema(description = "删除标记，等于0表示没有删除，否则为删除")
-    private Long deleteFlag;
-
     @Schema(description = "创建人用户ID")
     private Long createUserId;
 
     @Schema(description = "更新人用户ID")
     private Long updateUserId;
+
+    @Schema(description = "创建人姓名")
+    private String createUserName;
+
+    @Schema(description = "更新人姓名")
+    private String updateUserName;
 
     @Schema(description = "创建时间")
     private LocalDateTime createTime;

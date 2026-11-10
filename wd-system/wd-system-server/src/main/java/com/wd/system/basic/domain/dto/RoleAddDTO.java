@@ -1,16 +1,10 @@
 package com.wd.system.basic.domain.dto;
 
-import com.wd.common.core.annotions.EnumCodeExist;
-import com.wd.system.basic.domain.enums.RolePermissionFlagEnum;
-import com.wd.system.basic.domain.enums.RoleStatusEnum;
-import com.wd.system.basic.domain.enums.RoleTypeEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.List;
 
 /**
  * <p>
@@ -35,21 +29,7 @@ public class RoleAddDTO {
     @Size(max = 100, message = "角色名称长度不能超过100")
     private String name;
 
-    @Schema(description = "状态(ENABLED:启用,DISABLED:禁用)")
-    @EnumCodeExist(message = "角色状态不正确", enumClass = RoleStatusEnum.class)
-    @Size(max = 100, message = "角色状态长度不能超过100")
-    private String status;
-
-    @Schema(description = "类型(NORMAL:普通,BUILT_IN:内置)")
-    @EnumCodeExist(message = "角色类型不正确", enumClass = RoleTypeEnum.class)
-    @Size(max = 100, message = "角色类型长度不能超过100")
-    private String type;
-
     @Schema(description = "备注")
     @Size(max = 1000, message = "备注长度不能超过1000")
     private String remark;
-
-    @Schema(description = "权限标记")
-    @EnumCodeExist(message = "权限标记不正确", enumClass = RolePermissionFlagEnum.class)
-    private List<@NotBlank(message = "权限标记不能为空") String> permissionFlag;
 }

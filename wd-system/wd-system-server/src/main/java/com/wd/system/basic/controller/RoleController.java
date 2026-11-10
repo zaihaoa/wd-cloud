@@ -11,6 +11,7 @@ import com.wd.system.basic.domain.dto.RoleAuthorizeAllDTO;
 import com.wd.system.basic.domain.dto.RoleAuthorizeDTO;
 import com.wd.system.basic.domain.dto.RolePageParamDTO;
 import com.wd.system.basic.domain.dto.RoleUpdateDTO;
+import com.wd.system.basic.domain.dto.RoleUpdateStatusDTO;
 import com.wd.system.basic.domain.vo.RolePageVO;
 import com.wd.system.basic.domain.vo.RoleDetailVO;
 import com.wd.system.basic.service.RoleService;
@@ -53,6 +54,13 @@ public class RoleController {
     @PutMapping("/update")
     public R<Boolean> updateRole(@RequestBody @Valid RoleUpdateDTO roleUpdateParam) {
         return R.success(roleService.updateRole(roleUpdateParam));
+    }
+
+    @Operation(summary = "启用禁用")
+    @SaCheckPermission(PermissionConstant.ROLE_UPDATE)
+    @PostMapping("/update-status")
+    public R<Boolean> updateStatus(@RequestBody @Valid RoleUpdateStatusDTO updateStatusDTO) {
+        return R.success(roleService.updateStatus(updateStatusDTO));
     }
 
     @Operation(summary = "删除角色")
