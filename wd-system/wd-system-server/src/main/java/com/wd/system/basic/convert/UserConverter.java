@@ -2,6 +2,7 @@ package com.wd.system.basic.convert;
 
 import com.wd.system.basic.domain.entity.User;
 import com.wd.system.basic.domain.entity.Role;
+import com.wd.system.basic.domain.vo.UserAuthorizePageVO;
 import com.wd.system.basic.domain.vo.UserDetailVO;
 import com.wd.system.basic.domain.vo.UserInfoVO;
 import com.wd.system.system.api.basic.vo.UserRoleVO;
@@ -9,6 +10,7 @@ import com.wd.system.system.api.basic.dto.UserPermissionDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import com.wd.system.basic.domain.dto.UserPageDTO;
+import com.wd.system.basic.domain.dto.UserAuthorizePageDTO;
 import com.wd.system.basic.domain.vo.UserPageVO;
 
 
@@ -17,6 +19,8 @@ public interface UserConverter {
 
     @Mapping(target = "roles", ignore = true)
     UserPageVO convertUserPageVO(UserPageDTO dbRecord);
+
+    UserAuthorizePageVO convertUserAuthorizePageVO(UserAuthorizePageDTO dbRecord);
 
     @Mapping(target = "roles", ignore = true)
     UserDetailVO convertUserDetailVO(User user);

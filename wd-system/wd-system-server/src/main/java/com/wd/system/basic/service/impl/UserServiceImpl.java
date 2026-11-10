@@ -27,9 +27,11 @@ import com.wd.system.basic.domain.entity.Role;
 import com.wd.system.basic.domain.entity.User;
 import com.wd.system.basic.domain.entity.UserRoleRelevance;
 import com.wd.system.basic.domain.enums.CommonLogBusinessTypeEnum;
+import com.wd.system.basic.domain.enums.RolePermissionFlagEnum;
 import com.wd.system.basic.domain.enums.UserStatusEnum;
 import com.wd.system.basic.domain.enums.UserTypeEnum;
 import com.wd.system.basic.domain.vo.UserDetailVO;
+import com.wd.system.basic.domain.vo.UserAuthorizePageVO;
 import com.wd.system.basic.domain.vo.UserInfoVO;
 import com.wd.system.basic.domain.vo.UserPageVO;
 import com.wd.system.basic.mapper.RoleMapper;
@@ -97,6 +99,39 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         List<UserPageVO> voRecords = convertUserPageVOList(dbRecords);
 
         return PageUtil.buildPageInfo(pageParam, count, voRecords);
+    }
+
+    @Override
+    public PageInfo<UserAuthorizePageVO> authorizePage(UserAuthorizePageParamDTO pageParam) {
+        Long roleId = pageParam.getRoleId();
+        Boolean authorized = pageParam.getAuthorized();
+        AssertUtil.isTrue(roleId != null && roleId > 0, "角色ID必须为正数");
+        AssertUtil.notNull(authorized, "是否授权不能为空");
+
+        Role role = roleMapper.selectById(roleId);
+        AssertUtil.notNull(role, "角色不存在或已删除");
+
+        List<String> permissionFlags = Optional.ofNullable(role.getPermissionFlag()).orElse(List.of());
+        boolean allUserPermission = permissionFlags.contains(RolePermissionFlagEnum.ALL_PERMISSION.getCode())
+                || permissionFlags.contains(RolePermissionFlagEnum.ALL_DATA_USER_PERMISSION.getCode());
+        if (allUserPermission && !authorized) {
+            return PageUtil.buildPageInfo(pageParam);
+        }
+
+        int count = baseMapper.authorizePageCount(pageParam, allUserPermission);
+        if (count <= 0) {
+            return PageUtil.buildPageInfo(pageParam);
+        }
+
+        List<UserAuthorizePageVO> records = baseMapper.authorizePageList(pageParam, allUserPermission)
+                .stream()
+                .map(record -> {
+                    UserAuthorizePageVO vo = userConverter.convertUserAuthorizePageVO(record);
+                    vo.setStatusDesc(CodeDescEnumUtil.getDescByCode(UserStatusEnum.class, vo.getStatus()));
+                    return vo;
+                })
+                .toList();
+        return PageUtil.buildPageInfo(pageParam, count, records);
     }
 
     private List<UserPageVO> convertUserPageVOList(List<UserPageDTO> dbRecords) {

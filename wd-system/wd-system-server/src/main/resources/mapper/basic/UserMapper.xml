@@ -31,6 +31,28 @@
         LIMIT #{limitStart}, #{param.size}
     </select>
 
+    <select id="authorizePageCount" resultType="java.lang.Integer">
+        select count(*)
+        from sys_user u
+        <include refid="Authorize_Page_Condition"/>
+    </select>
+
+    <select id="authorizePageList" resultType="com.wd.system.basic.domain.dto.UserAuthorizePageDTO">
+        select
+            u.id as userId,
+            u.username as username,
+            u.name as name,
+            u.status as status
+        from sys_user u
+        <include refid="Authorize_Page_Condition"/>
+
+        <if test="param.sort != null and param.sort != ''">
+            ORDER BY ${param.sort} ${param.order}
+        </if>
+        <bind name="limitStart" value="(param.current lte 1) ? 0 : ((param.current - 1) * param.size)"/>
+        LIMIT #{limitStart}, #{param.size}
+    </select>
+
     <sql id="Page_Condition">
         <where>
             <if test="param.username != null and param.username != ''">
@@ -50,6 +72,43 @@
             </if>
             <if test="param.email != null and param.email != ''">
                 and `email` like concat('%',#{param.email}, '%')
+            </if>
+        </where>
+    </sql>
+
+    <sql id="Authorize_Page_Condition">
+        <where>
+            and u.delete_flag = 0
+            <if test="param.username != null and param.username != ''">
+                and u.username like concat('%', #{param.username}, '%')
+            </if>
+            <if test="param.name != null and param.name != ''">
+                and u.name like concat('%', #{param.name}, '%')
+            </if>
+            <if test="param.status != null and param.status != ''">
+                and u.status = #{param.status}
+            </if>
+            <if test="allUserPermission == false">
+                <choose>
+                    <when test="param.authorized">
+                        and exists (
+                            select 1
+                            from sys_role_permission_relevance rpr
+                            where rpr.role_id = #{param.roleId}
+                              and rpr.type = 'DATA_USER'
+                              and rpr.relevance_id = u.id
+                        )
+                    </when>
+                    <otherwise>
+                        and not exists (
+                            select 1
+                            from sys_role_permission_relevance rpr
+                            where rpr.role_id = #{param.roleId}
+                              and rpr.type = 'DATA_USER'
+                              and rpr.relevance_id = u.id
+                        )
+                    </otherwise>
+                </choose>
             </if>
         </where>
     </sql>

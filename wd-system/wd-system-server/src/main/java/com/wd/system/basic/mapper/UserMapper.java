@@ -1,5 +1,7 @@
 package com.wd.system.basic.mapper;
 
+import com.wd.system.basic.domain.dto.UserAuthorizePageDTO;
+import com.wd.system.basic.domain.dto.UserAuthorizePageParamDTO;
 import com.wd.system.basic.domain.dto.UserPageParamDTO;
 import com.wd.system.basic.domain.dto.UserPageDTO;
 import com.wd.system.basic.domain.entity.User;
@@ -22,5 +24,11 @@ public interface UserMapper extends SuperMapper<User> {
     int pageCount(@Param("param") UserPageParamDTO pageParam);
 
     List<UserPageDTO> pageList(@Param("param") UserPageParamDTO pageParam);
+
+    int authorizePageCount(@Param("param") UserAuthorizePageParamDTO pageParam,
+                           @Param("allUserPermission") boolean allUserPermission);
+
+    List<UserAuthorizePageDTO> authorizePageList(@Param("param") UserAuthorizePageParamDTO pageParam,
+                                                 @Param("allUserPermission") boolean allUserPermission);
 
 }

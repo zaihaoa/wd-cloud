@@ -9,6 +9,7 @@ import com.wd.common.core.constants.CommonConstant;
 import com.wd.common.core.enums.FieldPermissionEnum;
 import com.wd.common.core.model.IdDTO;
 import com.wd.common.core.model.PageInfo;
+import com.wd.common.core.model.SelectCombobox;
 import com.wd.common.core.util.AssertUtil;
 import com.wd.common.core.util.CodeDescEnumUtil;
 import com.wd.common.core.util.I18nUtil;
@@ -17,27 +18,23 @@ import com.wd.common.mybatisplus.SuperMapper;
 import com.wd.common.redis.CacheRegion;
 import com.wd.common.redis.util.RedisHelper;
 import com.wd.system.basic.convert.RoleConverter;
-import com.wd.system.basic.domain.dto.RoleAddDTO;
-import com.wd.system.basic.domain.dto.RoleAuthorizeAllDTO;
-import com.wd.system.basic.domain.dto.RoleAuthorizeDTO;
-import com.wd.system.basic.domain.dto.RolePageDTO;
-import com.wd.system.basic.domain.dto.RolePageParamDTO;
-import com.wd.system.basic.domain.dto.RoleUpdateDTO;
-import com.wd.system.basic.domain.dto.RoleUpdateStatusDTO;
-import com.wd.system.basic.domain.entity.Role;
+import com.wd.system.basic.domain.dto.*;
 import com.wd.system.basic.domain.entity.Menu;
-import com.wd.system.basic.domain.entity.User;
+import com.wd.system.basic.domain.entity.Role;
 import com.wd.system.basic.domain.entity.RolePermissionRelevance;
+import com.wd.system.basic.domain.entity.User;
 import com.wd.system.basic.domain.enums.RolePermissionFlagEnum;
 import com.wd.system.basic.domain.enums.RolePermissionTypeEnum;
 import com.wd.system.basic.domain.enums.RoleStatusEnum;
 import com.wd.system.basic.domain.enums.RoleTypeEnum;
-import com.wd.system.basic.domain.vo.RolePageVO;
+import com.wd.system.basic.domain.vo.FieldPermissionGroupVO;
+import com.wd.system.basic.domain.vo.FieldPermissionItemVO;
 import com.wd.system.basic.domain.vo.RoleDetailVO;
-import com.wd.system.basic.mapper.RoleMapper;
+import com.wd.system.basic.domain.vo.RolePageVO;
 import com.wd.system.basic.mapper.MenuMapper;
-import com.wd.system.basic.mapper.UserMapper;
+import com.wd.system.basic.mapper.RoleMapper;
 import com.wd.system.basic.mapper.RolePermissionRelevanceMapper;
+import com.wd.system.basic.mapper.UserMapper;
 import com.wd.system.basic.service.RoleService;
 import com.wd.system.basic.service.UserService;
 import jakarta.annotation.Resource;
@@ -50,6 +47,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -241,7 +239,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     }
 
     private RolePermissionRelevance newPermission(Long roleId, RolePermissionTypeEnum type,
-                                                 Long relevanceId, String relevanceValue) {
+                                                  Long relevanceId, String relevanceValue) {
         RolePermissionRelevance permission = new RolePermissionRelevance();
         permission.setId(IdWorker.getId());
         permission.setRoleId(roleId);
@@ -287,7 +285,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         baseMapper.update(Wrappers.<Role>lambdaUpdate()
                 .set(Role::getCode, roleUpdateParam.getCode())
                 .set(Role::getName, roleUpdateParam.getName())
-                .set(Role::getRemark,Optional.ofNullable(roleUpdateParam.getRemark()).orElse(""))
+                .set(Role::getRemark, Optional.ofNullable(roleUpdateParam.getRemark()).orElse(""))
                 .eq(Role::getId, role.getId()));
 
         clearPermissionCacheAfterCommit();
@@ -375,5 +373,31 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
                 clearPermissionCache();
             }
         });
+    }
+
+    @Override
+    public List<SelectCombobox> roleCombobox(String status) {
+        // 角色ID和名称
+        return baseMapper
+                .selectList(Wrappers.<Role>lambdaQuery()
+                        .eq(StringUtils.isNotBlank(status), Role::getStatus, status)
+                        .select(Role::getId, Role::getName))
+                .stream()
+                .map(v -> new SelectCombobox(String.valueOf(v.getId()), v.getName()))
+                .sorted(Comparator.comparing(SelectCombobox::getLabel))
+                .toList();
+    }
+
+    @Override
+    public List<FieldPermissionGroupVO> fieldPermissionConstants() {
+        Map<String, List<FieldPermissionItemVO>> permissionGroups = Arrays.stream(FieldPermissionEnum.values())
+                .collect(Collectors.groupingBy(FieldPermissionEnum::getGroup, LinkedHashMap::new,
+                        Collectors.mapping(permission -> new FieldPermissionItemVO(permission.getCode(), permission.getDesc()),
+                                Collectors.toList())));
+
+        return permissionGroups.entrySet()
+                .stream()
+                .map(entry -> new FieldPermissionGroupVO(entry.getKey(), entry.getValue()))
+                .toList();
     }
 }

@@ -3,22 +3,30 @@ package com.wd.system.basic.controller;
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.wd.common.core.annotions.ApifoxFolder;
 import com.wd.common.core.constants.PermissionConstant;
-import com.wd.common.core.model.IdDTO;
-import com.wd.common.core.model.PageInfo;
-import com.wd.common.core.model.R;
+import com.wd.common.core.enums.FieldPermissionEnum;
+import com.wd.common.core.model.*;
 import com.wd.system.basic.domain.dto.RoleAddDTO;
 import com.wd.system.basic.domain.dto.RoleAuthorizeAllDTO;
 import com.wd.system.basic.domain.dto.RoleAuthorizeDTO;
 import com.wd.system.basic.domain.dto.RolePageParamDTO;
 import com.wd.system.basic.domain.dto.RoleUpdateDTO;
 import com.wd.system.basic.domain.dto.RoleUpdateStatusDTO;
+import com.wd.system.basic.domain.vo.FieldPermissionGroupVO;
+import com.wd.system.basic.domain.vo.FieldPermissionItemVO;
 import com.wd.system.basic.domain.vo.RolePageVO;
 import com.wd.system.basic.domain.vo.RoleDetailVO;
 import com.wd.system.basic.service.RoleService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -89,4 +97,19 @@ public class RoleController {
     public R<Boolean> authorize(@RequestBody @Valid RoleAuthorizeDTO dto) {
         return R.success(roleService.authorize(dto));
     }
+
+    @Operation(summary = "角色下拉框")
+    @GetMapping("/role-combobox")
+    public R<List<SelectCombobox>> roleCombobox(@RequestParam(value = "status", required = false)
+                                                @Parameter(name = "status", description = "状态,不传默认所有(ENABLED:启用,DISABLED:禁用)")
+                                                String status) {
+        return R.success(roleService.roleCombobox(status));
+    }
+
+    @Operation(summary = "获取所有字段权限常量")
+    @GetMapping("/field-permission-constants")
+    public R<List<FieldPermissionGroupVO>> fieldPermissionConstants() {
+        return R.success(roleService.fieldPermissionConstants());
+    }
+
 }

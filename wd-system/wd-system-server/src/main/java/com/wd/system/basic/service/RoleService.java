@@ -2,9 +2,11 @@ package com.wd.system.basic.service;
 
 import com.wd.common.core.model.PageInfo;
 import com.wd.common.core.model.IdDTO;
+import com.wd.common.core.model.SelectCombobox;
 import com.wd.system.basic.domain.dto.RolePageParamDTO;
 import com.wd.system.basic.domain.dto.RoleAuthorizeAllDTO;
 import com.wd.system.basic.domain.dto.RoleAuthorizeDTO;
+import com.wd.system.basic.domain.vo.FieldPermissionGroupVO;
 import com.wd.system.basic.domain.vo.RoleDetailVO;
 import com.wd.system.basic.domain.vo.RolePageVO;
 import com.wd.system.basic.domain.dto.RoleAddDTO;
@@ -14,6 +16,7 @@ import com.wd.system.basic.domain.entity.Role;
 import com.wd.common.mybatisplus.SuperService;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * <p>
@@ -88,4 +91,15 @@ public interface RoleService extends SuperService<Role> {
      * 覆盖保存当前授权类型，空集合清空，保留其他类型及全部权限标记。
      */
     boolean authorize(RoleAuthorizeDTO dto);
+
+    /**
+     * 角色下拉框
+     */
+    List<SelectCombobox> roleCombobox(String status);
+
+    /**
+     * 获取所有字段权限常量
+     */
+    List<FieldPermissionGroupVO> fieldPermissionConstants();
+
 }

@@ -8,6 +8,7 @@ import com.wd.common.core.model.PageInfo;
 import com.wd.common.core.model.R;
 import com.wd.common.core.model.SelectCombobox;
 import com.wd.system.basic.domain.dto.*;
+import com.wd.system.basic.domain.vo.UserAuthorizePageVO;
 import com.wd.system.basic.domain.vo.UserDetailVO;
 import com.wd.system.basic.domain.vo.UserInfoVO;
 import com.wd.system.basic.domain.vo.UserPageVO;
@@ -40,6 +41,12 @@ public class UserController {
     @PostMapping("/page")
     public R<PageInfo<UserPageVO>> pageList(@RequestBody UserPageParamDTO pageParam) {
         return R.success(userService.pageList(pageParam));
+    }
+
+    @Operation(summary = "授权用户分页查询")
+    @PostMapping("/authorize-page")
+    public R<PageInfo<UserAuthorizePageVO>> authorizePage(@RequestBody @Valid UserAuthorizePageParamDTO pageParam) {
+        return R.success(userService.authorizePage(pageParam));
     }
 
     @Operation(summary = "新增用户")
@@ -98,7 +105,7 @@ public class UserController {
     @Operation(summary = "用户下拉框")
     @GetMapping("/user-combobox")
     public R<List<SelectCombobox>> userCombobox(@RequestParam(value = "status", required = false)
-                                                @Parameter(name = "status", description = "状态,不传默认所有(NORMAL:启用,DISABLE:禁用)")
+                                                @Parameter(name = "status", description = "状态,不传默认所有(ENABLED:启用,DISABLE:禁用)")
                                                 String status) {
         return R.success(userService.userCombobox(status));
     }

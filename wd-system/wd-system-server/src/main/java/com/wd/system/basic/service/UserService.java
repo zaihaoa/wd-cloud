@@ -7,6 +7,7 @@ import com.wd.common.mybatisplus.SuperService;
 import com.wd.system.basic.domain.dto.*;
 import com.wd.system.basic.domain.entity.User;
 import com.wd.system.basic.domain.vo.UserDetailVO;
+import com.wd.system.basic.domain.vo.UserAuthorizePageVO;
 import com.wd.system.basic.domain.vo.UserInfoVO;
 import com.wd.system.basic.domain.vo.UserPageVO;
 import jakarta.validation.Valid;
@@ -33,6 +34,14 @@ public interface UserService extends SuperService<User> {
      * @return 列表数据
      */
     PageInfo<UserPageVO> pageList(UserPageParamDTO pageParam);
+
+    /**
+     * 用户授权分页查询
+     *
+     * @param pageParam 查询条件
+     * @return 分页数据
+     */
+    PageInfo<UserAuthorizePageVO> authorizePage(UserAuthorizePageParamDTO pageParam);
 
     /**
      * 添加
