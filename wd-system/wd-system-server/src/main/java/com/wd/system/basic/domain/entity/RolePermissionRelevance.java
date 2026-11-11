@@ -38,7 +38,7 @@ public class RolePermissionRelevance extends BaseUserTimeEntity {
     private Long roleId;
 
     @TableField("type")
-    @Schema(description = "类型(MENU:菜单权限,FIELD:字段权限,DATA_USER:用户数据权限)")
+    @Schema(description = "类型(MENU:菜单权限,BUTTON:按钮权限,FIELD:字段权限,DATA_USER:用户数据权限)")
     private String type;
 
     @TableField("relevance_id")

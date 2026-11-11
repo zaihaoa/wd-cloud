@@ -2,6 +2,7 @@ package com.wd.system.basic.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import com.alibaba.fastjson2.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
@@ -23,6 +24,7 @@ import com.wd.system.basic.domain.entity.Menu;
 import com.wd.system.basic.domain.entity.Role;
 import com.wd.system.basic.domain.entity.RolePermissionRelevance;
 import com.wd.system.basic.domain.entity.User;
+import com.wd.system.basic.domain.enums.RoleAuthorizeOperationEnum;
 import com.wd.system.basic.domain.enums.RolePermissionFlagEnum;
 import com.wd.system.basic.domain.enums.RolePermissionTypeEnum;
 import com.wd.system.basic.domain.enums.RoleStatusEnum;
@@ -37,6 +39,7 @@ import com.wd.system.basic.mapper.RolePermissionRelevanceMapper;
 import com.wd.system.basic.mapper.UserMapper;
 import com.wd.system.basic.service.RoleService;
 import com.wd.system.basic.service.UserService;
+import com.wd.system.basic.util.MenuButtonHelper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -136,6 +139,11 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
                 .map(RolePermissionRelevance::getRelevanceId)
                 .filter(Objects::nonNull)
                 .distinct().toList());
+        vo.setButtonCodes(permissions.stream()
+                .filter(p -> RolePermissionTypeEnum.BUTTON.getCode().equals(p.getType()))
+                .map(RolePermissionRelevance::getRelevanceValue)
+                .filter(StringUtils::isNotBlank)
+                .distinct().toList());
         vo.setFieldCodes(permissions.stream()
                 .filter(p -> RolePermissionTypeEnum.FIELD.getCode().equals(p.getType()))
                 .map(RolePermissionRelevance::getRelevanceValue)
@@ -144,7 +152,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         vo.setDataUserIds(permissions.stream()
                 .filter(p -> RolePermissionTypeEnum.DATA_USER.getCode().equals(p.getType()))
                 .map(RolePermissionRelevance::getRelevanceId)
-                .filter(Objects::nonNull)
+                .filter(userId -> userId != null && userId > 0 && userIdNameMap.containsKey(userId))
                 .distinct().toList());
         return vo;
     }
@@ -183,38 +191,111 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         AssertUtil.notNull(type, "授权类型不正确");
         Set<Long> ids = new LinkedHashSet<>(Optional.ofNullable(dto.getRelevanceIds()).orElse(List.of()));
         Set<String> values = new LinkedHashSet<>(Optional.ofNullable(dto.getRelevanceValues()).orElse(List.of()));
-        AssertUtil.isTrue(ids.isEmpty() || values.isEmpty(), "关联ID和关联值不能同时有值");
-        if (type == RolePermissionTypeEnum.FIELD) {
-            AssertUtil.isTrue(ids.isEmpty(), "字段授权只能使用关联值");
-            for (String code : values) {
-                AssertUtil.isTrue(StringUtils.isNotBlank(code)
-                        && CodeDescEnumUtil.isExist(FieldPermissionEnum.class, code), "字段权限编码不存在");
-            }
+        RoleAuthorizeOperationEnum operation = dto.getOperation();
+        if (type == RolePermissionTypeEnum.DATA_USER) {
+            AssertUtil.notNull(operation, "用户数据授权操作不能为空");
+            AssertUtil.isTrue(!ids.isEmpty(), "请选择需要授权或取消授权的用户");
+            AssertUtil.isTrue(values.isEmpty(), "用户数据授权只能使用关联ID");
         } else {
-            AssertUtil.isTrue(values.isEmpty(), "菜单和用户数据授权只能使用关联ID");
-            AssertUtil.isTrue(ids.stream().allMatch(id -> id != null && id > 0), "关联ID必须为正数");
+            AssertUtil.isTrue(operation == null, "只有用户数据授权支持增减操作");
+        }
+        if (type == RolePermissionTypeEnum.MENU) {
+            AssertUtil.isTrue(dto.getRelevanceIds() != null && dto.getRelevanceValues() != null,
+                    "菜单授权必须同时提交菜单ID和按钮编码集合");
+        }
+        if (type == RolePermissionTypeEnum.FIELD || type == RolePermissionTypeEnum.BUTTON) {
+            AssertUtil.isTrue(ids.isEmpty(), "字段和按钮授权只能使用关联值");
+        }
+        AssertUtil.isTrue(ids.stream().allMatch(id -> id != null && id > 0), "关联ID必须为正数");
+
+        Long roleId = dto.getRoleId();
+        lockRole(roleId);
+        switch (type) {
+            case MENU -> {
+                validatePermissionIds(type, ids);
+                validateButtonCodes(ids, values);
+                replacePermissions(roleId, type, ids, Set.of());
+                replacePermissions(roleId, RolePermissionTypeEnum.BUTTON, Set.of(), values);
+            }
+            case BUTTON -> {
+                if (!values.isEmpty()) {
+                    Set<Long> menuIds = rolePermissionRelevanceMapper.selectList(permissionQuery(roleId, RolePermissionTypeEnum.MENU))
+                            .stream().map(RolePermissionRelevance::getRelevanceId).filter(Objects::nonNull)
+                            .collect(Collectors.toSet());
+                    validateButtonCodes(menuIds, values);
+                }
+                replacePermissions(roleId, type, Set.of(), values);
+            }
+            case FIELD -> {
+                for (String code : values) {
+                    AssertUtil.isTrue(StringUtils.isNotBlank(code)
+                            && CodeDescEnumUtil.isExist(FieldPermissionEnum.class, code), "字段权限编码不存在");
+                }
+                replacePermissions(roleId, type, Set.of(), values);
+            }
+            case DATA_USER -> updateUserPermissions(roleId, ids, operation == RoleAuthorizeOperationEnum.GRANT);
+        }
+        clearPermissionCacheAfterCommit();
+        return true;
+    }
+
+    private void updateUserPermissions(Long roleId, Set<Long> userIds, boolean grant) {
+        RolePermissionTypeEnum type = RolePermissionTypeEnum.DATA_USER;
+        if (grant) {
+            validatePermissionIds(type, userIds);
         }
 
-        lockRole(dto.getRoleId());
-        validatePermissionIds(type, ids);
+        for (List<Long> batch : CollUtil.split(new ArrayList<>(userIds), SuperMapper.DEFAULT_BATCH_SIZE)) {
+            var query = permissionQuery(roleId, type).in(RolePermissionRelevance::getRelevanceId, batch);
+            if (!grant) {
+                rolePermissionRelevanceMapper.delete(query);
+                continue;
+            }
 
-        rolePermissionRelevanceMapper.delete(Wrappers.<RolePermissionRelevance>lambdaQuery()
-                .eq(RolePermissionRelevance::getRoleId, dto.getRoleId())
-                .eq(RolePermissionRelevance::getType, type.getCode()));
+            Set<Long> missingIds = new LinkedHashSet<>(batch);
+            rolePermissionRelevanceMapper.selectList(query).stream()
+                    .map(RolePermissionRelevance::getRelevanceId)
+                    .forEach(missingIds::remove);
+            savePermissions(roleId, type, missingIds, Set.of());
+        }
+    }
 
+    private void validateButtonCodes(Set<Long> menuIds, Set<String> codes) {
+        if (codes.isEmpty()) {
+            return;
+        }
+        Set<String> allowed = new HashSet<>();
+        for (List<Long> batch : CollUtil.split(new ArrayList<>(menuIds), SuperMapper.DEFAULT_BATCH_SIZE)) {
+            menuMapper.selectList(Wrappers.<Menu>lambdaQuery().in(Menu::getId, batch)).stream()
+                    .flatMap(menu -> MenuButtonHelper.permissionCodes(menu.getButton()))
+                    .forEach(allowed::add);
+        }
+        AssertUtil.isTrue(allowed.containsAll(codes), "按钮权限编码无效或不属于已选菜单");
+    }
+
+    private void replacePermissions(Long roleId, RolePermissionTypeEnum type, Set<Long> ids, Set<String> values) {
+        rolePermissionRelevanceMapper.delete(permissionQuery(roleId, type));
+        savePermissions(roleId, type, ids, values);
+    }
+
+    private LambdaQueryWrapper<RolePermissionRelevance> permissionQuery(
+            Long roleId, RolePermissionTypeEnum type) {
+        return Wrappers.<RolePermissionRelevance>lambdaQuery()
+                .eq(RolePermissionRelevance::getRoleId, roleId)
+                .eq(RolePermissionRelevance::getType, type.getCode());
+    }
+
+    private void savePermissions(Long roleId, RolePermissionTypeEnum type, Set<Long> ids, Set<String> values) {
         List<RolePermissionRelevance> permissions = new ArrayList<>(ids.size() + values.size());
         for (Long relevanceId : ids) {
-            permissions.add(newPermission(dto.getRoleId(), type, relevanceId, ""));
+            permissions.add(newPermission(roleId, type, relevanceId, ""));
         }
         for (String relevanceValue : values) {
-            permissions.add(newPermission(dto.getRoleId(), type, 0L, relevanceValue));
+            permissions.add(newPermission(roleId, type, 0L, relevanceValue));
         }
         for (List<RolePermissionRelevance> batch : CollUtil.split(permissions, SuperMapper.DEFAULT_BATCH_SIZE)) {
             AssertUtil.isTrue(rolePermissionRelevanceMapper.insertBatchSomeColumn(batch) == batch.size(), "保存角色授权失败");
         }
-
-        clearPermissionCacheAfterCommit();
-        return true;
     }
 
     private Role lockRole(Long id) {

@@ -8,6 +8,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum RolePermissionTypeEnum implements CodeDescEnum {
     MENU("MENU", "菜单权限"),
+    BUTTON("BUTTON", "按钮权限"),
     FIELD("FIELD", "字段权限"),
     DATA_USER("DATA_USER", "用户数据权限"),
     ;

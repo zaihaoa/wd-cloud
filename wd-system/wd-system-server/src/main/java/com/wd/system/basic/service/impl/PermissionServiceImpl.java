@@ -14,6 +14,7 @@ import com.wd.system.basic.domain.enums.*;
 import com.wd.system.basic.mapper.*;
 import com.wd.system.basic.service.PermissionService;
 import com.wd.system.system.api.basic.dto.UserPermissionDTO;
+import com.wd.system.basic.util.MenuButtonHelper;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -21,10 +22,12 @@ import tools.jackson.core.type.TypeReference;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 用户有效权限汇总。
@@ -84,10 +87,13 @@ public class PermissionServiceImpl implements PermissionService {
                 .in(RolePermissionRelevance::getRoleId, roles.stream().map(Role::getId).toList())
                 .orderByAsc(RolePermissionRelevance::getId));
 
-        List<Menu> menus = authorizedMenus(all || flags.contains(RolePermissionFlagEnum.ALL_MENU_PERMISSION.getCode()), permissions);
+        boolean allMenus = all || flags.contains(RolePermissionFlagEnum.ALL_MENU_PERMISSION.getCode());
+        List<Menu> menus = authorizedMenus(allMenus, permissions);
         result.setAuthMenuIds(menus.stream().map(Menu::getId).toList());
-        result.setAuthMenuPermissionList(menus.stream().map(Menu::getPermission)
-                .filter(StringUtils::isNotBlank).distinct().toList());
+        result.setAuthMenuPermissionList(Stream.concat(
+                menus.stream().map(Menu::getPermission).filter(StringUtils::isNotBlank),
+                authorizedButtonCodes(menus, permissions, allMenus))
+                .distinct().toList());
         result.setAuthFieldPermissionList(all || flags.contains(RolePermissionFlagEnum.ALL_FIELD_PERMISSION.getCode())
                 ? Arrays.stream(FieldPermissionEnum.values()).map(FieldPermissionEnum::getCode).toList()
                 : permissions.stream().filter(p -> RolePermissionTypeEnum.FIELD.getCode().equals(p.getType()))
@@ -121,8 +127,27 @@ public class PermissionServiceImpl implements PermissionService {
         return menuMapper.selectList(Wrappers.<Menu>lambdaQuery()
                 .eq(Menu::getStatus, MenuStatusEnum.ENABLED.getCode())
                 .in(!all, Menu::getId, ids)
-                .select(Menu::getId, Menu::getPermission)
+                .select(Menu::getId, Menu::getPermission, Menu::getButton)
                 .orderByAsc(Menu::getId));
+    }
+
+    private Stream<String> authorizedButtonCodes(List<Menu> menus, List<RolePermissionRelevance> permissions, boolean allMenus) {
+        if (allMenus) {
+            return menus.stream().flatMap(menu -> MenuButtonHelper.permissionCodes(menu.getButton()));
+        }
+
+        Map<Long, Menu> menusById = menus.stream().collect(Collectors.toMap(Menu::getId, menu -> menu));
+        Map<Long, Set<String>> availableCodesByRole = permissions.stream()
+                .filter(p -> RolePermissionTypeEnum.MENU.getCode().equals(p.getType()))
+                .filter(p -> menusById.containsKey(p.getRelevanceId()))
+                .collect(Collectors.groupingBy(RolePermissionRelevance::getRoleId,
+                        Collectors.flatMapping(p -> MenuButtonHelper.permissionCodes(menusById.get(p.getRelevanceId()).getButton()),
+                                Collectors.toSet())));
+        return permissions.stream()
+                .filter(p -> RolePermissionTypeEnum.BUTTON.getCode().equals(p.getType()))
+                .filter(p -> p.getRelevanceValue() != null)
+                .filter(p -> availableCodesByRole.getOrDefault(p.getRoleId(), Set.of()).contains(p.getRelevanceValue()))
+                .map(RolePermissionRelevance::getRelevanceValue);
     }
 
     private List<Long> authorizedUserIds(List<RolePermissionRelevance> permissions) {

@@ -47,7 +47,7 @@
         <include refid="Authorize_Page_Condition"/>
 
         <if test="param.sort != null and param.sort != ''">
-            ORDER BY ${param.sort} ${param.order}
+            ORDER BY ${param.sort} ${param.order}, u.id ASC
         </if>
         <bind name="limitStart" value="(param.current lte 1) ? 0 : ((param.current - 1) * param.size)"/>
         LIMIT #{limitStart}, #{param.size}

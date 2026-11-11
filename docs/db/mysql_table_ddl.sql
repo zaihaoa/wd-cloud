@@ -199,7 +199,7 @@ CREATE TABLE `sys_user_config` (
 
 -- 数据
 
--- 用户
+-- 用户 admin/123456
 INSERT INTO `sys_user` (`id`, `username`, `name`, `password`, `status`, `type`, `phone`, `email`, `delete_flag`, `create_user_id`, `update_user_id`, `create_time`, `update_time`) VALUES (1, 'admin', 'Admin', '$2a$10$6aXuZTjLdebHrZKQwmRJw.PwuWt.X0rQIZEW4umBdvrMV5uWPyfsi', 'ENABLED', 'BUILT_IN', NULL, NULL, 0, 0, 0, now(), now());
 
 -- 角色

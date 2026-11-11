@@ -47,9 +47,6 @@ public class RoleDetailVO {
     @Schema(description = "权限标记")
     private List<String> permissionFlag;
 
-    @Schema(description = "删除标记，等于0表示没有删除，否则为删除")
-    private Long deleteFlag;
-
     @Schema(description = "创建人用户ID")
     private Long createUserId;
 
@@ -70,6 +67,9 @@ public class RoleDetailVO {
 
     @Schema(description = "已授权菜单ID集合")
     private List<Long> menuIds;
+
+    @Schema(description = "已授权按钮编码集合")
+    private List<String> buttonCodes;
 
     @Schema(description = "已授权字段编码集合")
     private List<String> fieldCodes;

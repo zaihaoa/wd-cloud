@@ -91,7 +91,7 @@ public class RoleController {
         return R.success(roleService.authorizeAll(dto));
     }
 
-    @Operation(summary = "覆盖保存角色指定类型的授权")
+    @Operation(summary = "保存角色指定类型的授权")
     @SaCheckPermission(PermissionConstant.ROLE_AUTH)
     @PutMapping("/authorize")
     public R<Boolean> authorize(@RequestBody @Valid RoleAuthorizeDTO dto) {

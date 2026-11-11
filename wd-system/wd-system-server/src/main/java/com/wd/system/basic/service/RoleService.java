@@ -78,7 +78,7 @@ public interface RoleService extends SuperService<Role> {
     Role getRoleByIdAssertExist(Serializable id);
 
     /**
-     * 获取未删除角色详情及已保存的三类具体授权。
+     * 获取未删除角色详情及已保存的具体授权。
      */
     RoleDetailVO detail(Long id);
 
@@ -88,7 +88,7 @@ public interface RoleService extends SuperService<Role> {
     boolean authorizeAll(RoleAuthorizeAllDTO dto);
 
     /**
-     * 覆盖保存当前授权类型，空集合清空，保留其他类型及全部权限标记。
+     * 覆盖保存菜单、按钮或字段授权，按所选用户增减用户数据授权。
      */
     boolean authorize(RoleAuthorizeDTO dto);
 
