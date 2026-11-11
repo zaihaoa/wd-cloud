@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.google.common.collect.Maps;
 import com.wd.common.core.constants.CommonConstant;
+import com.wd.common.core.context.SystemContext;
 import com.wd.common.core.exception.PromptException;
 import com.wd.common.core.model.IdDTO;
 import com.wd.common.core.model.PageInfo;
@@ -477,7 +478,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public boolean updatePassword(UserUpdatePasswordDTO userUpdatePasswordDTO) {
-        Long userId = userUpdatePasswordDTO.getId();
+        Long userId = SystemContext.getUserIdAssertExist();
         log.info("修改密码,用户ID:{}", userId);
 
         String oldPassword = userUpdatePasswordDTO.getOldPassword();

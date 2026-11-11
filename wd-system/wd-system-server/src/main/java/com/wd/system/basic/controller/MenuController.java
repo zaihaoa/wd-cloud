@@ -62,12 +62,14 @@ public class MenuController {
 
 
     @Operation(summary = "所有菜单列表Tree")
+    @SaCheckPermission(PermissionConstant.MENU_LIST)
     @GetMapping("/menu-tree")
     public R<List<MenuTreeVO>> menuTree() {
         return R.success(menuService.menuTree());
     }
 
     @Operation(summary = "获取详情")
+    @SaCheckPermission(PermissionConstant.MENU_LIST)
     @PostMapping("/detail")
     public R<MenuDetailVO> detail(@RequestBody @Valid IdDTO idParam) {
         return R.success(menuService.detail(idParam));

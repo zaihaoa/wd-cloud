@@ -38,6 +38,7 @@ public class UserController {
     private UserService userService;
 
     @Operation(summary = "列表查询")
+    @SaCheckPermission(PermissionConstant.USER_LIST)
     @PostMapping("/page")
     public R<PageInfo<UserPageVO>> pageList(@RequestBody UserPageParamDTO pageParam) {
         return R.success(userService.pageList(pageParam));
@@ -91,6 +92,7 @@ public class UserController {
     }
 
     @Operation(summary = "获取详情")
+    @SaCheckPermission(PermissionConstant.USER_LIST)
     @PostMapping("/detail")
     public R<UserDetailVO> detail(@RequestBody @Valid IdDTO idDTO) {
         return R.success(userService.detail(idDTO));

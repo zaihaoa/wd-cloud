@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
  **/
 @ApifoxFolder("登录注销")
 @Tag(name = "登录注销")
-@Slf4j
 @RestController
 @RequestMapping
 public class LoginController {

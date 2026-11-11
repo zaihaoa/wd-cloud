@@ -2,7 +2,6 @@ package com.wd.system.basic.domain.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,10 +13,6 @@ import lombok.Setter;
 @Setter
 @Schema(description = "用户修改密码DTO")
 public class UserUpdatePasswordDTO {
-
-    @Schema(description = "用户ID")
-    @NotNull(message = "ID不能为空")
-    private Long id;
 
     @Schema(description = "旧密码")
     @NotBlank(message = "旧密码不能为空")

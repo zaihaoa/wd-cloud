@@ -45,6 +45,7 @@ public class RoleController {
     private RoleService roleService;
 
     @Operation(summary = "列表查询")
+    @SaCheckPermission(PermissionConstant.ROLE_LIST)
     @PostMapping("/page")
     public R<PageInfo<RolePageVO>> pageList(@RequestBody @Valid RolePageParamDTO pageParam) {
         return R.success(roleService.pageList(pageParam));
@@ -79,6 +80,7 @@ public class RoleController {
     }
 
     @Operation(summary = "获取角色详情及授权")
+    @SaCheckPermission(PermissionConstant.ROLE_LIST)
     @GetMapping("/detail")
     public R<RoleDetailVO> detail(@RequestParam("id") Long id) {
         return R.success(roleService.detail(id));
