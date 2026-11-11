@@ -191,10 +191,10 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
                         value -> Boolean.TRUE.equals(value) ? "是" : "否"),
                 ObjectCompareCustom.<MenuUpdateDTO, List<MenuRouteParam>>ofCollection(MenuUpdateDTO::getRouteParam,
                         value -> value.stream()
-                                .collect(Collectors.toMap(MenuRouteParam::getParam, v -> v.getParam() + ":" + v.getValue(), (o, n) -> n))),
+                                .collect(Collectors.toMap(v -> v.getParam() + ":" + v.getValue(), v -> v.getParam() + ":" + v.getValue(), (o, n) -> n))),
                 ObjectCompareCustom.<MenuUpdateDTO, List<MenuButton>>ofCollection(MenuUpdateDTO::getButton,
                         value -> value.stream()
-                                .collect(Collectors.toMap(MenuButton::getCode, v -> v.getCode() + ":" + v.getLabel(), (o, n) -> n))));
+                                .collect(Collectors.toMap(v -> v.getCode() + ":" + v.getLabel(), v -> v.getCode() + ":" + v.getLabel(), (o, n) -> n))));
 
         menu.setMenuName(menuUpdateDTO.getMenuName());
         menu.setMenuGroupName(menuGroupName);
