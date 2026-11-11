@@ -1,14 +1,19 @@
 package com.wd.common.core.objectcompare;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 /**
  * 对象比较log输出格式
  * @author huangwenda
  * @date 2023/3/8 16:15
  **/
+@Getter
+@AllArgsConstructor
 public enum ObjectCompareLogFormatEnum {
-    SIMPLE("name：[oldValue]变更为[newValue]", "name：设置为[newValue]", "name：[oldValue]变更为空", "，"),
-    FORMAT_1("name：【oldValue】变更为【newValue】", "name：设置为【newValue】", "name：【oldValue】变更为空", "，"),
-    FORMAT_2("name：oldValue -> newValue", "name：newValue", "name：删除oldValue", "，"),
+    SIMPLE("name：[oldValue]变更为[newValue]", "name：设置为[newValue]", "name：[oldValue]变更为空", "，", "name：新增[collectionAddValue]", "name：移除[collectionRemoveValue]", "、"),
+    FORMAT_1("name：【oldValue】变更为【newValue】", "name：设置为【newValue】", "name：【oldValue】变更为空", "，", "name：新增【collectionAddValue】", "name：移除【collectionRemoveValue】", "、"),
+    FORMAT_2("name：oldValue -> newValue", "name：newValue", "name：删除oldValue", "，", "name：新增collectionAddValue", "name：移除collectionRemoveValue", "、"),
     ;
 
     /**
@@ -17,12 +22,12 @@ public enum ObjectCompareLogFormatEnum {
     private final String updateFormat;
 
     /**
-     * 更新格式
+     * 新增格式
      */
     private final String addFormat;
 
     /**
-     * 更新格式
+     * 移除格式
      */
     private final String removeFormat;
 
@@ -31,26 +36,19 @@ public enum ObjectCompareLogFormatEnum {
      */
     private final String joinChar;
 
-    ObjectCompareLogFormatEnum(String updateFormat, String addFormat, String removeFormat, String joinChar) {
-        this.updateFormat = updateFormat;
-        this.addFormat = addFormat;
-        this.removeFormat = removeFormat;
-        this.joinChar = joinChar;
-    }
+    /**
+     * 集合新增格式
+     */
+    private final String collectionAddFormat;
 
-    public String getUpdateFormat() {
-        return updateFormat;
-    }
+    /**
+     * 集合更新格式
+     */
+    private final String collectionRemoveFormat;
 
-    public String getAddFormat() {
-        return addFormat;
-    }
+    /**
+     * 集合拼接字符
+     */
+    private final String collectionJoinChar;
 
-    public String getRemoveFormat() {
-        return removeFormat;
-    }
-
-    public String getJoinChar() {
-        return joinChar;
-    }
 }

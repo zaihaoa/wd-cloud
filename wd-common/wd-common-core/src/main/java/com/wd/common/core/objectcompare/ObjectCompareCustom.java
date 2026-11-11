@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -29,7 +30,16 @@ public class ObjectCompareCustom<T, R> {
      */
     private Function<R, String> convertFunc;
 
+    /**
+     * 集合字段值转换
+     */
+    private Function<R, Map<String, String>> collectionConvertFunc;
+
     public static <T, R> ObjectCompareCustom<T, R> of(Func1<T, ?> fieldFunc, Function<R, String> convertFunc) {
-        return new ObjectCompareCustom<>(fieldFunc, convertFunc);
+        return new ObjectCompareCustom<>(fieldFunc, convertFunc, null);
+    }
+
+    public static <T, R> ObjectCompareCustom<T, R> ofCollection(Func1<T, ?> fieldFunc, Function<R, Map<String, String>> collectionConvertFunc) {
+        return new ObjectCompareCustom<>(fieldFunc, null, collectionConvertFunc);
     }
 }

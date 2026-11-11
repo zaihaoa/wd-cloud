@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 
 /**
@@ -105,49 +106,82 @@ public class ObjectCompareUtil {
         if (compareResultList.isEmpty()) {
             return "";
         }
-        int size = compareResultList.size();
-        StringBuilder sb = new StringBuilder(size * 15);
 
+        List<String> logResult = new ArrayList<>();
+
+        int size = compareResultList.size();
         for (int i = 0; i < size; i++) {
             ObjectCompareResult compareResult = compareResultList.get(i);
+
+            String type = compareResult.getType();
             String name = compareResult.getName();
-            String oldValue = compareResult.getOldValue();
-            String newValue = compareResult.getNewValue();
 
-            if (Objects.equals(oldValue, newValue)) {
-                continue;
-            }
+            if (ObjectCompareResultTypeEnum.STRING.getCode().equals(type)) {
+                String oldValue = compareResult.getOldValue();
+                String newValue = compareResult.getNewValue();
 
-            // 更新
-            if (!isBlank(oldValue) && !isBlank(newValue)) {
-                String logFormat = logEnum.getUpdateFormat();
-                logFormat = logFormat.replace("name", Matcher.quoteReplacement(name));
-                logFormat = logFormat.replace("oldValue", oldValue);
-                logFormat = logFormat.replace("newValue", newValue);
-                sb.append(logFormat);
-            }
+                if (Objects.equals(oldValue, newValue)) {
+                    continue;
+                }
 
-            // 新增
-            if (isBlank(oldValue) && !isBlank(newValue)) {
-                String logFormat = logEnum.getAddFormat();
-                logFormat = logFormat.replace("name", name);
-                logFormat = logFormat.replace("newValue", newValue);
-                sb.append(logFormat);
-            }
+                // 更新
+                if (!isBlank(oldValue) && !isBlank(newValue)) {
+                    String logFormat = logEnum.getUpdateFormat();
+                    logFormat = logFormat.replace("name", Matcher.quoteReplacement(name));
+                    logFormat = logFormat.replace("oldValue", oldValue);
+                    logFormat = logFormat.replace("newValue", newValue);
+                    logResult.add(logFormat);
+                }
 
-            // 移除
-            if (!isBlank(oldValue) && isBlank(newValue)) {
-                String logFormat = logEnum.getRemoveFormat();
-                logFormat = logFormat.replace("name", name);
-                logFormat = logFormat.replace("oldValue", oldValue);
-                sb.append(logFormat);
-            }
+                // 新增
+                if (isBlank(oldValue) && !isBlank(newValue)) {
+                    String logFormat = logEnum.getAddFormat();
+                    logFormat = logFormat.replace("name", name);
+                    logFormat = logFormat.replace("newValue", newValue);
+                    logResult.add(logFormat);
+                }
 
-            if (i != (size - 1)) {
-                sb.append(logEnum.getJoinChar());
+                // 移除
+                if (!isBlank(oldValue) && isBlank(newValue)) {
+                    String logFormat = logEnum.getRemoveFormat();
+                    logFormat = logFormat.replace("name", name);
+                    logFormat = logFormat.replace("oldValue", oldValue);
+                    logResult.add(logFormat);
+                }
+            } else if (ObjectCompareResultTypeEnum.COLLECTION.getCode().equals(type)) {
+                List<String> collectionAddValue = compareResult.getCollectionAddValue();
+                List<String> collectionRemoveValue = compareResult.getCollectionRemoveValue();
+
+                if (isEmpty(collectionAddValue) && isEmpty(collectionRemoveValue)) {
+                    continue;
+                }
+
+                if (!isEmpty(collectionAddValue)) {
+                    String logFormat = logEnum.getCollectionAddFormat();
+                    logFormat = logFormat.replace("name", name);
+                    logFormat = logFormat.replace("collectionAddValue", String.join(logEnum.getCollectionJoinChar(), collectionAddValue));
+                    logResult.add(logFormat);
+                }
+
+                if (!isEmpty(collectionRemoveValue)) {
+                    String logFormat = logEnum.getCollectionRemoveFormat();
+                    logFormat = logFormat.replace("name", name);
+                    logFormat = logFormat.replace("collectionRemoveValue", String.join(logEnum.getCollectionJoinChar(), collectionRemoveValue));
+                    logResult.add(logFormat);
+                }
             }
         }
-        return sb.toString();
+        return String.join(logEnum.getJoinChar(), logResult);
+    }
+
+    /**
+     * 集合是否为空
+     *
+     * @param collection 集合
+     * @return 是否为空
+     */
+    public static boolean isEmpty(Collection<?> collection) {
+        return collection == null || collection.isEmpty();
     }
 
     /**
@@ -202,13 +236,40 @@ public class ObjectCompareUtil {
                         }
                     } else {
                         Object sourceOriginValue = source.getOriginValue();
-                        String sourceValue = Objects.isNull(sourceOriginValue) ? "" : (String) objectCompareCustom.getConvertFunc().apply(sourceOriginValue);
-
                         Object targetOriginValue = target.getOriginValue();
-                        String targetValue = Objects.isNull(targetOriginValue) ? "" : (String) objectCompareCustom.getConvertFunc().apply(targetOriginValue);
 
-                        if (!Objects.equals(sourceValue, targetValue)) {
-                            resultList.add(new ObjectCompareResult(name, sourceValue, targetValue));
+                        Function convertFunc = objectCompareCustom.getConvertFunc();
+                        Function collectionConvertFunc = objectCompareCustom.getCollectionConvertFunc();
+
+                        if (Objects.nonNull(convertFunc)) {
+                            String sourceValue = Objects.isNull(sourceOriginValue) ? "" : (String) convertFunc.apply(sourceOriginValue);
+                            String targetValue = Objects.isNull(targetOriginValue) ? "" : (String) convertFunc.apply(targetOriginValue);
+
+                            if (!Objects.equals(sourceValue, targetValue)) {
+                                resultList.add(new ObjectCompareResult(name, sourceValue, targetValue));
+                            }
+                        } else {
+                            Map<String, String> sourceValue = Objects.isNull(sourceOriginValue) ? null : (Map<String, String>) collectionConvertFunc.apply(sourceOriginValue);
+                            Map<String, String> targetValue = Objects.isNull(targetOriginValue) ? null : (Map<String, String>) collectionConvertFunc.apply(targetOriginValue);
+
+                            Map<String, String> sourceValueMap = Objects.requireNonNullElse(sourceValue, Map.of());
+                            Map<String, String> targetValueMap = Objects.requireNonNullElse(targetValue, Map.of());
+
+                            // 新增：取新集合中、旧集合没有的明细
+                            List<String> added = targetValueMap.entrySet().stream()
+                                    .filter(entry -> !sourceValueMap.containsKey(entry.getKey()))
+                                    .map(Map.Entry::getValue)
+                                    .toList();
+
+                            // 移除：取旧集合中、新集合没有的明细
+                            List<String> removed = sourceValueMap.entrySet().stream()
+                                    .filter(entry -> !targetValueMap.containsKey(entry.getKey()))
+                                    .map(Map.Entry::getValue)
+                                    .toList();
+
+                            if (!added.isEmpty() || !removed.isEmpty()) {
+                                resultList.add(new ObjectCompareResult(ObjectCompareResultTypeEnum.COLLECTION.getCode(), name, added, removed));
+                            }
                         }
                     }
                 }

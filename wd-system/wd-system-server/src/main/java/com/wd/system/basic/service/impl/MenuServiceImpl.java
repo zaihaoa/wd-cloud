@@ -177,24 +177,24 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         menuUpdateDTO.setExternalLink(Optional.ofNullable(menuUpdateDTO.getExternalLink()).orElse(""));
 
         String compareLog = ObjectCompareUtil.compareLog(menu, menuUpdateDTO,
-                ObjectCompareCustom.of(MenuUpdateDTO::getMenuType, MenuTypeEnum::getDesc),
-                ObjectCompareCustom.of(MenuUpdateDTO::getStatus, MenuStatusEnum::getDesc),
+                ObjectCompareCustom.<MenuUpdateDTO, String>of(MenuUpdateDTO::getMenuType,
+                        value -> CodeDescEnumUtil.getDescByCode(MenuTypeEnum.class, value)),
+                ObjectCompareCustom.<MenuUpdateDTO, String>of(MenuUpdateDTO::getStatus,
+                        value -> CodeDescEnumUtil.getDescByCode(MenuStatusEnum.class, value)),
                 ObjectCompareCustom.<MenuUpdateDTO, Long>of(MenuUpdateDTO::getParentId,
-                        value -> {
-                            if (Objects.isNull(value)) {
-                                return "";
-                            }
-                            return Optional.ofNullable(getMenuById(value)).map(Menu::getMenuName).orElse("");
-                        }),
-                ObjectCompareCustom.<MenuUpdateDTO, Boolean>of(MenuUpdateDTO::getCacheRoute, value -> Boolean.TRUE.equals(value) ? "是" : "否"),
-                ObjectCompareCustom.<MenuUpdateDTO, Boolean>of(MenuUpdateDTO::getConstantRoute, value -> Boolean.TRUE.equals(value) ? "是" : "否"),
-                ObjectCompareCustom.<MenuUpdateDTO, Boolean>of(MenuUpdateDTO::getHideRoute, value -> Boolean.TRUE.equals(value) ? "是" : "否"),
-                ObjectCompareCustom.<MenuUpdateDTO, List<MenuRouteParam>>of(MenuUpdateDTO::getRouteParam, value -> {
-                    return "";
-                    }),
-                ObjectCompareCustom.<MenuUpdateDTO, List<MenuButton>>of(MenuUpdateDTO::getButton, value -> {
-                    return "";
-                }));
+                        value -> Optional.ofNullable(getMenuById(value)).map(Menu::getMenuName).orElse("")),
+                ObjectCompareCustom.<MenuUpdateDTO, Boolean>of(MenuUpdateDTO::getCacheRoute,
+                        value -> Boolean.TRUE.equals(value) ? "是" : "否"),
+                ObjectCompareCustom.<MenuUpdateDTO, Boolean>of(MenuUpdateDTO::getConstantRoute,
+                        value -> Boolean.TRUE.equals(value) ? "是" : "否"),
+                ObjectCompareCustom.<MenuUpdateDTO, Boolean>of(MenuUpdateDTO::getHideRoute,
+                        value -> Boolean.TRUE.equals(value) ? "是" : "否"),
+                ObjectCompareCustom.<MenuUpdateDTO, List<MenuRouteParam>>ofCollection(MenuUpdateDTO::getRouteParam,
+                        value -> value.stream()
+                                .collect(Collectors.toMap(MenuRouteParam::getParam, v -> v.getParam() + ":" + v.getValue(), (o, n) -> n))),
+                ObjectCompareCustom.<MenuUpdateDTO, List<MenuButton>>ofCollection(MenuUpdateDTO::getButton,
+                        value -> value.stream()
+                                .collect(Collectors.toMap(MenuButton::getCode, v -> v.getCode() + ":" + v.getLabel(), (o, n) -> n))));
 
         menu.setMenuName(menuUpdateDTO.getMenuName());
         menu.setMenuGroupName(menuGroupName);
