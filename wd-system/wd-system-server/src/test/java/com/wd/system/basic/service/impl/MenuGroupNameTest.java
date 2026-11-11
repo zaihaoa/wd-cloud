@@ -61,14 +61,14 @@ class MenuGroupNameTest {
     }
 
     @Test
-    void keepsExistingGroupWhenLegacyUpdateOmitsField() {
+    void clearsGroupWhenUpdateOmitsField() {
         var request = json.readValue("""
                 {"id":42,"parentId":20}
                 """, MenuUpdateDTO.class);
 
         service.updateMenu(request);
 
-        assertEquals("基础", menu.getMenuGroupName());
+        assertNull(menu.getMenuGroupName());
     }
 
     @Test

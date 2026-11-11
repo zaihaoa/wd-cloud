@@ -9,7 +9,6 @@ import com.wd.system.basic.domain.vo.MenuDetailVO;
 import com.wd.system.basic.domain.vo.MenuTreeVO;
 import com.wd.system.system.api.basic.dto.UserPermissionDTO;
 
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -72,18 +71,9 @@ public interface MenuService extends SuperService<Menu> {
      */
     List<Menu> menuList();
 
-    /**
-     * 所有菜单ID
-     */
-    List<Long> allMenuIds();
 
     /**
      * 获取详情
      */
     MenuDetailVO detail(IdDTO idParam);
-
-    /**
-     * 所有菜单对应的权限
-     */
-    List<String> getPermissionByIds(Collection<Long> menuIds);
 }

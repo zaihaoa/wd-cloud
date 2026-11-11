@@ -78,6 +78,7 @@ public class ObjectCompareUtil {
         }
         return getLogContent(compareResultList, ObjectCompareLogFormatEnum.SIMPLE);
     }
+
     /**
      * 属性比较
      *
@@ -251,7 +252,7 @@ public class ObjectCompareUtil {
                 // 值转化为string类型
                 String stringValue = getFileStringValue(field, value);
 
-                String annotationName = Optional.ofNullable(compareAnnotation).map(ObjectCompare::value).orElse(name);
+                String annotationName = Optional.of(compareAnnotation).map(ObjectCompare::value).orElse(name);
 
                 map.put(name, new ObjectCompareField(name, stringValue, value, annotationName));
             } catch (IllegalArgumentException | IllegalAccessException ignored) {
@@ -296,6 +297,8 @@ public class ObjectCompareUtil {
             return sdf.format(((Date) val));
         } else if (LocalDateTime.class.getTypeName().equals(typeName)) {
             return ((LocalDateTime) val).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        } else if (val instanceof Collection<?> collection) {
+            return collection.isEmpty() ? "" : String.valueOf(collection);
         } else {
             return String.valueOf(val);
         }

@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
 import com.wd.common.core.constants.CommonConstant;
 import com.wd.common.core.model.IdDTO;
+import com.wd.common.core.objectcompare.ObjectCompareCustom;
 import com.wd.common.core.objectcompare.ObjectCompareUtil;
 import com.wd.common.core.util.AssertUtil;
 import com.wd.common.core.util.CodeDescEnumUtil;
@@ -22,6 +23,8 @@ import com.wd.system.basic.domain.entity.Menu;
 import com.wd.system.basic.domain.enums.CommonLogBusinessTypeEnum;
 import com.wd.system.basic.domain.enums.MenuStatusEnum;
 import com.wd.system.basic.domain.enums.MenuTypeEnum;
+import com.wd.system.basic.domain.model.MenuButton;
+import com.wd.system.basic.domain.model.MenuRouteParam;
 import com.wd.system.basic.domain.vo.MenuDetailVO;
 import com.wd.system.basic.domain.vo.MenuTreeVO;
 import com.wd.system.basic.mapper.MenuMapper;
@@ -139,15 +142,11 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         Long menuId = menuUpdateDTO.getId();
         Menu menu = getMenuForUpdate(menuId);
         AssertUtil.notNull(menu, "菜单不存在");
-        String menuName = menu.getMenuName();
 
         Long parentId = Optional.ofNullable(menuUpdateDTO.getParentId()).orElse(CommonConstant.ZERO_LONG);
-        boolean preserveGroup = !menuUpdateDTO.hasMenuGroupName() && Objects.equals(menu.getParentId(), parentId);
-        String requestedGroup = preserveGroup ? menu.getMenuGroupName() : menuUpdateDTO.getMenuGroupName();
+        String requestedGroup = menuUpdateDTO.getMenuGroupName();
         Menu parent = getParentMenu(parentId, StringUtils.isNotBlank(requestedGroup));
-        String menuGroupName = menuUpdateDTO.hasMenuGroupName()
-                ? normalizeMenuGroupName(requestedGroup, parent)
-                : isTopLevelDirectory(parent) ? requestedGroup : null;
+        String menuGroupName = normalizeMenuGroupName(requestedGroup, parent);
         if (!CommonConstant.ZERO_LONG.equals(parentId)
                 || !MenuTypeEnum.DIRECTORY.getCode().equals(menuUpdateDTO.getMenuType())) {
             assertNoGroupedChildren(menu);
@@ -177,7 +176,25 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         menuUpdateDTO.setHideRoute(Optional.ofNullable(menuUpdateDTO.getHideRoute()).orElse(false));
         menuUpdateDTO.setExternalLink(Optional.ofNullable(menuUpdateDTO.getExternalLink()).orElse(""));
 
-        String compareLog = ObjectCompareUtil.compareLog(menu, menuUpdateDTO);
+        String compareLog = ObjectCompareUtil.compareLog(menu, menuUpdateDTO,
+                ObjectCompareCustom.of(MenuUpdateDTO::getMenuType, MenuTypeEnum::getDesc),
+                ObjectCompareCustom.of(MenuUpdateDTO::getStatus, MenuStatusEnum::getDesc),
+                ObjectCompareCustom.<MenuUpdateDTO, Long>of(MenuUpdateDTO::getParentId,
+                        value -> {
+                            if (Objects.isNull(value)) {
+                                return "";
+                            }
+                            return Optional.ofNullable(getMenuById(value)).map(Menu::getMenuName).orElse("");
+                        }),
+                ObjectCompareCustom.<MenuUpdateDTO, Boolean>of(MenuUpdateDTO::getCacheRoute, value -> Boolean.TRUE.equals(value) ? "是" : "否"),
+                ObjectCompareCustom.<MenuUpdateDTO, Boolean>of(MenuUpdateDTO::getConstantRoute, value -> Boolean.TRUE.equals(value) ? "是" : "否"),
+                ObjectCompareCustom.<MenuUpdateDTO, Boolean>of(MenuUpdateDTO::getHideRoute, value -> Boolean.TRUE.equals(value) ? "是" : "否"),
+                ObjectCompareCustom.<MenuUpdateDTO, List<MenuRouteParam>>of(MenuUpdateDTO::getRouteParam, value -> {
+                    return "";
+                    }),
+                ObjectCompareCustom.<MenuUpdateDTO, List<MenuButton>>of(MenuUpdateDTO::getButton, value -> {
+                    return "";
+                }));
 
         menu.setMenuName(menuUpdateDTO.getMenuName());
         menu.setMenuGroupName(menuGroupName);
@@ -378,14 +395,6 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         return menus;
     }
 
-    @Override
-    public List<Long> allMenuIds() {
-        return baseMapper.selectList(Wrappers.<Menu>lambdaQuery().select(Menu::getId))
-                .stream()
-                .map(Menu::getId)
-                .toList();
-    }
-
     private void clearMenuCache() {
         redisHelper.deleteByCacheRegion(CacheRegion.MENU);
         redisHelper.deleteByCacheRegion(CacheRegion.PERMISSION);
@@ -421,23 +430,6 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         vo.setUpdateUserName(userIdNameMap.get(vo.getUpdateUserId()));
 
         return vo;
-    }
-
-    @Override
-    public List<String> getPermissionByIds(Collection<Long> menuIds) {
-        if (CollUtil.isEmpty(menuIds)) {
-            return Lists.newArrayList();
-        }
-
-        return baseMapper
-                .selectList(Wrappers.<Menu>lambdaQuery()
-                        .in(Menu::getId, menuIds)
-                        .select(Menu::getPermission))
-                .stream()
-                .map(Menu::getPermission)
-                .filter(StringUtils::isNotBlank)
-                .distinct()
-                .collect(Collectors.toList());
     }
 
     public Menu getMenuById(Long id) {
