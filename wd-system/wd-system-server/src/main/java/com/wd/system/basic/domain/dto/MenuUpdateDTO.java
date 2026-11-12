@@ -134,6 +134,6 @@ public class MenuUpdateDTO {
     private List<MenuRouteParam> routeParam;
 
     @Schema(description = "按钮")
-    @ObjectCompare("按钮")
+    @ObjectCompare("按钮配置")
     private List<MenuButton> button;
 }

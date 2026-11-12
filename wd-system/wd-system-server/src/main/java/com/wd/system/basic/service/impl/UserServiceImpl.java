@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.wd.common.core.constants.CommonConstant;
 import com.wd.common.core.context.SystemContext;
@@ -13,6 +14,7 @@ import com.wd.common.core.exception.PromptException;
 import com.wd.common.core.model.IdDTO;
 import com.wd.common.core.model.PageInfo;
 import com.wd.common.core.model.SelectCombobox;
+import com.wd.common.core.objectcompare.ObjectCompareCustom;
 import com.wd.common.core.objectcompare.ObjectCompareUtil;
 import com.wd.common.core.util.AssertUtil;
 import com.wd.common.core.util.CodeDescEnumUtil;
@@ -31,8 +33,8 @@ import com.wd.system.basic.domain.enums.CommonLogBusinessTypeEnum;
 import com.wd.system.basic.domain.enums.RolePermissionFlagEnum;
 import com.wd.system.basic.domain.enums.UserStatusEnum;
 import com.wd.system.basic.domain.enums.UserTypeEnum;
-import com.wd.system.basic.domain.vo.UserDetailVO;
 import com.wd.system.basic.domain.vo.UserAuthorizePageVO;
+import com.wd.system.basic.domain.vo.UserDetailVO;
 import com.wd.system.basic.domain.vo.UserInfoVO;
 import com.wd.system.basic.domain.vo.UserPageVO;
 import com.wd.system.basic.mapper.RoleMapper;
@@ -198,7 +200,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setDeleteFlag(CommonConstant.NOT_DELETE_FLAG);
 
         baseMapper.insert(user);
-        replaceUserRoles(id, roleIds);
+        insertUserRoles(id, roleIds);
 
         // 添加日志
         addLog(id, "新增", "新增用户");
@@ -242,7 +244,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             Assert.isTrue(emailCount <= 0, "邮箱已存在");
         }
 
-        String compareLog = ObjectCompareUtil.compareLog(user, userUpdateParam);
+        // 锁定读避免角色差集基于前置校验建立的事务快照计算。
+        List<Long> existRoleIds = userRoleRelevanceMapper
+                .selectList(Wrappers.<UserRoleRelevance>lambdaQuery()
+                        .eq(UserRoleRelevance::getUserId, id)
+                        .select(UserRoleRelevance::getRoleId))
+                .stream()
+                .map(UserRoleRelevance::getRoleId)
+                .distinct()
+                .toList();
+
+        // 角色id和名称映射
+        Map<Long, String> roleIdNameMap = getRoleIdNameMap(roleIds, existRoleIds);
+
+        UserUpdateDTO originUserInfo = convertOriginUserParam(user, existRoleIds);
+        String compareLog = ObjectCompareUtil.compareLog(originUserInfo, userUpdateParam,
+                ObjectCompareCustom.<UserUpdateDTO, List<Long>>ofCollection(UserUpdateDTO::getRoleIds,
+                        value -> value.stream().collect(Collectors.toMap(String::valueOf, v -> roleIdNameMap.getOrDefault(v, "")))));
 
         baseMapper.update(Wrappers.<User>lambdaUpdate()
                 .set(User::getUsername, username)
@@ -250,7 +268,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .set(User::getPhone, Optional.ofNullable(phone).orElse(""))
                 .set(User::getEmail, Optional.ofNullable(email).orElse(""))
                 .eq(User::getId, id));
-        replaceUserRoles(id, roleIds);
+        updateUserRoles(id, existRoleIds, roleIds);
 
         // 添加日志
         if (StringUtils.isNotBlank(compareLog)) {
@@ -261,6 +279,39 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         clearUserCacheAfterCommit();
 
         return true;
+    }
+
+    private Map<Long, String> getRoleIdNameMap(List<Long> roleIds, List<Long> existRoleIds) {
+        List<Long> allRoleIds = Lists.newArrayList();
+        if (CollUtil.isNotEmpty(roleIds)) {
+            allRoleIds.addAll(roleIds);
+        }
+        if (CollUtil.isNotEmpty(existRoleIds)) {
+            allRoleIds.addAll(existRoleIds);
+        }
+        if (CollUtil.isEmpty(allRoleIds)) {
+            return Collections.emptyMap();
+        }
+
+        return roleMapper
+                .selectList(Wrappers.<Role>lambdaQuery().in(Role::getId, allRoleIds)
+                        .select(Role::getId, Role::getName))
+                .stream()
+                .collect(Collectors.toMap(Role::getId, Role::getName));
+    }
+
+    private UserUpdateDTO convertOriginUserParam(User user, List<Long> existRoleIds) {
+        Long userId = user.getId();
+
+        UserUpdateDTO originUserParam = new UserUpdateDTO();
+        originUserParam.setId(userId);
+        originUserParam.setUsername(user.getUsername());
+        originUserParam.setName(user.getName());
+        originUserParam.setPhone(user.getPhone());
+        originUserParam.setEmail(user.getEmail());
+        originUserParam.setRoleIds(existRoleIds);
+
+        return originUserParam;
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -280,7 +331,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .eq(User::getId, id)) > 0;
 
 //        userRoleRelevanceService.remove(Wrappers.<UserRoleRelevance>lambdaQuery().eq(UserRoleRelevance::getUserId, userId));
-//        userDataPermissionRelevanceService.remove(Wrappers.<UserDataPermissionRelevance>lambdaQuery().eq(UserDataPermissionRelevance::getUserId, userId));
 
         // 添加日志
         addLog(id, "删除", "删除用户");
@@ -400,9 +450,27 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return ids;
     }
 
-    private void replaceUserRoles(Long userId, List<Long> roleIds) {
-        userRoleRelevanceMapper.delete(Wrappers.<UserRoleRelevance>lambdaQuery()
-                .eq(UserRoleRelevance::getUserId, userId));
+    private void updateUserRoles(Long userId, List<Long> existingRoleIds, List<Long> requestedRoleIds) {
+        Set<Long> requestedRoles = new HashSet<>(requestedRoleIds);
+        List<Long> rolesToRemove = existingRoleIds.stream()
+                .filter(roleId -> !requestedRoles.contains(roleId))
+                .toList();
+        if (!rolesToRemove.isEmpty()) {
+            userRoleRelevanceMapper.delete(Wrappers.<UserRoleRelevance>lambdaQuery()
+                    .eq(UserRoleRelevance::getUserId, userId)
+                    .in(UserRoleRelevance::getRoleId, rolesToRemove));
+        }
+
+        Set<Long> existingRoles = new HashSet<>(existingRoleIds);
+        List<Long> rolesToAdd = requestedRoleIds.stream()
+                .filter(roleId -> !existingRoles.contains(roleId))
+                .toList();
+        if (!rolesToAdd.isEmpty()) {
+            insertUserRoles(userId, rolesToAdd);
+        }
+    }
+
+    private void insertUserRoles(Long userId, List<Long> roleIds) {
         List<UserRoleRelevance> links = new ArrayList<>(roleIds.size());
         for (Long roleId : roleIds) {
             UserRoleRelevance link = new UserRoleRelevance();
