@@ -17,48 +17,59 @@ import org.springframework.context.annotation.Configuration;
 public class XxlJobConfig {
     private Logger logger = LoggerFactory.getLogger(XxlJobConfig.class);
 
-    @Value("${xxl.job.admin.addresses:}")
+    @Value("${xxl.job.admin.addresses}")
     private String adminAddresses;
 
-    @Value("${xxl.job.admin.accessToken:}")
-    private String accessToken;
-
-    @Value("${xxl.job.admin.timeout:}")
+    @Value("${xxl.job.admin.timeout}")
     private int timeout;
 
-    @Value("${xxl.job.executor.appname:}")
+    @Value("${xxl.job.executor.enabled}")
+    private Boolean enabled;
+
+    @Value("${xxl.job.executor.appname}")
     private String appname;
 
-    @Value("${xxl.job.executor.address:}")
-    private String address;
+    @Value("${xxl.job.executor.accessToken}")
+    private String accessToken;
 
-    @Value("${xxl.job.executor.ip:}")
+    @Value("${xxl.job.executor.ip}")
     private String ip;
 
-    @Value("${xxl.job.executor.port:}")
+    @Value("${xxl.job.executor.port}")
     private int port;
 
-    @Value("${xxl.job.executor.logpath:}")
+    @Value("${xxl.job.executor.address}")
+    private String address;
+
+    @Value("${xxl.job.executor.logpath}")
     private String logPath;
 
-    @Value("${xxl.job.executor.logretentiondays:}")
+    @Value("${xxl.job.executor.logretentiondays}")
     private int logRetentionDays;
+
+    @Value("${xxl.job.executor.excludedpackage}")
+    private String excludedPackage;
+
+    @Value("${xxl.job.executor.glueenabled:true}")
+    private Boolean glueEnabled;
 
 
     @Bean
-    @ConditionalOnProperty(name = "xxl.job.enabled", havingValue = "true")
     public XxlJobSpringExecutor xxlJobExecutor() {
         logger.info(">>>>>>>>>>> xxl-job config init.");
         XxlJobSpringExecutor xxlJobSpringExecutor = new XxlJobSpringExecutor();
         xxlJobSpringExecutor.setAdminAddresses(adminAddresses);
+        xxlJobSpringExecutor.setTimeout(timeout);
+        xxlJobSpringExecutor.setEnabled(enabled);
         xxlJobSpringExecutor.setAppname(appname);
-        xxlJobSpringExecutor.setAddress(address);
+        xxlJobSpringExecutor.setAccessToken(accessToken);
         xxlJobSpringExecutor.setIp(ip);
         xxlJobSpringExecutor.setPort(port);
-        xxlJobSpringExecutor.setAccessToken(accessToken);
-        xxlJobSpringExecutor.setTimeout(timeout);
+        xxlJobSpringExecutor.setAddress(address);
         xxlJobSpringExecutor.setLogPath(logPath);
         xxlJobSpringExecutor.setLogRetentionDays(logRetentionDays);
+        xxlJobSpringExecutor.setExcludedPackage(excludedPackage);
+        xxlJobSpringExecutor.setGlueEnabled(glueEnabled);
 
         return xxlJobSpringExecutor;
     }
@@ -79,6 +90,4 @@ public class XxlJobConfig {
      *      3、获取IP
      *          String ip_ = inetUtils.findFirstNonLoopbackHostInfo().getIpAddress();
      */
-
-
 }
