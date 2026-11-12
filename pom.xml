@@ -12,7 +12,6 @@
 
     <modules>
         <module>wd-common</module>
-        <module>wd-generator</module>
         <module>wd-job-admin</module>
         <module>wd-gateway</module>
         <module>wd-system</module>

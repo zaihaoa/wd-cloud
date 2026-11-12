@@ -34,6 +34,18 @@
             <artifactId>mybatis-plus-spring-boot4-starter</artifactId>
         </dependency>
 
+        <!-- mybatis-plus-generator -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-generator</artifactId>
+        </dependency>
+
+        <!-- freemarker -->
+        <dependency>
+            <groupId>org.freemarker</groupId>
+            <artifactId>freemarker</artifactId>
+        </dependency>
+
         <!-- mybatis-plus-jsqlparser -->
         <dependency>
             <groupId>com.baomidou</groupId>
