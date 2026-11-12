@@ -90,6 +90,11 @@
         <!-- freemarker -->
         <freemarker.version>2.3.35</freemarker.version>
 
+        <!-- xxl-tool -->
+        <xxl-tool.version>2.5.2</xxl-tool.version>
+        <!-- xxl-sso -->
+        <xxl-sso.version>2.4.1</xxl-sso.version>
+
     </properties>
 
 
@@ -347,6 +352,27 @@
                 <groupId>org.freemarker</groupId>
                 <artifactId>freemarker</artifactId>
                 <version>${freemarker.version}</version>
+            </dependency>
+
+            <!-- xxl-tool -->
+            <dependency>
+                <groupId>com.xuxueli</groupId>
+                <artifactId>xxl-tool</artifactId>
+                <version>${xxl-tool.version}</version>
+            </dependency>
+
+            <!-- xxl-sso (xxl-tool、gson) -->
+            <dependency>
+                <groupId>com.xuxueli</groupId>
+                <artifactId>xxl-sso-core</artifactId>
+                <version>${xxl-sso.version}</version>
+            </dependency>
+
+            <!-- mybatis-spring-boot-starter -->
+            <dependency>
+                <groupId>org.mybatis.spring.boot</groupId>
+                <artifactId>mybatis-spring-boot-starter</artifactId>
+                <version>${mybatis-spring-boot-starter.version}</version>
             </dependency>
 
         </dependencies>

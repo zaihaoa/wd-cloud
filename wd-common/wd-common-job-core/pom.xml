@@ -16,30 +16,6 @@
 
     <dependencies>
 
-        <!-- ********************** embed server: netty + gson ********************** -->
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-codec-http</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-        </dependency>
-
-        <!-- ********************** plugin ********************** -->
-        <!-- groovy-all -->
-        <dependency>
-            <groupId>org.apache.groovy</groupId>
-            <artifactId>groovy</artifactId>
-        </dependency>
-
-        <!-- spring-context -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
         <!-- ********************** base ********************** -->
         <!-- slf4j -->
         <dependency>
@@ -51,6 +27,37 @@
         <dependency>
             <groupId>jakarta.annotation</groupId>
             <artifactId>jakarta.annotation-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- ********************** embed server: netty + gson ********************** -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-codec-http</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
+
+        <!-- ********************** tool: xxl-tool ********************** -->
+        <dependency>
+            <groupId>com.xuxueli</groupId>
+            <artifactId>xxl-tool</artifactId>
+        </dependency>
+
+        <!-- ********************** plugin: groovy + spring ********************** -->
+        <!-- groovy-all -->
+        <dependency>
+            <groupId>org.apache.groovy</groupId>
+            <artifactId>groovy</artifactId>
+        </dependency>
+
+        <!-- spring-context -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

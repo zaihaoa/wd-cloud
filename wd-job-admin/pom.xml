@@ -10,15 +10,16 @@
     </parent>
 
     <artifactId>wd-job-admin</artifactId>
+    <packaging>jar</packaging>
 
     <dependencies>
 
-        <!-- starter-web：spring-webmvc + autoconfigure + logback + yaml + tomcat -->
+        <!-- starter-web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-        <!-- starter-test：junit + spring-test + mockito -->
+        <!-- starter-test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -30,29 +31,32 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-freemarker</artifactId>
         </dependency>
-
         <!-- mail-starter -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
-
         <!-- starter-actuator -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-        <!-- mybatis-starter：mybatis + mybatis-spring + hikari（default） -->
+        <!-- mybatis-starter -->
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>
             <artifactId>mybatis-spring-boot-starter</artifactId>
-            <version>${mybatis-spring-boot-starter.version}</version>
         </dependency>
         <!-- mysql -->
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
+        </dependency>
+
+        <!-- xxl-sso -->
+        <dependency>
+            <groupId>com.xuxueli</groupId>
+            <artifactId>xxl-sso-core</artifactId>
         </dependency>
 
         <!-- wd-common-job-core -->
@@ -89,7 +93,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot.version}</version>
                 <configuration>
-                    <mainClass>com.xxl.job.admin.JobAdminApplication</mainClass>
+                    <mainClass>com.xxl.job.admin.XxlJobAdminApplication</mainClass>
                 </configuration>
                 <executions>
                     <execution>
