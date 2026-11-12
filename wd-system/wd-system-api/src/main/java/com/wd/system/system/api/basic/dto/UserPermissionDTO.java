@@ -1,7 +1,6 @@
 package com.wd.system.system.api.basic.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.wd.common.core.constants.CommonConstant;
 import com.wd.system.system.api.basic.vo.UserRoleVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
@@ -9,7 +8,6 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * @author huangwenda
@@ -72,7 +70,7 @@ public class UserPermissionDTO {
     @Schema(description = "有权限的字段权限(返回有的权限集合,没有权限返回空数组)")
     private List<String> authFieldPermissionList;
 
-    @Schema(description = "有权限的用户ID权限(所有权限返回null,没有权限返回-1)")
+    @Schema(description = "有权限的用户ID集合，包含本人，所有用户权限返回 null")
     private List<Long> authUserIds;
 
 
@@ -81,15 +79,6 @@ public class UserPermissionDTO {
      */
     public boolean allUserIdPermission() {
         return getAuthUserIds() == null;
-    }
-
-    /**
-     * 是否没有用户权限
-     */
-    public boolean notUserIdPermission() {
-        List<Long> userIds = getAuthUserIds();
-        return Objects.nonNull(userIds) && Objects.equals(userIds.size(), 1)
-                && Objects.equals(userIds.get(0), CommonConstant.NOT_PERMISSION_FLAG);
     }
 
 }

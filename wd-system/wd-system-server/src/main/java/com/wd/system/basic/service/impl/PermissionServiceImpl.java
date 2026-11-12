@@ -99,7 +99,7 @@ public class PermissionServiceImpl implements PermissionService {
                 : permissions.stream().filter(p -> RolePermissionTypeEnum.FIELD.getCode().equals(p.getType()))
                 .map(RolePermissionRelevance::getRelevanceValue).filter(StringUtils::isNotBlank).distinct().toList());
         result.setAuthUserIds(all || flags.contains(RolePermissionFlagEnum.ALL_DATA_USER_PERMISSION.getCode())
-                ? null : authorizedUserIds(permissions));
+                ? null : authorizedUserIds(userId, permissions));
 
         redisHelper.setEx(CacheRegion.PERMISSION, key, result, 5, TimeUnit.DAYS);
         return result;
@@ -150,15 +150,15 @@ public class PermissionServiceImpl implements PermissionService {
                 .map(RolePermissionRelevance::getRelevanceValue);
     }
 
-    private List<Long> authorizedUserIds(List<RolePermissionRelevance> permissions) {
+    private List<Long> authorizedUserIds(Long userId, List<RolePermissionRelevance> permissions) {
         List<Long> ids = permissionIds(permissions, RolePermissionTypeEnum.DATA_USER);
         if (ids.isEmpty()) {
-            return List.of(CommonConstant.NOT_PERMISSION_FLAG);
+            return List.of(userId);
         }
-        List<Long> userIds = userMapper.selectList(Wrappers.<User>lambdaQuery()
-                        .in(User::getId, ids).select(User::getId).orderByAsc(User::getId))
-                .stream().map(User::getId).toList();
-        return userIds.isEmpty() ? List.of(CommonConstant.NOT_PERMISSION_FLAG) : userIds;
+        List<User> grantedUsers = userMapper.selectList(Wrappers.<User>lambdaQuery()
+                .in(User::getId, ids).select(User::getId));
+        return Stream.concat(Stream.of(userId), grantedUsers.stream().map(User::getId))
+                .distinct().sorted().toList();
     }
 
     private List<Long> permissionIds(List<RolePermissionRelevance> permissions, RolePermissionTypeEnum type) {
