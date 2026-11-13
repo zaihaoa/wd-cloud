@@ -54,34 +54,34 @@ public class ExcelHelper {
      * 读取Excel数据
      *
      * @param importParam    导入参数
-     * @param cls            实体类
+     * @param excelClass     实体类
      * @return 数据列表
      */
-    public <T> List<T> readExcelData(ImportParam importParam, Class<T> cls) {
-        return readExcelData(importParam, cls, null);
+    public <T> List<T> readExcelData(ImportParam importParam, Class<T> excelClass) {
+        return readExcelData(importParam, excelClass, null);
     }
 
     /**
      * 读取Excel数据
      *
      * @param importParam    导入参数
-     * @param cls            实体类
+     * @param excelClass     实体类
      * @param excludeFields  需要排除的字段
      * @return 数据列表
      */
-    public <T> List<T> readExcelData(ImportParam importParam, Class<T> cls, Set<String> excludeFields) {
-        log.info("导入参数:{},", importParam);
+    public <T> List<T> readExcelData(ImportParam importParam, Class<T> excelClass, Set<String> excludeFields) {
+        log.info("导入参数:{},排除的字段:{}", JSON.toJSONString(importParam), JSON.toJSONString(excludeFields));
 
         String filePath = importParam.getFilePath();
         // 下载文件到临时文件
         File tempFile = FileUtil.createTempFile(".xlsx", true);
         ossClientService.download(tempFile, filePath);
 
-        ExcelReadListener<T> listener = new ExcelReadListener<>(getExcelPropertyNames(cls, excludeFields));
+        ExcelReadListener<T> listener = new ExcelReadListener<>(getExcelPropertyNames(excelClass, excludeFields));
 
         try (InputStream inputStream = Files.newInputStream(tempFile.toPath())) {
             //读取文件
-            FesodSheet.read(inputStream, cls, listener).sheet().doReadSync();
+            FesodSheet.read(inputStream, excelClass, listener).sheet().doReadSync();
             // 验证表头
             listener.validateTitle();
 
@@ -136,15 +136,15 @@ public class ExcelHelper {
      * @param sheetName sheet名称
      * @param excelClass Excel数据类
      * @param dataList 数据列表
-     * @param excludeColumnFieldNames 需要排除的列字段名
+     * @param excludeFields 需要排除的列字段名
      * @return 导出结果
      */
     public <T extends BaseExportQuery, R, E> ExportResult exportSingleSheet(String fileName,
                                                                             String sheetName,
                                                                             Class<E> excelClass,
                                                                             List<E> dataList,
-                                                                            List<String> excludeColumnFieldNames) {
-        return exportSingleSheet(fileName, sheetName, excelClass, dataList, excludeColumnFieldNames, null);
+                                                                            List<String> excludeFields) {
+        return exportSingleSheet(fileName, sheetName, excelClass, dataList, excludeFields, null);
     }
 
     /**
@@ -154,7 +154,7 @@ public class ExcelHelper {
      * @param sheetName sheet名称
      * @param excelClass Excel数据类
      * @param dataList 数据列表
-     * @param excludeColumnFieldNames 需要排除的列字段名
+     * @param excludeFields 需要排除的列字段名
      * @param cellSelectors 列选择器
      * @return 导出结果
      */
@@ -162,10 +162,10 @@ public class ExcelHelper {
                                                                             String sheetName,
                                                                             Class<E> excelClass,
                                                                             List<E> dataList,
-                                                                            List<String> excludeColumnFieldNames,
+                                                                            List<String> excludeFields,
                                                                             List<CellSelector> cellSelectors) {
         // 参数校验
-        if (sheetName == null || excelClass == null) {
+        if (fileName == null || sheetName == null || excelClass == null) {
             throw new IllegalArgumentException("关键参数不能为空");
         }
 
@@ -173,7 +173,7 @@ public class ExcelHelper {
              ExcelWriter excelWriter = buildExcelWriter(out, excelClass, cellSelectors)) {
 
             // 创建sheet
-            WriteSheet writeSheet = createWriteSheet(sheetName, excludeColumnFieldNames);
+            WriteSheet writeSheet = createWriteSheet(sheetName, excludeFields);
 
             excelWriter.write(CollUtil.isEmpty(dataList) ? List.of() : dataList, writeSheet);
 
@@ -215,7 +215,7 @@ public class ExcelHelper {
      * @param pageCountFunction 分页统计函数
      * @param excelDataFunction 数据转换函数
      * @param excelClass Excel数据类
-     * @param excludeColumnFieldNames 需要排除的列字段名
+     * @param excludeFields 需要排除的列字段名
      * @return 导出结果
      */
     public <T extends BaseExportQuery, R, E> ExportResult exportPageSingleSheet(String sheetName,
@@ -223,8 +223,8 @@ public class ExcelHelper {
                                                                                 Function<T, Integer> pageCountFunction,
                                                                                 Function<T, List<E>> excelDataFunction,
                                                                                 Class<E> excelClass,
-                                                                                List<String> excludeColumnFieldNames) {
-        return exportPageSingleSheet(sheetName, sheetName, pageParam, pageCountFunction, excelDataFunction, excelClass, excludeColumnFieldNames, null);
+                                                                                List<String> excludeFields) {
+        return exportPageSingleSheet(sheetName, sheetName, pageParam, pageCountFunction, excelDataFunction, excelClass, excludeFields, null);
     }
 
     /**
@@ -256,7 +256,7 @@ public class ExcelHelper {
      * @param pageCountFunction 分页统计函数
      * @param excelDataFunction 分页数据函数
      * @param excelClass Excel数据类
-     * @param excludeColumnFieldNames 需要排除的列字段名
+     * @param excludeFields 需要排除的列字段名
      * @return 导出结果
      */
     public <T extends BaseExportQuery, R, E> ExportResult exportPageSingleSheet(String fileNamePrefix,
@@ -265,8 +265,8 @@ public class ExcelHelper {
                                                                                 Function<T, Integer> pageCountFunction,
                                                                                 Function<T, List<E>> excelDataFunction,
                                                                                 Class<E> excelClass,
-                                                                                List<String> excludeColumnFieldNames) {
-        return exportPageSingleSheet(fileNamePrefix, sheetName, pageParam, pageCountFunction, excelDataFunction, excelClass, excludeColumnFieldNames, null);
+                                                                                List<String> excludeFields) {
+        return exportPageSingleSheet(fileNamePrefix, sheetName, pageParam, pageCountFunction, excelDataFunction, excelClass, excludeFields, null);
     }
 
 
@@ -279,7 +279,7 @@ public class ExcelHelper {
      * @param pageCountFunction 分页统计函数
      * @param excelDataFunction 数据转换函数
      * @param excelClass Excel数据类
-     * @param excludeColumnFieldNames 需要排除的列字段名
+     * @param excludeFields 需要排除的列字段名
      * @param cellSelectors 列选择器
      * @return 导出结果
      */
@@ -289,14 +289,14 @@ public class ExcelHelper {
                                                                                 Function<T, Integer> pageCountFunction,
                                                                                 Function<T, List<E>> excelDataFunction,
                                                                                 Class<E> excelClass,
-                                                                                List<String> excludeColumnFieldNames,
+                                                                                List<String> excludeFields,
                                                                                 List<CellSelector> cellSelectors) {
+        log.info("导出,sheetName:{},查询参数:{},需要排除的列:{}", sheetName, JSON.toJSONString(pageParam), JSON.toJSONString(excludeFields));
+
         // 参数校验
         if (sheetName == null || pageParam == null || pageCountFunction == null || excelDataFunction == null || excelClass == null) {
             throw new IllegalArgumentException("关键参数不能为空");
         }
-
-        log.info("导出,sheetName:{},查询参数:{},需要排除的列:{}", sheetName, JSON.toJSONString(pageParam), JSON.toJSONString(excludeColumnFieldNames));
 
         // 导出参数处理
         ExportUtil.pageExportParamValidAndDefaultValue(pageParam);
@@ -305,7 +305,7 @@ public class ExcelHelper {
              ExcelWriter excelWriter = buildExcelWriter(out, excelClass, cellSelectors)) {
 
             // 创建sheet
-            WriteSheet writeSheet = createWriteSheet(sheetName, excludeColumnFieldNames);
+            WriteSheet writeSheet = createWriteSheet(sheetName, excludeFields);
 
             // 总记录数
             Integer pageCount = pageCountFunction.apply(pageParam);
@@ -388,14 +388,14 @@ public class ExcelHelper {
                 Function<T, Integer> pageCountFunction = excelSheetExport.getPageCountFunction();
                 Function<T, ? extends List<?>> excelDataFunction = excelSheetExport.getExcelDataFunction();
                 Class<?> excelClass = excelSheetExport.getExcelClass();
-                List<String> excludeColumnFieldNames = excelSheetExport.getExcludeColumnFieldNames();
+                List<String> excludeFields = excelSheetExport.getExcludeFields();
                 List<CellSelector> cellSelectors = excelSheetExport.getCellSelectors();
 
                 // 导出参数处理
                 ExportUtil.pageExportParamValidAndDefaultValue(pageParam);
 
                 // 创建sheet
-                WriteSheet writeSheet = createWriteSheet(sheetName, excelClass, excludeColumnFieldNames, cellSelectors);
+                WriteSheet writeSheet = createWriteSheet(sheetName, excelClass, excludeFields, cellSelectors);
 
                 // 总记录数
                 Integer pageCount = pageCountFunction.apply(pageParam);
@@ -496,24 +496,24 @@ public class ExcelHelper {
     }
 
     private WriteSheet createWriteSheet(String sheetName,
-                                        List<String> excludeColumnFieldNames) {
+                                        List<String> excludeFields) {
         WriteSheet writeSheet = FesodSheet.writerSheet().sheetName(sheetName).build();
-        if (CollUtil.isNotEmpty(excludeColumnFieldNames)) {
-            writeSheet.setExcludeColumnFieldNames(excludeColumnFieldNames);
+        if (CollUtil.isNotEmpty(excludeFields)) {
+            writeSheet.setExcludeColumnFieldNames(excludeFields);
         }
         return writeSheet;
     }
 
     private <E> WriteSheet createWriteSheet(String sheetName,
                                             Class<E> excelClass,
-                                            List<String> excludeColumnFieldNames,
+                                            List<String> excludeFields,
                                             List<CellSelector> cellSelectors) {
         ExcelWriterSheetBuilder writerSheetBuilder = FesodSheet.writerSheet().sheetName(sheetName).head(excelClass);
         if (CollUtil.isNotEmpty(cellSelectors)) {
             writerSheetBuilder.registerWriteHandler(new CellSelectorSheetWriteHandler(cellSelectors));
         }
-        if (CollUtil.isNotEmpty(excludeColumnFieldNames)) {
-            writerSheetBuilder.excludeColumnFieldNames(excludeColumnFieldNames);
+        if (CollUtil.isNotEmpty(excludeFields)) {
+            writerSheetBuilder.excludeColumnFieldNames(excludeFields);
         }
         return writerSheetBuilder.build();
     }

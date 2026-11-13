@@ -6,7 +6,9 @@ import org.apache.fesod.sheet.write.metadata.holder.WriteWorkbookHolder;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddressList;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -16,10 +18,10 @@ import java.util.List;
  **/
 public class CellSelectorSheetWriteHandler implements SheetWriteHandler {
 
-    List<CellSelector> list;
+    private final List<CellSelector> cellSelectors;
 
-    public CellSelectorSheetWriteHandler(List<CellSelector> list) {
-        this.list = list;
+    public CellSelectorSheetWriteHandler(List<CellSelector> cellSelectors) {
+        this.cellSelectors = cellSelectors;
     }
 
     @Override
@@ -36,31 +38,39 @@ public class CellSelectorSheetWriteHandler implements SheetWriteHandler {
     @Override
     public void afterSheetCreate(WriteWorkbookHolder writeWorkbookHolder, WriteSheetHolder writeSheetHolder) {
 
-        // 获取第一个sheet页
+        // 获取当前sheet页
         Sheet sheet = writeSheetHolder.getCachedSheet();
         // 获取sheet页的数据校验对象
         DataValidationHelper helper = sheet.getDataValidationHelper();
         // 获取工作簿对象，用于创建存放下拉数据的字典sheet数据页
         Workbook workbook = writeWorkbookHolder.getWorkbook();
 
-        // 迭代索引，用于存放下拉数据的字典sheet数据页命名
-        for (int idx = 0; idx < list.size(); idx++) {
-            CellSelector cellSelector = list.get(idx);
+        Map<String, Integer> columnIndexes = new HashMap<>();
+        writeSheetHolder.excelWriteHeadProperty().getHeadMap().forEach((columnIndex, head) -> {
+            if (head.getFieldName() != null) {
+                columnIndexes.put(head.getFieldName(), columnIndex);
+            }
+        });
 
+        int sheetIndex = workbook.getSheetIndex(sheet.getSheetName());
+        int index = 1;
+        for (CellSelector cellSelector : cellSelectors) {
+            Integer columnIndex = columnIndexes.get(cellSelector.getFieldName());
+            if (columnIndex == null) {
+                continue;
+            }
             // 设置存放下拉数据的字典sheet，并把这些sheet隐藏掉，这样用户交互更友好
-            Integer columnIndex = cellSelector.getColumnIndex();
             List<String> selectDataList = cellSelector.getSelectDataList();
-            String dictSheetName = "dict_hide_sheet" + columnIndex;
+            String dictSheetName = "dict_hide_sheet" + sheetIndex + "_" + index++;
             Sheet dictSheet = workbook.createSheet(dictSheetName);
             // 隐藏字典sheet页
-            workbook.setSheetHidden(idx + 1, true);
+            workbook.setSheetHidden(workbook.getSheetIndex(dictSheet), true);
 
 
             // 设置下拉列表覆盖的行数，从第一行开始到最后一行，这里注意，Excel行的
             // 索引是从0开始的，我这边第0行是标题行，第1行开始时数据化，可根据实
             // 际业务设置真正的数据开始行，如果要设置到最后一行，那么一定注意，
-            // 最后一行的行索引是1048575，千万别写成1048576，不然会导致下拉列表
-            // 失效，出不来
+            // 最后一行的行索引是1048575，千万别写成1048576，不然会导致下拉列表失效，出不来
             CellRangeAddressList infoList = new CellRangeAddressList(1, 1048575, columnIndex, columnIndex);
             int rowLen = selectDataList.size();
             for (int i = 0; i < rowLen; i++) {

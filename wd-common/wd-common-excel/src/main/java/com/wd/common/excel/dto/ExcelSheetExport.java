@@ -38,7 +38,7 @@ public class ExcelSheetExport<T extends BaseExportQuery, R> {
     private Class<R> excelClass;
 
     @Schema(description = "需要排除的列字段名")
-    private List<String> excludeColumnFieldNames;
+    private List<String> excludeFields;
 
     @Schema(description = "列选择器")
     private List<CellSelector> cellSelectors;
