@@ -1,5 +1,6 @@
 package com.wd.system.basic.convert;
 
+import com.wd.system.basic.domain.dto.UserExportDTO;
 import com.wd.system.basic.domain.entity.User;
 import com.wd.system.basic.domain.entity.Role;
 import com.wd.system.basic.domain.vo.UserAuthorizePageVO;
@@ -41,4 +42,6 @@ public interface UserConverter {
     @Mapping(target = "authFieldPermissionList", ignore = true)
     @Mapping(target = "authUserIds", ignore = true)
     UserPermissionDTO convertUserPermissionDTO(User user);
+
+    UserExportDTO convertUserExportDTO(UserPageDTO record);
 }

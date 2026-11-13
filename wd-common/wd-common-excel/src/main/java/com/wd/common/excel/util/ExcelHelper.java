@@ -45,47 +45,21 @@ import java.util.function.Function;
  **/
 @Slf4j
 @Component
-public class EasyExcelHelper {
+public class ExcelHelper {
 
     @Resource
     private OssClientService ossClientService;
 
     /**
-     * 获取Excel属性字段
+     * 读取Excel数据
      *
-     * @param clazz          实体类
-     * @return 属性名称列表
+     * @param importParam    导入参数
+     * @param cls            实体类
+     * @return 数据列表
      */
-    public static List<String> getExcelPropertyNames(Class<?> clazz) {
-        return getExcelPropertyNames(clazz, null);
+    public <T> List<T> readExcelData(ImportParam importParam, Class<T> cls) {
+        return readExcelData(importParam, cls, null);
     }
-
-    /**
-     * 获取Excel属性字段
-     *
-     * @param clazz          实体类
-     * @param excludeFields  需要排除的字段
-     * @return 属性名称列表
-     */
-    public static List<String> getExcelPropertyNames(Class<?> clazz, Set<String> excludeFields) {
-        // excel属性名称
-        List<String> excelPropertyList = Lists.newArrayList();
-        boolean hasExcludeFields = CollUtil.isNotEmpty(excludeFields);
-
-        Field[] declaredFields = clazz.getDeclaredFields();
-
-        for (Field field : declaredFields) {
-            ExcelProperty annotation = field.getAnnotation(ExcelProperty.class);
-            if (annotation != null) {
-                if (hasExcludeFields && excludeFields.contains(field.getName())) {
-                    continue;
-                }
-                excelPropertyList.add(annotation.value()[0]);
-            }
-        }
-        return excelPropertyList;
-    }
-
 
     /**
      * 读取Excel数据
@@ -96,7 +70,7 @@ public class EasyExcelHelper {
      * @return 数据列表
      */
     public <T> List<T> readExcelData(ImportParam importParam, Class<T> cls, Set<String> excludeFields) {
-        log.info("导入参数:{}", importParam);
+        log.info("导入参数:{},", importParam);
 
         String filePath = importParam.getFilePath();
         // 下载文件到临时文件
@@ -125,75 +99,6 @@ public class EasyExcelHelper {
         }
     }
 
-
-    private <E> ExcelWriter buildExcelWriter(ByteArrayOutputStream out,
-                                             Class<E> excelClass,
-                                             List<CellSelector> cellSelectors) {
-        ExcelWriterBuilder excelWriterBuilder = FesodSheet.write(out, excelClass);
-        if (CollUtil.isNotEmpty(cellSelectors)) {
-            excelWriterBuilder.registerWriteHandler(new CellSelectorSheetWriteHandler(cellSelectors));
-        }
-        return excelWriterBuilder.build();
-    }
-
-    private WriteSheet createWriteSheet(String sheetName,
-                                        List<String> excludeColumnFieldNames) {
-        WriteSheet writeSheet = FesodSheet.writerSheet().sheetName(sheetName).build();
-        if (CollUtil.isNotEmpty(excludeColumnFieldNames)) {
-            writeSheet.setExcludeColumnFieldNames(excludeColumnFieldNames);
-        }
-        return writeSheet;
-    }
-
-    private <E> WriteSheet createWriteSheet(String sheetName,
-                                            Class<E> excelClass,
-                                            List<String> excludeColumnFieldNames,
-                                            List<CellSelector> cellSelectors) {
-        ExcelWriterSheetBuilder writerSheetBuilder = FesodSheet.writerSheet().sheetName(sheetName).head(excelClass);
-        if (CollUtil.isNotEmpty(cellSelectors)) {
-            writerSheetBuilder.registerWriteHandler(new CellSelectorSheetWriteHandler(cellSelectors));
-        }
-        if (CollUtil.isNotEmpty(excludeColumnFieldNames)) {
-            writerSheetBuilder.excludeColumnFieldNames(excludeColumnFieldNames);
-        }
-        return writerSheetBuilder.build();
-    }
-
-    private String generateFileName(String sheetName) {
-        return sheetName + "-" + LocalDateTimeUtil.format(LocalDateTime.now(), DatePattern.PURE_DATETIME_PATTERN) + ".xlsx";
-    }
-
-
-    private String generateOssPath() {
-        return "/excel/" + UUID.randomUUID().toString().replace("-", "") + ".xlsx";
-    }
-
-    public static int getTotalPage(int total, int size) {
-        if (size == 0) {
-            return 0;
-        } else {
-            return total % size == 0 ? total / size : total / size + 1;
-        }
-    }
-
-    public <T extends BaseExportQuery, E> List<E> pageData(List<E> allDataList, T pageParam) {
-        if (CollUtil.isEmpty(allDataList)) {
-            return Collections.emptyList();
-        }
-        if (!ExportTypeEnum.QUERY_RESULT.getCode().equals(pageParam.getExportType())) {
-            return allDataList;
-        }
-
-        int current = Optional.ofNullable(pageParam.getCurrent()).orElse(1);
-        int size = Optional.ofNullable(pageParam.getSize()).orElse(allDataList.size());
-        int fromIndex = Math.max((current - 1) * size, 0);
-        if (fromIndex >= allDataList.size()) {
-            return Collections.emptyList();
-        }
-        int toIndex = Math.min(fromIndex + size, allDataList.size());
-        return allDataList.subList(fromIndex, toIndex);
-    }
-
     /**
      * 模版导出执行器
      *
@@ -202,10 +107,10 @@ public class EasyExcelHelper {
      * @param excelClass Excel数据类
      * @return 导出结果
      */
-    public <T extends BaseExportQuery, R, E> ExportResult exportTemplate(String fileName,
-                                                                         String sheetName,
-                                                                         Class<E> excelClass) {
-        return exportTemplate(fileName, sheetName, excelClass, null, null, null);
+    public <T extends BaseExportQuery, R, E> ExportResult exportSingleSheet(String fileName,
+                                                                            String sheetName,
+                                                                            Class<E> excelClass) {
+        return exportSingleSheet(fileName, sheetName, excelClass, null, null, null);
     }
 
     /**
@@ -217,11 +122,11 @@ public class EasyExcelHelper {
      * @param dataList 数据列表
      * @return 导出结果
      */
-    public <T extends BaseExportQuery, R, E> ExportResult exportTemplate(String fileName,
-                                                                         String sheetName,
-                                                                         Class<E> excelClass,
-                                                                         List<E> dataList) {
-        return exportTemplate(fileName, sheetName, excelClass, dataList, null, null);
+    public <T extends BaseExportQuery, R, E> ExportResult exportSingleSheet(String fileName,
+                                                                            String sheetName,
+                                                                            Class<E> excelClass,
+                                                                            List<E> dataList) {
+        return exportSingleSheet(fileName, sheetName, excelClass, dataList, null, null);
     }
 
     /**
@@ -234,12 +139,12 @@ public class EasyExcelHelper {
      * @param excludeColumnFieldNames 需要排除的列字段名
      * @return 导出结果
      */
-    public <T extends BaseExportQuery, R, E> ExportResult exportTemplate(String fileName,
-                                                                         String sheetName,
-                                                                         Class<E> excelClass,
-                                                                         List<E> dataList,
-                                                                         List<String> excludeColumnFieldNames) {
-        return exportTemplate(fileName, sheetName, excelClass, dataList, excludeColumnFieldNames, null);
+    public <T extends BaseExportQuery, R, E> ExportResult exportSingleSheet(String fileName,
+                                                                            String sheetName,
+                                                                            Class<E> excelClass,
+                                                                            List<E> dataList,
+                                                                            List<String> excludeColumnFieldNames) {
+        return exportSingleSheet(fileName, sheetName, excelClass, dataList, excludeColumnFieldNames, null);
     }
 
     /**
@@ -253,12 +158,12 @@ public class EasyExcelHelper {
      * @param cellSelectors 列选择器
      * @return 导出结果
      */
-    public <T extends BaseExportQuery, R, E> ExportResult exportTemplate(String fileName,
-                                                                         String sheetName,
-                                                                         Class<E> excelClass,
-                                                                         List<E> dataList,
-                                                                         List<String> excludeColumnFieldNames,
-                                                                         List<CellSelector> cellSelectors) {
+    public <T extends BaseExportQuery, R, E> ExportResult exportSingleSheet(String fileName,
+                                                                            String sheetName,
+                                                                            Class<E> excelClass,
+                                                                            List<E> dataList,
+                                                                            List<String> excludeColumnFieldNames,
+                                                                            List<CellSelector> cellSelectors) {
         // 参数校验
         if (sheetName == null || excelClass == null) {
             throw new IllegalArgumentException("关键参数不能为空");
@@ -290,18 +195,16 @@ public class EasyExcelHelper {
      * @param sheetName sheet名称
      * @param pageParam 分页参数
      * @param pageCountFunction 分页统计函数
-     * @param pageListFunction 分页数据函数
-     * @param dataConvertFunction 数据转换函数
+     * @param excelDataFunction 分页数据函数
      * @param excelClass Excel数据类
      * @return 导出结果
      */
     public <T extends BaseExportQuery, R, E> ExportResult exportPageSingleSheet(String sheetName,
                                                                                 T pageParam,
                                                                                 Function<T, Integer> pageCountFunction,
-                                                                                Function<T, List<R>> pageListFunction,
-                                                                                Function<List<R>, List<E>> dataConvertFunction,
+                                                                                Function<T, List<E>> excelDataFunction,
                                                                                 Class<E> excelClass) {
-        return exportPageSingleSheet(sheetName, sheetName, pageParam, pageCountFunction, pageListFunction, dataConvertFunction, excelClass, null, null);
+        return exportPageSingleSheet(sheetName, sheetName, pageParam, pageCountFunction, excelDataFunction, excelClass, null, null);
     }
 
     /**
@@ -310,8 +213,7 @@ public class EasyExcelHelper {
      * @param sheetName sheet名称
      * @param pageParam 分页参数
      * @param pageCountFunction 分页统计函数
-     * @param pageListFunction 分页数据函数
-     * @param dataConvertFunction 数据转换函数
+     * @param excelDataFunction 数据转换函数
      * @param excelClass Excel数据类
      * @param excludeColumnFieldNames 需要排除的列字段名
      * @return 导出结果
@@ -319,11 +221,10 @@ public class EasyExcelHelper {
     public <T extends BaseExportQuery, R, E> ExportResult exportPageSingleSheet(String sheetName,
                                                                                 T pageParam,
                                                                                 Function<T, Integer> pageCountFunction,
-                                                                                Function<T, List<R>> pageListFunction,
-                                                                                Function<List<R>, List<E>> dataConvertFunction,
+                                                                                Function<T, List<E>> excelDataFunction,
                                                                                 Class<E> excelClass,
                                                                                 List<String> excludeColumnFieldNames) {
-        return exportPageSingleSheet(sheetName, sheetName, pageParam, pageCountFunction, pageListFunction, dataConvertFunction, excelClass, excludeColumnFieldNames, null);
+        return exportPageSingleSheet(sheetName, sheetName, pageParam, pageCountFunction, excelDataFunction, excelClass, excludeColumnFieldNames, null);
     }
 
     /**
@@ -333,8 +234,27 @@ public class EasyExcelHelper {
      * @param sheetName sheet名称
      * @param pageParam 分页参数
      * @param pageCountFunction 分页统计函数
-     * @param pageListFunction 分页数据函数
-     * @param dataConvertFunction 数据转换函数
+     * @param excelDataFunction 数据转换函数
+     * @param excelClass Excel数据类
+     * @return 导出结果
+     */
+    public <T extends BaseExportQuery, R, E> ExportResult exportPageSingleSheet(String fileNamePrefix,
+                                                                                String sheetName,
+                                                                                T pageParam,
+                                                                                Function<T, Integer> pageCountFunction,
+                                                                                Function<T, List<E>> excelDataFunction,
+                                                                                Class<E> excelClass) {
+        return exportPageSingleSheet(fileNamePrefix, sheetName, pageParam, pageCountFunction, excelDataFunction, excelClass, null, null);
+    }
+
+    /**
+     * 分页导出执行器,单sheet页
+     *
+     * @param fileNamePrefix 文件名称前缀
+     * @param sheetName sheet名称
+     * @param pageParam 分页参数
+     * @param pageCountFunction 分页统计函数
+     * @param excelDataFunction 分页数据函数
      * @param excelClass Excel数据类
      * @param excludeColumnFieldNames 需要排除的列字段名
      * @return 导出结果
@@ -343,11 +263,10 @@ public class EasyExcelHelper {
                                                                                 String sheetName,
                                                                                 T pageParam,
                                                                                 Function<T, Integer> pageCountFunction,
-                                                                                Function<T, List<R>> pageListFunction,
-                                                                                Function<List<R>, List<E>> dataConvertFunction,
+                                                                                Function<T, List<E>> excelDataFunction,
                                                                                 Class<E> excelClass,
                                                                                 List<String> excludeColumnFieldNames) {
-        return exportPageSingleSheet(fileNamePrefix, sheetName, pageParam, pageCountFunction, pageListFunction, dataConvertFunction, excelClass, excludeColumnFieldNames, null);
+        return exportPageSingleSheet(fileNamePrefix, sheetName, pageParam, pageCountFunction, excelDataFunction, excelClass, excludeColumnFieldNames, null);
     }
 
 
@@ -358,8 +277,7 @@ public class EasyExcelHelper {
      * @param sheetName sheet名称
      * @param pageParam 分页参数
      * @param pageCountFunction 分页统计函数
-     * @param pageListFunction 分页数据函数
-     * @param dataConvertFunction 数据转换函数
+     * @param excelDataFunction 数据转换函数
      * @param excelClass Excel数据类
      * @param excludeColumnFieldNames 需要排除的列字段名
      * @param cellSelectors 列选择器
@@ -369,20 +287,19 @@ public class EasyExcelHelper {
                                                                                 String sheetName,
                                                                                 T pageParam,
                                                                                 Function<T, Integer> pageCountFunction,
-                                                                                Function<T, List<R>> pageListFunction,
-                                                                                Function<List<R>, List<E>> dataConvertFunction,
+                                                                                Function<T, List<E>> excelDataFunction,
                                                                                 Class<E> excelClass,
                                                                                 List<String> excludeColumnFieldNames,
                                                                                 List<CellSelector> cellSelectors) {
         // 参数校验
-        if (sheetName == null || pageParam == null || pageCountFunction == null || pageListFunction == null || dataConvertFunction == null || excelClass == null) {
+        if (sheetName == null || pageParam == null || pageCountFunction == null || excelDataFunction == null || excelClass == null) {
             throw new IllegalArgumentException("关键参数不能为空");
         }
 
         log.info("导出,sheetName:{},查询参数:{},需要排除的列:{}", sheetName, JSON.toJSONString(pageParam), JSON.toJSONString(excludeColumnFieldNames));
 
         // 导出参数处理
-        ExportUtil.pageExportParamValidAndDefaultValue(pageParam, 5000);
+        ExportUtil.pageExportParamValidAndDefaultValue(pageParam);
 
         try (ByteArrayOutputStream out = new ByteArrayOutputStream();
              ExcelWriter excelWriter = buildExcelWriter(out, excelClass, cellSelectors)) {
@@ -410,14 +327,11 @@ public class EasyExcelHelper {
                 for (int currentPage = current; currentPage <= totalPage; currentPage++) {
                     pageParam.setCurrent(currentPage);
 
-                    // 分页查询
-                    List<R> records = Optional.ofNullable(pageListFunction.apply(pageParam)).orElseGet(ArrayList::new);
-
                     // 转换数据
-                    List<E> data = Optional.ofNullable(dataConvertFunction.apply(records)).orElseGet(ArrayList::new);
+                    List<E> data = Optional.ofNullable(excelDataFunction.apply(pageParam)).orElseGet(ArrayList::new);
                     excelWriter.write(data, writeSheet);
 
-                    totalRecords += records.size();
+                    totalRecords += data.size();
 
                     log.info("处理进度 - 当前处理完第{}页,共{}页,已处理{}条,一共{}条", currentPage, totalPage, totalRecords, pageCount);
 
@@ -440,6 +354,13 @@ public class EasyExcelHelper {
         }
     }
 
+    /**
+     * 分页导出执行器,多sheet页
+     *
+     * @param fileNamePrefix 文件名称前缀
+     * @param excelSheetExportList sheet参数
+     * @return 导出结果
+     */
     public <T extends BaseExportQuery, E> ExportResult exportPageMultiSheet(String fileNamePrefix,
                                                                             ExcelSheetExport<T, ?>... excelSheetExportList) {
         log.info("多sheet导出,fileNamePrefix:{},参数:{}", fileNamePrefix, JSON.toJSONString(excelSheetExportList));
@@ -471,7 +392,7 @@ public class EasyExcelHelper {
                 List<CellSelector> cellSelectors = excelSheetExport.getCellSelectors();
 
                 // 导出参数处理
-                ExportUtil.pageExportParamValidAndDefaultValue(pageParam, 5000);
+                ExportUtil.pageExportParamValidAndDefaultValue(pageParam);
 
                 // 创建sheet
                 WriteSheet writeSheet = createWriteSheet(sheetName, excelClass, excludeColumnFieldNames, cellSelectors);
@@ -525,6 +446,92 @@ public class EasyExcelHelper {
         } catch (Exception e) {
             log.error("导出报错", e);
             throw new PromptException("导出失败");
+        }
+    }
+
+    /**
+     * 获取Excel属性字段
+     *
+     * @param clazz          实体类
+     * @return 属性名称列表
+     */
+    public static List<String> getExcelPropertyNames(Class<?> clazz) {
+        return getExcelPropertyNames(clazz, null);
+    }
+
+    /**
+     * 获取Excel属性字段
+     *
+     * @param clazz          实体类
+     * @param excludeFields  需要排除的字段
+     * @return 属性名称列表
+     */
+    public static List<String> getExcelPropertyNames(Class<?> clazz, Set<String> excludeFields) {
+        // excel属性名称
+        List<String> excelPropertyList = Lists.newArrayList();
+        boolean hasExcludeFields = CollUtil.isNotEmpty(excludeFields);
+
+        Field[] declaredFields = clazz.getDeclaredFields();
+
+        for (Field field : declaredFields) {
+            ExcelProperty annotation = field.getAnnotation(ExcelProperty.class);
+            if (annotation != null) {
+                if (hasExcludeFields && excludeFields.contains(field.getName())) {
+                    continue;
+                }
+                excelPropertyList.add(annotation.value()[0]);
+            }
+        }
+        return excelPropertyList;
+    }
+
+    private <E> ExcelWriter buildExcelWriter(ByteArrayOutputStream out,
+                                             Class<E> excelClass,
+                                             List<CellSelector> cellSelectors) {
+        ExcelWriterBuilder excelWriterBuilder = FesodSheet.write(out, excelClass);
+        if (CollUtil.isNotEmpty(cellSelectors)) {
+            excelWriterBuilder.registerWriteHandler(new CellSelectorSheetWriteHandler(cellSelectors));
+        }
+        return excelWriterBuilder.build();
+    }
+
+    private WriteSheet createWriteSheet(String sheetName,
+                                        List<String> excludeColumnFieldNames) {
+        WriteSheet writeSheet = FesodSheet.writerSheet().sheetName(sheetName).build();
+        if (CollUtil.isNotEmpty(excludeColumnFieldNames)) {
+            writeSheet.setExcludeColumnFieldNames(excludeColumnFieldNames);
+        }
+        return writeSheet;
+    }
+
+    private <E> WriteSheet createWriteSheet(String sheetName,
+                                            Class<E> excelClass,
+                                            List<String> excludeColumnFieldNames,
+                                            List<CellSelector> cellSelectors) {
+        ExcelWriterSheetBuilder writerSheetBuilder = FesodSheet.writerSheet().sheetName(sheetName).head(excelClass);
+        if (CollUtil.isNotEmpty(cellSelectors)) {
+            writerSheetBuilder.registerWriteHandler(new CellSelectorSheetWriteHandler(cellSelectors));
+        }
+        if (CollUtil.isNotEmpty(excludeColumnFieldNames)) {
+            writerSheetBuilder.excludeColumnFieldNames(excludeColumnFieldNames);
+        }
+        return writerSheetBuilder.build();
+    }
+
+    private String generateFileName(String sheetName) {
+        return sheetName + "-" + LocalDateTimeUtil.format(LocalDateTime.now(), DatePattern.PURE_DATETIME_PATTERN) + ".xlsx";
+    }
+
+
+    private String generateOssPath() {
+        return "/excel/" + UUID.randomUUID().toString().replace("-", "") + ".xlsx";
+    }
+
+    public static int getTotalPage(int total, int size) {
+        if (size == 0) {
+            return 0;
+        } else {
+            return total % size == 0 ? total / size : total / size + 1;
         }
     }
 }

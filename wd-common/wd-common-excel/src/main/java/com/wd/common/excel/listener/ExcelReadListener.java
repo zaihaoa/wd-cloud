@@ -38,6 +38,13 @@ public class ExcelReadListener<T> extends AnalysisEventListener<T> {
         this.headTitle = headTitle;
     }
 
+    /**
+     * 获取数据
+     */
+    public List<T> getDataList() {
+        return dataList;
+    }
+
     @Override
     public void invoke(T data, AnalysisContext context) {
         dataList.add(data);
@@ -55,14 +62,6 @@ public class ExcelReadListener<T> extends AnalysisEventListener<T> {
     }
 
     /**
-     * 获取数据
-     */
-    public List<T> getDataList() {
-        return dataList;
-    }
-
-
-    /**
      * 验证表头是否正确
      */
     public void validateTitle() {
@@ -73,7 +72,6 @@ public class ExcelReadListener<T> extends AnalysisEventListener<T> {
         if (templateHeadMap.size() != headTitle.size()) {
             throw new PromptException("模板不正确，请下载最新模板导入");
         }
-
 
         for (Map.Entry<Integer, String> entry : templateHeadMap.entrySet()) {
             if (!headTitle.contains(entry.getValue())) {

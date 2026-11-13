@@ -11,6 +11,7 @@ import com.google.common.collect.Maps;
 import com.wd.common.core.constants.CommonConstant;
 import com.wd.common.core.context.SystemContext;
 import com.wd.common.core.exception.PromptException;
+import com.wd.common.core.model.ExportResult;
 import com.wd.common.core.model.IdDTO;
 import com.wd.common.core.model.PageInfo;
 import com.wd.common.core.model.SelectCombobox;
@@ -19,6 +20,7 @@ import com.wd.common.core.objectcompare.ObjectCompareUtil;
 import com.wd.common.core.util.AssertUtil;
 import com.wd.common.core.util.CodeDescEnumUtil;
 import com.wd.common.core.util.I18nUtil;
+import com.wd.common.excel.util.ExcelHelper;
 import com.wd.common.mybatisplus.PageUtil;
 import com.wd.common.mybatisplus.SuperMapper;
 import com.wd.common.redis.CacheRegion;
@@ -88,6 +90,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private PermissionService permissionService;
     @Resource
     private MenuService menuService;
+    @Resource
+    private ExcelHelper excelHelper;
 
     @Override
     public PageInfo<UserPageVO> pageList(UserPageParamDTO pageParam) {
@@ -102,6 +106,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         List<UserPageVO> voRecords = convertUserPageVOList(dbRecords);
 
         return PageUtil.buildPageInfo(pageParam, count, voRecords);
+    }
+
+    @Override
+    public ExportResult exportPageList(UserPageParamDTO pageParam) {
+        log.info("导出参数:{}", JSON.toJSONString(pageParam));
+
+        return excelHelper.exportPageSingleSheet(
+                "用户",
+                "用户",
+                pageParam,
+                baseMapper::pageCount,
+                this::convertUserExportDTOList,
+                UserExportDTO.class,
+                null
+        );
     }
 
     @Override
@@ -135,6 +154,34 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 })
                 .toList();
         return PageUtil.buildPageInfo(pageParam, count, records);
+    }
+
+    private List<UserExportDTO> convertUserExportDTOList(UserPageParamDTO pageParam) {
+
+        List<UserPageDTO> records = baseMapper.pageList(pageParam);
+
+        Map<Long, String> userIdNameMap = getUserIdNameMap();
+        Map<Long, List<UserRoleVO>> userRoleMap = getUserRoleMap(records.stream().map(UserPageDTO::getId).toList());
+
+        return records
+                .stream()
+                .map(record -> {
+                    UserExportDTO vo = userConverter.convertUserExportDTO(record);
+                    vo.setStatusDesc(CodeDescEnumUtil.getDescByCode(UserStatusEnum.class, record.getStatus()));
+                    vo.setTypeDesc(CodeDescEnumUtil.getDescByCode(UserTypeEnum.class, record.getType()));
+
+                    vo.setCreateUserName(userIdNameMap.get(record.getCreateUserId()));
+                    vo.setUpdateUserName(userIdNameMap.get(record.getUpdateUserId()));
+
+                    String roleNameJoin = userRoleMap.getOrDefault(record.getId(), List.of())
+                            .stream()
+                            .map(UserRoleVO::getRuleName)
+                            .collect(Collectors.joining("、"));
+                    vo.setRoleNameJoin(roleNameJoin);
+
+                    return vo;
+                })
+                .toList();
     }
 
     private List<UserPageVO> convertUserPageVOList(List<UserPageDTO> dbRecords) {

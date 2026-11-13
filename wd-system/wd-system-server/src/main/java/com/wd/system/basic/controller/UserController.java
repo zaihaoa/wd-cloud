@@ -3,10 +3,7 @@ package com.wd.system.basic.controller;
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.wd.common.core.annotions.ApifoxFolder;
 import com.wd.common.core.constants.PermissionConstant;
-import com.wd.common.core.model.IdDTO;
-import com.wd.common.core.model.PageInfo;
-import com.wd.common.core.model.R;
-import com.wd.common.core.model.SelectCombobox;
+import com.wd.common.core.model.*;
 import com.wd.system.basic.domain.dto.*;
 import com.wd.system.basic.domain.vo.UserAuthorizePageVO;
 import com.wd.system.basic.domain.vo.UserDetailVO;
@@ -42,6 +39,12 @@ public class UserController {
     @PostMapping("/page")
     public R<PageInfo<UserPageVO>> pageList(@RequestBody UserPageParamDTO pageParam) {
         return R.success(userService.pageList(pageParam));
+    }
+
+    @Operation(summary = "列表导出")
+    @PostMapping("/export-page")
+    public R<ExportResult> exportPageList(@RequestBody @Valid UserPageParamDTO pageParam) {
+        return R.success(userService.exportPageList(pageParam));
     }
 
     @Operation(summary = "授权用户分页查询")

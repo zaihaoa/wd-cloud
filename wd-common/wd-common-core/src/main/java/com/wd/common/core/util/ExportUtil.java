@@ -41,7 +41,7 @@ public class ExportUtil {
             }
 
             exportQuery.setCurrent(1);
-            exportQuery.setSize(exportKeys.size());
+            exportQuery.setSize(size);
         } else if (ExportTypeEnum.CURRENT_PAGE.getCode().equals(exportType)) {
             exportQuery.setExportKeys(null);
         } else if (ExportTypeEnum.QUERY_RESULT.getCode().equals(exportType)) {

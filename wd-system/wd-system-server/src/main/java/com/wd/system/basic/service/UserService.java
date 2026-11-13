@@ -1,16 +1,16 @@
 package com.wd.system.basic.service;
 
+import com.wd.common.core.model.ExportResult;
 import com.wd.common.core.model.IdDTO;
 import com.wd.common.core.model.PageInfo;
 import com.wd.common.core.model.SelectCombobox;
 import com.wd.common.mybatisplus.SuperService;
 import com.wd.system.basic.domain.dto.*;
 import com.wd.system.basic.domain.entity.User;
-import com.wd.system.basic.domain.vo.UserDetailVO;
 import com.wd.system.basic.domain.vo.UserAuthorizePageVO;
+import com.wd.system.basic.domain.vo.UserDetailVO;
 import com.wd.system.basic.domain.vo.UserInfoVO;
 import com.wd.system.basic.domain.vo.UserPageVO;
-import jakarta.validation.Valid;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -34,6 +34,13 @@ public interface UserService extends SuperService<User> {
      * @return 列表数据
      */
     PageInfo<UserPageVO> pageList(UserPageParamDTO pageParam);
+
+    /**
+     * 列表导出
+     * @param pageParam 查询条件
+     * @return 导出文件
+     */
+    ExportResult exportPageList(UserPageParamDTO pageParam);
 
     /**
      * 用户授权分页查询
