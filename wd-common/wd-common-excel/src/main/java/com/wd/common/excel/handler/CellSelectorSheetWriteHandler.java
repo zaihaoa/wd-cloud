@@ -29,11 +29,7 @@ public class CellSelectorSheetWriteHandler implements SheetWriteHandler {
     }
 
     /**
-     * 想实现Excel引用其他sheet页数据作为单元格下拉选项值，
-     * 需要重写该方法
-     *
-     * @param writeWorkbookHolder
-     * @param writeSheetHolder
+     * 想实现Excel引用其他sheet页数据作为单元格下拉选项值，需要重写该方法
      */
     @Override
     public void afterSheetCreate(WriteWorkbookHolder writeWorkbookHolder, WriteSheetHolder writeSheetHolder) {
