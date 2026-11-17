@@ -20,6 +20,12 @@ public class I18nUtil {
         I18nUtil.messageSource = messageSource;
     }
 
+    /**
+     * 解析code对应的信息进行返回，如果对应的code不能被解析则抛出异常NoSuchMessageException
+     *
+     * @param code 需要进行解析的code，对应资源文件中的一个属性名
+     * @return 国际化翻译值
+     */
     public static String message(String code) {
         return messageSource.getMessage(code, null, LocaleContextHolder.getLocale());
     }
@@ -28,7 +34,7 @@ public class I18nUtil {
      * 解析code对应的信息进行返回，如果对应的code不能被解析则抛出异常NoSuchMessageException
      *
      * @param code 需要进行解析的code，对应资源文件中的一个属性名
-     * @param args 当对应code对应的信息不存在时需要返回的默认值
+     * @param args 需要用来替换code对应的信息中包含参数的内容，如：{0},{1,date},{2,time}
      * @return 国际化翻译值
      */
     public static String message(String code, Object... args) {

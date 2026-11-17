@@ -11,9 +11,9 @@ import lombok.*;
 @AllArgsConstructor
 public class ExportResult {
 
-    @Schema(description = "文件名称", example = "123.png")
+    @Schema(description = "文件名称")
     private String fileName;
 
-    @Schema(description = "文件路径", example = "/te/sd/123.xlsx")
-    private String filePath;
+    @Schema(description = "文件链接")
+    private String fileLink;
 }

@@ -15,6 +15,7 @@ import com.wd.common.excel.dto.ExcelSheetExport;
 import com.wd.common.excel.handler.CellSelector;
 import com.wd.common.excel.handler.CellSelectorSheetWriteHandler;
 import com.wd.common.excel.listener.ExcelReadListener;
+import com.wd.common.oss.model.OssFileLinkVO;
 import com.wd.common.oss.service.OssClientService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -180,9 +181,12 @@ public class ExcelHelper {
             excelWriter.finish();
 
             String finalFileName = fileName + ".xlsx";
-            String filePath = ossClientService.uploadTemporary(new ByteArrayInputStream(out.toByteArray()), generateOssPath());
-            log.info("生成文件成功,fileName:{},filePath:{}", finalFileName, filePath);
-            return new ExportResult(finalFileName, filePath);
+            String filePath = ossClientService.uploadTemporary(new ByteArrayInputStream(out.toByteArray()), generateOssPath(finalFileName));
+
+            OssFileLinkVO fileLinkVO = ossClientService.getSignUrl(filePath, 600);
+
+            log.info("生成文件成功,fileName:{},filePath:{}", fileName, filePath);
+            return new ExportResult(fileName, fileLinkVO.getFileLink());
         } catch (Exception e) {
             log.error("导出报错", e);
             throw new PromptException("导出失败");
@@ -344,10 +348,12 @@ public class ExcelHelper {
             excelWriter.finish();
 
             String fileName = generateFileName(fileNamePrefix);
-            String filePath = ossClientService.uploadTemporary(new ByteArrayInputStream(out.toByteArray()), generateOssPath());
+            String filePath = ossClientService.uploadTemporary(new ByteArrayInputStream(out.toByteArray()), generateOssPath(fileName));
+
+            OssFileLinkVO fileLinkVO = ossClientService.getSignUrl(filePath, 600);
 
             log.info("生成文件成功,总记录数:{},fileName:{},filePath:{}", totalRecords, fileName, filePath);
-            return new ExportResult(fileName, filePath);
+            return new ExportResult(fileName, fileLinkVO.getFileLink());
         } catch (Exception e) {
             log.error("导出报错", e);
             throw new PromptException("导出失败");
@@ -439,10 +445,12 @@ public class ExcelHelper {
             excelWriter.finish();
 
             String fileName = generateFileName(fileNamePrefix);
-            String filePath = ossClientService.uploadTemporary(new ByteArrayInputStream(out.toByteArray()), generateOssPath());
+            String filePath = ossClientService.uploadTemporary(new ByteArrayInputStream(out.toByteArray()), generateOssPath(fileName));
+
+            OssFileLinkVO fileLinkVO = ossClientService.getSignUrl(filePath, 600);
 
             log.info("生成文件成功,fileName:{},filePath:{}", fileName, filePath);
-            return new ExportResult(fileName, filePath);
+            return new ExportResult(fileName, fileLinkVO.getFileLink());
         } catch (Exception e) {
             log.error("导出报错", e);
             throw new PromptException("导出失败");
@@ -518,13 +526,13 @@ public class ExcelHelper {
         return writerSheetBuilder.build();
     }
 
-    private String generateFileName(String sheetName) {
-        return sheetName + "-" + LocalDateTimeUtil.format(LocalDateTime.now(), DatePattern.PURE_DATETIME_PATTERN) + ".xlsx";
+    private String generateFileName(String fileName) {
+        return fileName + "-" + LocalDateTimeUtil.format(LocalDateTime.now(), DatePattern.PURE_DATETIME_PATTERN) + ".xlsx";
     }
 
 
-    private String generateOssPath() {
-        return "/excel/" + UUID.randomUUID().toString().replace("-", "") + ".xlsx";
+    private String generateOssPath(String fileName) {
+        return "/excel/" + UUID.randomUUID().toString().replace("-", "") + fileName;
     }
 
     public static int getTotalPage(int total, int size) {

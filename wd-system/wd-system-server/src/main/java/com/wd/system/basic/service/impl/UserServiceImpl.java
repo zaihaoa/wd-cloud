@@ -19,6 +19,7 @@ import com.wd.common.core.objectcompare.ObjectCompareCustom;
 import com.wd.common.core.objectcompare.ObjectCompareUtil;
 import com.wd.common.core.util.AssertUtil;
 import com.wd.common.core.util.CodeDescEnumUtil;
+import com.wd.common.core.util.FieldPermissionUtil;
 import com.wd.common.core.util.I18nUtil;
 import com.wd.common.excel.util.ExcelHelper;
 import com.wd.common.mybatisplus.PageUtil;
@@ -112,14 +113,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public ExportResult exportPageList(UserPageParamDTO pageParam) {
         log.info("导出参数:{}", JSON.toJSONString(pageParam));
 
+        UserPermissionDTO userPermission = permissionService.getCurrentUserPermission();
+
         return excelHelper.exportPageSingleSheet(
-                "用户",
+                "用户列表",
                 "用户",
                 pageParam,
                 baseMapper::pageCount,
                 this::convertUserExportDTOList,
                 UserExportDTO.class,
-                null
+                FieldPermissionUtil.notFieldPermissionNames(UserExportDTO.class, userPermission.getAuthFieldPermissionList())
         );
     }
 

@@ -42,12 +42,14 @@ public class UserController {
     }
 
     @Operation(summary = "列表导出")
+    @SaCheckPermission(PermissionConstant.USER_LIST)
     @PostMapping("/export-page")
     public R<ExportResult> exportPageList(@RequestBody @Valid UserPageParamDTO pageParam) {
         return R.success(userService.exportPageList(pageParam));
     }
 
     @Operation(summary = "授权用户分页查询")
+    @SaCheckPermission(PermissionConstant.USER_LIST)
     @PostMapping("/authorize-page")
     public R<PageInfo<UserAuthorizePageVO>> authorizePage(@RequestBody @Valid UserAuthorizePageParamDTO pageParam) {
         return R.success(userService.authorizePage(pageParam));

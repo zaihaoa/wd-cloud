@@ -20,9 +20,9 @@ public interface OssClientService {
      * 生成签名URL
      *
      * @param filePath 文件路径
-     * @param expirationDate 过期时间
+     * @param expirationSeconds 过期秒数
      */
-    OssFileLinkVO getSignUrl(String filePath, Date expirationDate);
+    OssFileLinkVO getSignUrl(String filePath, Integer expirationSeconds);
 
     /**
      * 文件上传
