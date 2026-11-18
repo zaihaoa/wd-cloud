@@ -6,7 +6,7 @@ CREATE TABLE `sys_user` (
                             `username` varchar(100) NOT NULL DEFAULT '' COMMENT '用户名',
                             `name` varchar(100) NOT NULL DEFAULT '' COMMENT '姓名',
                             `password` varchar(200) NOT NULL DEFAULT '' COMMENT '用户密码',
-                            `status` varchar(100) NOT NULL DEFAULT '' COMMENT '状态(ENABLED:启用,DISABLED:禁用)',
+                            `status` varchar(100) NOT NULL COMMENT '状态(ENABLED:启用,DISABLED:禁用)',
                             `type` varchar(100) NOT NULL DEFAULT '' COMMENT '类型(BUILT_IN:内置用户,NORMAL:普通用户)',
                             `phone` varchar(100) DEFAULT NULL COMMENT '手机号码',
                             `email` varchar(200) DEFAULT NULL COMMENT '邮箱',
@@ -18,7 +18,8 @@ CREATE TABLE `sys_user` (
                             PRIMARY KEY (`id`),
                             UNIQUE KEY `uk_username` (`username`,`delete_flag`) USING BTREE,
                             UNIQUE KEY `uk_email` (`email`,`delete_flag`) USING BTREE,
-                            UNIQUE KEY `uk_phone` (`phone`,`delete_flag`) USING BTREE
+                            UNIQUE KEY `uk_phone` (`phone`,`delete_flag`) USING BTREE,
+                            CONSTRAINT `chk_sys_user_status` CHECK (CAST(`status` AS BINARY) IN ('ENABLED', 'DISABLED'))
 ) ENGINE=InnoDB COMMENT='用户';
 
 

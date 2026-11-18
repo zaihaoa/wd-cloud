@@ -39,7 +39,7 @@ public class User extends BaseUserTimeEntity implements Serializable {
     @TableField("password")
     private String password;
 
-    @Schema(description = "状态(NORMAL:正常,DISABLE:禁用)")
+    @Schema(description = "状态(ENABLED:启用,DISABLED:禁用)")
     @TableField("status")
     private String status;
 

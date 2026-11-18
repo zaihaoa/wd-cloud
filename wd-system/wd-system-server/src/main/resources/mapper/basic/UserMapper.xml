@@ -53,16 +53,6 @@
         LIMIT #{limitStart}, #{param.size}
     </select>
 
-    <!-- 审计需要解析逻辑删除用户的历史授权。 -->
-    <select id="selectNamesForRoleAudit" resultType="com.wd.system.basic.domain.entity.User">
-        select id, name
-        from sys_user
-        where id in
-        <foreach collection="userIds" item="userId" open="(" separator="," close=")">
-            #{userId}
-        </foreach>
-    </select>
-
     <sql id="Page_Condition">
         <where>
             <if test="param.username != null and param.username != ''">

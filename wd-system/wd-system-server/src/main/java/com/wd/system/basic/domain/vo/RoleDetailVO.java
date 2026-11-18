@@ -47,16 +47,16 @@ public class RoleDetailVO {
     @Schema(description = "权限标记")
     private List<String> permissionFlag;
 
-    @Schema(description = "创建人用户ID")
+    @Schema(description = "创建人ID")
     private Long createUserId;
 
-    @Schema(description = "更新人用户ID")
+    @Schema(description = "更新人ID")
     private Long updateUserId;
 
-    @Schema(description = "创建人姓名")
+    @Schema(description = "创建人")
     private String createUserName;
 
-    @Schema(description = "更新人姓名")
+    @Schema(description = "更新人")
     private String updateUserName;
 
     @Schema(description = "创建时间")

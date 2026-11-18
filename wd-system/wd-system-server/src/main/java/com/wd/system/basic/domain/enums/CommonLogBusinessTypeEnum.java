@@ -14,6 +14,7 @@ public enum CommonLogBusinessTypeEnum implements CodeDescEnum {
     USER("USER", "用户管理"),
     ROLE("ROLE", "角色管理"),
     MENU("MENU", "菜单管理"),
+    GLOBAL_CONFIG("GLOBAL_CONFIG", "全局配置"),
 
     ;
 

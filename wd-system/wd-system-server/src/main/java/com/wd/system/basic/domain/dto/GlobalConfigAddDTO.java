@@ -1,6 +1,7 @@
 package com.wd.system.basic.domain.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,6 +19,7 @@ import lombok.Setter;
 public class GlobalConfigAddDTO {
 
     @Schema(description = "编码")
+    @NotBlank(message = "编码不能为空")
     private String code;
 
     @Schema(description = "值")
@@ -25,9 +27,6 @@ public class GlobalConfigAddDTO {
 
     @Schema(description = "备注")
     private String remark;
-
-    @Schema(description = "类型(SYSTEM:系统内置,NORMAL:普通)")
-    private String type;
 
     @Schema(description = "显示顺序，越小越优先")
     private Integer sortNumber;

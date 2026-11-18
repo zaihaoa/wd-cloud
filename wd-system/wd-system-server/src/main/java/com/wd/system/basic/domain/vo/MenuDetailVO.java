@@ -100,10 +100,10 @@ public class MenuDetailVO {
     @Schema(description = "更新人ID")
     private Long updateUserId;
 
-    @Schema(description = "创建人名称")
+    @Schema(description = "创建人")
     private String createUserName;
 
-    @Schema(description = "更新人名称")
+    @Schema(description = "更新人")
     private String updateUserName;
 
     @Schema(description = "创建时间")

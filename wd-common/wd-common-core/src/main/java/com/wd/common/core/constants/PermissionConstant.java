@@ -34,4 +34,12 @@ public class PermissionConstant {
     public static final String MENU_UPDATE = "menu:update";
     public static final String MENU_DELETE = "menu:delete";
 
+    /**
+     * 全局配置
+     */
+    public static final String GLOBAL_CONFIG_LIST = "global-config:list";
+    public static final String GLOBAL_CONFIG_ADD = "global-config:add";
+    public static final String GLOBAL_CONFIG_UPDATE = "global-config:update";
+    public static final String GLOBAL_CONFIG_DELETE = "global-config:delete";
+
 }

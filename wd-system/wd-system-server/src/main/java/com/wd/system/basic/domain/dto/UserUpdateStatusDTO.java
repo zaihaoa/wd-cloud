@@ -20,7 +20,7 @@ public class UserUpdateStatusDTO {
     @NotNull(message = "ID不能为空")
     private Long id;
 
-    @Schema(description = "状态(NORMAL:启用,DISABLE:禁用)")
+    @Schema(description = "状态(ENABLED:启用,DISABLED:禁用)")
     @EnumCodeExist(enumClass = UserStatusEnum.class, required = true, message = "状态不正确")
     private String status;
 }

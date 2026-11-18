@@ -30,6 +30,4 @@ public interface UserMapper extends SuperMapper<User> {
 
     List<UserAuthorizePageDTO> authorizePageList(@Param("param") UserAuthorizePageParamDTO pageParam,
                                                  @Param("allUserPermission") boolean allUserPermission);
-
-    List<User> selectNamesForRoleAudit(@Param("userIds") List<Long> userIds);
 }

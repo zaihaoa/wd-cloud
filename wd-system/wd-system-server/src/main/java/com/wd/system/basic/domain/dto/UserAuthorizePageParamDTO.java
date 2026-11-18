@@ -32,7 +32,7 @@ public class UserAuthorizePageParamDTO extends BaseQuery {
     @Schema(description = "姓名")
     private String name;
 
-    @Schema(description = "状态(ENABLED:启用,DISABLE:禁用)")
+    @Schema(description = "状态(ENABLED:启用,DISABLED:禁用)")
     @EnumCodeExist(enumClass = UserStatusEnum.class, message = "状态不正确")
     private String status;
 }

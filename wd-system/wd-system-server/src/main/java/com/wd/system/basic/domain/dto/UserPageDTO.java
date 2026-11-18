@@ -28,7 +28,7 @@ public class UserPageDTO {
     @Schema(description = "姓名")
     private String name;
 
-    @Schema(description = "状态(NORMAL:正常,DISABLE:禁用)")
+    @Schema(description = "状态(ENABLED:启用,DISABLED:禁用)")
     private String status;
 
     @Schema(description = "类型(BUILT_IN:内置用户,NORMAL:普通用户)")

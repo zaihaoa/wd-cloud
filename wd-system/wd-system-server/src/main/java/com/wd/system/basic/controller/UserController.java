@@ -112,7 +112,7 @@ public class UserController {
     @Operation(summary = "用户下拉框")
     @GetMapping("/user-combobox")
     public R<List<SelectCombobox>> userCombobox(@RequestParam(value = "status", required = false)
-                                                @Parameter(name = "status", description = "状态,不传默认所有(ENABLED:启用,DISABLE:禁用)")
+                                                @Parameter(name = "status", description = "状态,不传默认所有(ENABLED:启用,DISABLED:禁用)")
                                                 String status) {
         return R.success(userService.userCombobox(status));
     }

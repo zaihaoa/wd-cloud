@@ -1,6 +1,9 @@
 package com.wd.system.basic.domain.dto;
 
+import com.wd.common.core.objectcompare.ObjectCompare;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,20 +21,18 @@ import lombok.Setter;
 public class GlobalConfigUpdateDTO {
 
     @Schema(description = "主键ID")
+    @NotNull(message = "主键ID不能为空")
     private Long id;
 
-    @Schema(description = "编码")
-    private String code;
-
     @Schema(description = "值")
+    @ObjectCompare("值")
     private String value;
 
     @Schema(description = "备注")
+    @ObjectCompare("备注")
     private String remark;
 
-    @Schema(description = "类型(SYSTEM:系统内置,NORMAL:普通)")
-    private String type;
-
     @Schema(description = "显示顺序，越小越优先")
+    @ObjectCompare("显示顺序")
     private Integer sortNumber;
 }

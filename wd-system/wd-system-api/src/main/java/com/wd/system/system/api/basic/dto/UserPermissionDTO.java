@@ -28,7 +28,7 @@ public class UserPermissionDTO {
     @Schema(description = "姓名")
     private String name;
 
-    @Schema(description = "状态(NORMAL:启用,DISABLE:禁用) UserStatusEnum")
+    @Schema(description = "状态(ENABLED:启用,DISABLED:禁用) UserStatusEnum")
     private String status;
 
     @Schema(description = "类型(BUILT_IN:内置用户,NORMAL:普通用户) UserTypeEnum")

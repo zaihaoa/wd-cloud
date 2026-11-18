@@ -37,10 +37,10 @@ public class GlobalConfigPageDTO {
     @Schema(description = "显示顺序，越小越优先")
     private Integer sortNumber;
 
-    @Schema(description = "创建人用户ID")
+    @Schema(description = "创建人ID")
     private Long createUserId;
 
-    @Schema(description = "更新人用户ID")
+    @Schema(description = "更新人ID")
     private Long updateUserId;
 
     @Schema(description = "创建时间")

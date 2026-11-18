@@ -24,9 +24,24 @@
         from sys_global_config
         <include refid="Page_Condition"/>
 
-        <if test="param.sort != null and param.sort != ''">
-            ORDER BY ${param.sort} ${param.order}
-        </if>
+        ORDER BY
+        <choose>
+            <when test="param.sort == 'code'">`code`</when>
+            <when test="param.sort == 'value'">`value`</when>
+            <when test="param.sort == 'remark'">`remark`</when>
+            <when test="param.sort == 'type'">`type`</when>
+            <when test="param.sort == 'sortNumber'">`sort_number`</when>
+            <when test="param.sort == 'createUserId'">`create_user_id`</when>
+            <when test="param.sort == 'updateUserId'">`update_user_id`</when>
+            <when test="param.sort == 'createTime'">`create_time`</when>
+            <when test="param.sort == 'updateTime'">`update_time`</when>
+            <otherwise>`id`</otherwise>
+        </choose>
+        <choose>
+            <when test="param.order != null and param.order.equalsIgnoreCase('DESC')">DESC</when>
+            <otherwise>ASC</otherwise>
+        </choose>
+        , `id` ASC
         <bind name="limitStart" value="(param.current lte 1) ? 0 : ((param.current - 1) * param.size)"/>
         LIMIT #{limitStart}, #{param.size}
     </select>
@@ -45,6 +60,7 @@
             <if test="param.type != null and param.type != ''">
                 and `type` = #{param.type}
             </if>
+            and `delete_flag` = 0
         </where>
     </sql>
 </mapper>

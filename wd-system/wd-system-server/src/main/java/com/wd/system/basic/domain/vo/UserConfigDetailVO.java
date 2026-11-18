@@ -34,10 +34,10 @@ public class UserConfigDetailVO {
     @Schema(description = "内容")
     private String content;
 
-    @Schema(description = "创建人用户ID")
+    @Schema(description = "创建人ID")
     private Long createUserId;
 
-    @Schema(description = "更新人用户ID")
+    @Schema(description = "更新人ID")
     private Long updateUserId;
 
     @Schema(description = "创建时间")

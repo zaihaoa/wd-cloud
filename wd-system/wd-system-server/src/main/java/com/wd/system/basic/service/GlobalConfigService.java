@@ -65,9 +65,9 @@ public interface GlobalConfigService extends SuperService<GlobalConfig> {
     GlobalConfig getGlobalConfigById(Long id);
 
     /**
-     * 根据ID查询，并断言数据存在
-     * @param id 数据ID
-     * @return 数据
+     * 根据编码查询有效配置的值。
+     *
+     * @return 配置值，未找到时返回 null
      */
-    GlobalConfig getGlobalConfigByIdAssertExist(Long id);
+    String getValueByCode(String code);
 }

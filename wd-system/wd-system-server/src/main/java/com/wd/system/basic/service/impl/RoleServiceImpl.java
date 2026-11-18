@@ -250,10 +250,11 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         lockRole(roleId);
         boolean grant = operation == RoleAuthorizeOperationEnum.GRANT;
         Set<Long> changedIds = updateUserPermissions(roleId, userIds, grant);
-        Map<Long, String> names = loadUserNames(changedIds);
+
+        Map<Long, String> userIdNameMap = userService.getUserIdNameMap();
         PermissionChanges changes = new PermissionChanges();
         changes.add(RolePermissionTypeEnum.DATA_USER, grant ? Set.of() : changedIds, grant ? changedIds : Set.of(),
-                names::get, names::get);
+                userIdNameMap::get, userIdNameMap::get);
         finishAuthorization(roleId, changes);
         return true;
     }
@@ -320,16 +321,6 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
             }
         }
         return menus;
-    }
-
-    private Map<Long, String> loadUserNames(Set<Long> userIds) {
-        Map<Long, String> names = new HashMap<>();
-        for (List<Long> batch : CollUtil.split(new ArrayList<>(userIds), SuperMapper.DEFAULT_BATCH_SIZE)) {
-            for (User user : userMapper.selectNamesForRoleAudit(batch)) {
-                names.put(user.getId(), user.getName());
-            }
-        }
-        return names;
     }
 
     private static String menuName(Menu menu) {

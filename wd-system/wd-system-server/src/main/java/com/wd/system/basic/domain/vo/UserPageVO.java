@@ -32,10 +32,10 @@ public class UserPageVO {
     @Schema(description = "姓名")
     private String name;
 
-    @Schema(description = "状态(NORMAL:正常,DISABLE:禁用)")
+    @Schema(description = "状态(ENABLED:启用,DISABLED:禁用)")
     private String status;
 
-    @Schema(description = "状态描述(NORMAL:正常,DISABLE:禁用)")
+    @Schema(description = "状态描述(ENABLED:启用,DISABLED:禁用)")
     private String statusDesc;
 
     @Schema(description = "类型(BUILT_IN:内置用户,NORMAL:普通用户)")
@@ -57,10 +57,10 @@ public class UserPageVO {
     @Schema(description = "更新人ID")
     private Long updateUserId;
 
-    @Schema(description = "创建人姓名")
+    @Schema(description = "创建人")
     private String createUserName;
 
-    @Schema(description = "更新人姓名")
+    @Schema(description = "更新人")
     private String updateUserName;
 
     @Schema(description = "创建时间")
