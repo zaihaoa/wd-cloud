@@ -7,7 +7,10 @@ import com.wd.common.core.enums.FieldPermissionEnum;
 import com.wd.common.core.model.*;
 import com.wd.system.basic.domain.dto.RoleAddDTO;
 import com.wd.system.basic.domain.dto.RoleAuthorizeAllDTO;
-import com.wd.system.basic.domain.dto.RoleAuthorizeDTO;
+import com.wd.system.basic.domain.dto.RoleAuthorizeDataUserDTO;
+import com.wd.system.basic.domain.dto.RoleAuthorizeFieldDTO;
+import com.wd.system.basic.domain.dto.RoleAuthorizeMenuDTO;
+import com.wd.system.basic.domain.dto.RoleCopyDTO;
 import com.wd.system.basic.domain.dto.RolePageParamDTO;
 import com.wd.system.basic.domain.dto.RoleUpdateDTO;
 import com.wd.system.basic.domain.dto.RoleUpdateStatusDTO;
@@ -58,6 +61,13 @@ public class RoleController {
         return R.success(roleService.addRole(roleAddParam));
     }
 
+    @Operation(summary = "复制角色及其授权")
+    @SaCheckPermission({PermissionConstant.ROLE_ADD, PermissionConstant.ROLE_AUTH})
+    @PostMapping("/copy")
+    public R<Long> copyRole(@RequestBody @Valid RoleCopyDTO roleCopyParam) {
+        return R.success(roleService.copyRole(roleCopyParam));
+    }
+
     @Operation(summary = "更新角色")
     @SaCheckPermission(PermissionConstant.ROLE_UPDATE)
     @PutMapping("/update")
@@ -93,11 +103,25 @@ public class RoleController {
         return R.success(roleService.authorizeAll(dto));
     }
 
-    @Operation(summary = "保存角色指定类型的授权")
+    @Operation(summary = "保存角色菜单和按钮授权")
     @SaCheckPermission(PermissionConstant.ROLE_AUTH)
-    @PutMapping("/authorize")
-    public R<Boolean> authorize(@RequestBody @Valid RoleAuthorizeDTO dto) {
-        return R.success(roleService.authorize(dto));
+    @PostMapping("/authorize-menu")
+    public R<Boolean> authorizeMenu(@RequestBody @Valid RoleAuthorizeMenuDTO dto) {
+        return R.success(roleService.authorizeMenu(dto));
+    }
+
+    @Operation(summary = "保存角色字段授权")
+    @SaCheckPermission(PermissionConstant.ROLE_AUTH)
+    @PostMapping("/authorize-field")
+    public R<Boolean> authorizeField(@RequestBody @Valid RoleAuthorizeFieldDTO dto) {
+        return R.success(roleService.authorizeField(dto));
+    }
+
+    @Operation(summary = "授予或取消选中用户的数据权限")
+    @SaCheckPermission(PermissionConstant.ROLE_AUTH)
+    @PostMapping("/authorize-data-user")
+    public R<Boolean> authorizeDataUser(@RequestBody @Valid RoleAuthorizeDataUserDTO dto) {
+        return R.success(roleService.authorizeDataUser(dto));
     }
 
     @Operation(summary = "角色下拉框")

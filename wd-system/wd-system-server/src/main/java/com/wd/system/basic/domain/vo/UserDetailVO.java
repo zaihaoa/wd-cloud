@@ -68,4 +68,7 @@ public class UserDetailVO {
 
     @Schema(description = "用户绑定的角色集合")
     private List<UserRoleVO> roles;
+
+    @Schema(description = "是否为ADMIN用户")
+    private Boolean adminUser;
 }

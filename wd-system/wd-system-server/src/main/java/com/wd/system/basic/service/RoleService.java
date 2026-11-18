@@ -5,7 +5,10 @@ import com.wd.common.core.model.IdDTO;
 import com.wd.common.core.model.SelectCombobox;
 import com.wd.system.basic.domain.dto.RolePageParamDTO;
 import com.wd.system.basic.domain.dto.RoleAuthorizeAllDTO;
-import com.wd.system.basic.domain.dto.RoleAuthorizeDTO;
+import com.wd.system.basic.domain.dto.RoleAuthorizeDataUserDTO;
+import com.wd.system.basic.domain.dto.RoleAuthorizeFieldDTO;
+import com.wd.system.basic.domain.dto.RoleAuthorizeMenuDTO;
+import com.wd.system.basic.domain.dto.RoleCopyDTO;
 import com.wd.system.basic.domain.vo.FieldPermissionGroupVO;
 import com.wd.system.basic.domain.vo.RoleDetailVO;
 import com.wd.system.basic.domain.vo.RolePageVO;
@@ -42,6 +45,13 @@ public interface RoleService extends SuperService<Role> {
      * @return 添加成功数据ID
      */
     long addRole(RoleAddDTO roleAddParam);
+
+    /**
+     * 新建角色并复制源角色的全部授权。
+     *
+     * @return 新角色ID
+     */
+    long copyRole(RoleCopyDTO roleCopyParam);
 
     /**
      * 更新未删除角色，权限标记支持传空列表或null清空
@@ -88,9 +98,19 @@ public interface RoleService extends SuperService<Role> {
     boolean authorizeAll(RoleAuthorizeAllDTO dto);
 
     /**
-     * 覆盖保存菜单、按钮或字段授权，按所选用户增减用户数据授权。
+     * 覆盖保存菜单和按钮授权。
      */
-    boolean authorize(RoleAuthorizeDTO dto);
+    boolean authorizeMenu(RoleAuthorizeMenuDTO dto);
+
+    /**
+     * 覆盖保存字段授权。
+     */
+    boolean authorizeField(RoleAuthorizeFieldDTO dto);
+
+    /**
+     * 按所选用户增减用户数据授权。
+     */
+    boolean authorizeDataUser(RoleAuthorizeDataUserDTO dto);
 
     /**
      * 角色下拉框

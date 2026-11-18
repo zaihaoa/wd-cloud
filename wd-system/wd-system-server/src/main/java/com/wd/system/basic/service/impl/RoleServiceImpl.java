@@ -11,6 +11,7 @@ import com.wd.common.core.enums.FieldPermissionEnum;
 import com.wd.common.core.model.IdDTO;
 import com.wd.common.core.model.PageInfo;
 import com.wd.common.core.model.SelectCombobox;
+import com.wd.common.core.objectcompare.ObjectCompareUtil;
 import com.wd.common.core.util.AssertUtil;
 import com.wd.common.core.util.CodeDescEnumUtil;
 import com.wd.common.core.util.I18nUtil;
@@ -24,11 +25,8 @@ import com.wd.system.basic.domain.entity.Menu;
 import com.wd.system.basic.domain.entity.Role;
 import com.wd.system.basic.domain.entity.RolePermissionRelevance;
 import com.wd.system.basic.domain.entity.User;
-import com.wd.system.basic.domain.enums.RoleAuthorizeOperationEnum;
-import com.wd.system.basic.domain.enums.RolePermissionFlagEnum;
-import com.wd.system.basic.domain.enums.RolePermissionTypeEnum;
-import com.wd.system.basic.domain.enums.RoleStatusEnum;
-import com.wd.system.basic.domain.enums.RoleTypeEnum;
+import com.wd.system.basic.domain.enums.*;
+import com.wd.system.basic.domain.model.MenuButton;
 import com.wd.system.basic.domain.vo.FieldPermissionGroupVO;
 import com.wd.system.basic.domain.vo.FieldPermissionItemVO;
 import com.wd.system.basic.domain.vo.RoleDetailVO;
@@ -37,6 +35,7 @@ import com.wd.system.basic.mapper.MenuMapper;
 import com.wd.system.basic.mapper.RoleMapper;
 import com.wd.system.basic.mapper.RolePermissionRelevanceMapper;
 import com.wd.system.basic.mapper.UserMapper;
+import com.wd.system.basic.service.CommonLogService;
 import com.wd.system.basic.service.RoleService;
 import com.wd.system.basic.service.UserService;
 import com.wd.system.basic.util.MenuButtonHelper;
@@ -50,6 +49,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -76,6 +76,8 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     private UserMapper userMapper;
     @Resource
     private UserService userService;
+    @Resource
+    private CommonLogService commonLogService;
 
     @Override
     public PageInfo<RolePageVO> pageList(RolePageParamDTO pageParam) {
@@ -165,11 +167,9 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
 
         Role role = lockRole(dto.getRoleId());
         Set<String> flags = new LinkedHashSet<>(Optional.ofNullable(role.getPermissionFlag()).orElse(List.of()));
-        if (dto.getAuthorized()) {
-            flags.add(dto.getPermissionFlag());
-        } else {
-            flags.remove(dto.getPermissionFlag());
-        }
+        boolean grant = dto.getAuthorized();
+        String flag = dto.getPermissionFlag();
+        boolean changed = grant ? flags.add(flag) : flags.remove(flag);
         List<String> permissionFlags = new ArrayList<>(flags);
         if (Objects.equals(role.getPermissionFlag(), permissionFlags)) {
             return true;
@@ -180,97 +180,228 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         update.setId(role.getId());
         update.setPermissionFlag(permissionFlags);
         AssertUtil.isTrue(baseMapper.updateById(update) > 0, "角色授权失败");
+        if (changed) {
+            String name = CodeDescEnumUtil.getDescByCode(RolePermissionFlagEnum.class, flag);
+            addRoleLog(role.getId(), grant ? "授权" : "取消授权", (grant ? "授予" : "取消") + name);
+        }
         clearPermissionCacheAfterCommit();
         return true;
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public boolean authorize(RoleAuthorizeDTO dto) {
-        RolePermissionTypeEnum type = CodeDescEnumUtil.getEnumByCode(RolePermissionTypeEnum.class, dto.getType());
-        AssertUtil.notNull(type, "授权类型不正确");
-        Set<Long> ids = new LinkedHashSet<>(Optional.ofNullable(dto.getRelevanceIds()).orElse(List.of()));
-        Set<String> values = new LinkedHashSet<>(Optional.ofNullable(dto.getRelevanceValues()).orElse(List.of()));
-        RoleAuthorizeOperationEnum operation = dto.getOperation();
-        if (type == RolePermissionTypeEnum.DATA_USER) {
-            AssertUtil.notNull(operation, "用户数据授权操作不能为空");
-            AssertUtil.isTrue(!ids.isEmpty(), "请选择需要授权或取消授权的用户");
-            AssertUtil.isTrue(values.isEmpty(), "用户数据授权只能使用关联ID");
-        } else {
-            AssertUtil.isTrue(operation == null, "只有用户数据授权支持增减操作");
-        }
-        if (type == RolePermissionTypeEnum.MENU) {
-            AssertUtil.isTrue(dto.getRelevanceIds() != null && dto.getRelevanceValues() != null,
-                    "菜单授权必须同时提交菜单ID和按钮编码集合");
-        }
-        if (type == RolePermissionTypeEnum.FIELD || type == RolePermissionTypeEnum.BUTTON) {
-            AssertUtil.isTrue(ids.isEmpty(), "字段和按钮授权只能使用关联值");
-        }
-        AssertUtil.isTrue(ids.stream().allMatch(id -> id != null && id > 0), "关联ID必须为正数");
-
+    public boolean authorizeMenu(RoleAuthorizeMenuDTO dto) {
         Long roleId = dto.getRoleId();
+        Set<Long> menuIds = new LinkedHashSet<>(dto.getMenuIds());
+        Set<String> buttonCodes = new LinkedHashSet<>(dto.getButtonCodes());
+        RolePermissionTypeEnum menuType = RolePermissionTypeEnum.MENU;
+        RolePermissionTypeEnum buttonType = RolePermissionTypeEnum.BUTTON;
+
         lockRole(roleId);
-        switch (type) {
-            case MENU -> {
-                validatePermissionIds(type, ids);
-                validateButtonCodes(ids, values);
-                replacePermissions(roleId, type, ids, Set.of());
-                replacePermissions(roleId, RolePermissionTypeEnum.BUTTON, Set.of(), values);
-            }
-            case BUTTON -> {
-                if (!values.isEmpty()) {
-                    Set<Long> menuIds = rolePermissionRelevanceMapper.selectList(permissionQuery(roleId, RolePermissionTypeEnum.MENU))
-                            .stream().map(RolePermissionRelevance::getRelevanceId).filter(Objects::nonNull)
-                            .collect(Collectors.toSet());
-                    validateButtonCodes(menuIds, values);
-                }
-                replacePermissions(roleId, type, Set.of(), values);
-            }
-            case FIELD -> {
-                for (String code : values) {
-                    AssertUtil.isTrue(StringUtils.isNotBlank(code)
-                            && CodeDescEnumUtil.isExist(FieldPermissionEnum.class, code), "字段权限编码不存在");
-                }
-                replacePermissions(roleId, type, Set.of(), values);
-            }
-            case DATA_USER -> updateUserPermissions(roleId, ids, operation == RoleAuthorizeOperationEnum.GRANT);
+        Map<Long, Menu> menus = loadMenus(menuIds);
+        AssertUtil.isTrue(menus.size() == menuIds.size(), "菜单不存在");
+        validateButtonCodes(menus.values(), buttonCodes);
+
+        Set<Long> oldMenuIds = savedPermissions(roleId, menuType, RolePermissionRelevance::getRelevanceId);
+        Set<String> oldButtonCodes = savedPermissions(roleId, buttonType, RolePermissionRelevance::getRelevanceValue);
+        PermissionChanges changes = new PermissionChanges();
+        if (!oldMenuIds.equals(menuIds) || !oldButtonCodes.equals(buttonCodes)) {
+            Map<Long, Menu> oldMenus = oldMenuIds.equals(menuIds) ? menus : loadMenus(oldMenuIds);
+            changes.add(menuType, oldMenuIds, menuIds,
+                    id -> menuName(oldMenus.get(id)), id -> menuName(menus.get(id)));
+            changes.add(buttonType, oldButtonCodes, buttonCodes,
+                    buttonNames(oldMenus.values()), buttonNames(menus.values()));
         }
-        clearPermissionCacheAfterCommit();
+        replacePermissions(roleId, menuType, menuIds, Set.of());
+        replacePermissions(roleId, buttonType, Set.of(), buttonCodes);
+        finishAuthorization(roleId, changes);
         return true;
     }
 
-    private void updateUserPermissions(Long roleId, Set<Long> userIds, boolean grant) {
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public boolean authorizeField(RoleAuthorizeFieldDTO dto) {
+        Long roleId = dto.getRoleId();
+        Set<String> fieldCodes = new LinkedHashSet<>(dto.getFieldCodes());
+        RolePermissionTypeEnum type = RolePermissionTypeEnum.FIELD;
+
+        lockRole(roleId);
+        for (String code : fieldCodes) {
+            AssertUtil.isTrue(StringUtils.isNotBlank(code)
+                    && CodeDescEnumUtil.isExist(FieldPermissionEnum.class, code), "字段权限编码不存在");
+        }
+        Set<String> oldCodes = savedPermissions(roleId, type, RolePermissionRelevance::getRelevanceValue);
+        Function<String, String> names = code -> CodeDescEnumUtil.getDescByCode(FieldPermissionEnum.class, code);
+        PermissionChanges changes = new PermissionChanges();
+        changes.add(type, oldCodes, fieldCodes, names, names);
+        replacePermissions(roleId, type, Set.of(), fieldCodes);
+        finishAuthorization(roleId, changes);
+        return true;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public boolean authorizeDataUser(RoleAuthorizeDataUserDTO dto) {
+        Long roleId = dto.getRoleId();
+        RoleAuthorizeOperationEnum operation = dto.getOperation();
+        AssertUtil.notNull(operation, "用户数据授权操作不能为空");
+        Set<Long> userIds = new LinkedHashSet<>(dto.getUserIds());
+
+        lockRole(roleId);
+        boolean grant = operation == RoleAuthorizeOperationEnum.GRANT;
+        Set<Long> changedIds = updateUserPermissions(roleId, userIds, grant);
+        Map<Long, String> names = loadUserNames(changedIds);
+        PermissionChanges changes = new PermissionChanges();
+        changes.add(RolePermissionTypeEnum.DATA_USER, grant ? Set.of() : changedIds, grant ? changedIds : Set.of(),
+                names::get, names::get);
+        finishAuthorization(roleId, changes);
+        return true;
+    }
+
+    private void finishAuthorization(Long roleId, PermissionChanges changes) {
+        if (!changes.isEmpty()) {
+            addRoleLog(roleId, changes.operationType(), changes.content());
+        }
+        clearPermissionCacheAfterCommit();
+    }
+
+    private Set<Long> updateUserPermissions(Long roleId, Set<Long> userIds, boolean grant) {
         RolePermissionTypeEnum type = RolePermissionTypeEnum.DATA_USER;
+        List<List<Long>> batches = CollUtil.split(new ArrayList<>(userIds), SuperMapper.DEFAULT_BATCH_SIZE);
         if (grant) {
-            validatePermissionIds(type, userIds);
+            for (List<Long> batch : batches) {
+                long count = userMapper.selectCount(Wrappers.<User>lambdaQuery().in(User::getId, batch));
+                AssertUtil.isTrue(count == batch.size(), "用户不存在或已删除");
+            }
         }
 
-        for (List<Long> batch : CollUtil.split(new ArrayList<>(userIds), SuperMapper.DEFAULT_BATCH_SIZE)) {
+        Set<Long> changedIds = new LinkedHashSet<>();
+        for (List<Long> batch : batches) {
             var query = permissionQuery(roleId, type).in(RolePermissionRelevance::getRelevanceId, batch);
+            Set<Long> existingIds = rolePermissionRelevanceMapper.selectList(query).stream()
+                    .map(RolePermissionRelevance::getRelevanceId)
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
             if (!grant) {
-                rolePermissionRelevanceMapper.delete(query);
+                if (rolePermissionRelevanceMapper.delete(query) > 0) {
+                    changedIds.addAll(existingIds);
+                }
                 continue;
             }
 
             Set<Long> missingIds = new LinkedHashSet<>(batch);
-            rolePermissionRelevanceMapper.selectList(query).stream()
-                    .map(RolePermissionRelevance::getRelevanceId)
-                    .forEach(missingIds::remove);
+            missingIds.removeAll(existingIds);
             savePermissions(roleId, type, missingIds, Set.of());
+            changedIds.addAll(missingIds);
         }
+        return changedIds;
     }
 
-    private void validateButtonCodes(Set<Long> menuIds, Set<String> codes) {
+    private void validateButtonCodes(Collection<Menu> menus, Set<String> codes) {
         if (codes.isEmpty()) {
             return;
         }
-        Set<String> allowed = new HashSet<>();
-        for (List<Long> batch : CollUtil.split(new ArrayList<>(menuIds), SuperMapper.DEFAULT_BATCH_SIZE)) {
-            menuMapper.selectList(Wrappers.<Menu>lambdaQuery().in(Menu::getId, batch)).stream()
-                    .flatMap(menu -> MenuButtonHelper.permissionCodes(menu.getButton()))
-                    .forEach(allowed::add);
-        }
+        Set<String> allowed = menus.stream()
+                .flatMap(menu -> MenuButtonHelper.permissionCodes(menu.getButton()))
+                .collect(Collectors.toSet());
         AssertUtil.isTrue(allowed.containsAll(codes), "按钮权限编码无效或不属于已选菜单");
+    }
+
+    private <T> Set<T> savedPermissions(Long roleId, RolePermissionTypeEnum type,
+                                        Function<RolePermissionRelevance, T> key) {
+        return rolePermissionRelevanceMapper.selectList(permissionQuery(roleId, type))
+                .stream().map(key).collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    private Map<Long, Menu> loadMenus(Set<Long> menuIds) {
+        Map<Long, Menu> menus = new HashMap<>();
+        for (List<Long> batch : CollUtil.split(new ArrayList<>(menuIds), SuperMapper.DEFAULT_BATCH_SIZE)) {
+            for (Menu menu : menuMapper.selectList(Wrappers.<Menu>lambdaQuery().in(Menu::getId, batch))) {
+                menus.put(menu.getId(), menu);
+            }
+        }
+        return menus;
+    }
+
+    private Map<Long, String> loadUserNames(Set<Long> userIds) {
+        Map<Long, String> names = new HashMap<>();
+        for (List<Long> batch : CollUtil.split(new ArrayList<>(userIds), SuperMapper.DEFAULT_BATCH_SIZE)) {
+            for (User user : userMapper.selectNamesForRoleAudit(batch)) {
+                names.put(user.getId(), user.getName());
+            }
+        }
+        return names;
+    }
+
+    private static String menuName(Menu menu) {
+        return menu == null ? null : menu.getMenuName();
+    }
+
+    private static Function<String, String> buttonNames(Collection<Menu> menus) {
+        Map<String, Set<String>> namesByCode = new HashMap<>();
+        for (Menu menu : menus) {
+            if (StringUtils.isBlank(menu.getMenuName()) || menu.getButton() == null) {
+                continue;
+            }
+            for (MenuButton button : menu.getButton()) {
+                if (button != null && StringUtils.isNotBlank(button.getCode()) && StringUtils.isNotBlank(button.getLabel())) {
+                    namesByCode.computeIfAbsent(button.getCode(), code -> new TreeSet<>())
+                            .add(menu.getMenuName() + " / " + button.getLabel());
+                }
+            }
+        }
+        return code -> {
+            Set<String> names = namesByCode.get(code);
+            return names == null ? null : String.join("、", names);
+        };
+    }
+
+    private static final class PermissionChanges {
+        private final List<String> grants = new ArrayList<>();
+        private final List<String> revocations = new ArrayList<>();
+
+        private <T> void add(RolePermissionTypeEnum type, Set<T> before, Set<T> after,
+                             Function<T, String> oldName, Function<T, String> newName) {
+            append(grants, "授予" + type.getDesc(), after, before, newName);
+            append(revocations, "取消" + type.getDesc(), before, after, oldName);
+        }
+
+        private static <T> void append(List<String> changes, String action, Set<T> candidates, Set<T> retained,
+                                       Function<T, String> resolveName) {
+            List<String> names = new ArrayList<>();
+            int unavailable = 0;
+            for (T key : candidates) {
+                if (retained.contains(key)) {
+                    continue;
+                }
+                String name = resolveName.apply(key);
+                if (StringUtils.isBlank(name)) {
+                    unavailable++;
+                } else {
+                    names.add(name);
+                }
+            }
+            names.sort(Comparator.naturalOrder());
+            if (unavailable > 0) {
+                names.add("名称已不可用（" + unavailable + "项）");
+            }
+            if (!names.isEmpty()) {
+                changes.add(action + "：" + String.join("、", names));
+            }
+        }
+
+        private boolean isEmpty() {
+            return grants.isEmpty() && revocations.isEmpty();
+        }
+
+        private String operationType() {
+            return grants.isEmpty() ? "取消授权" : "授权";
+        }
+
+        private String content() {
+            List<String> changes = new ArrayList<>(grants);
+            changes.addAll(revocations);
+            return String.join("\n", changes);
+        }
     }
 
     private void replacePermissions(Long roleId, RolePermissionTypeEnum type, Set<Long> ids, Set<String> values) {
@@ -288,11 +419,15 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     private void savePermissions(Long roleId, RolePermissionTypeEnum type, Set<Long> ids, Set<String> values) {
         List<RolePermissionRelevance> permissions = new ArrayList<>(ids.size() + values.size());
         for (Long relevanceId : ids) {
-            permissions.add(newPermission(roleId, type, relevanceId, ""));
+            permissions.add(newPermission(roleId, type.getCode(), relevanceId, ""));
         }
         for (String relevanceValue : values) {
-            permissions.add(newPermission(roleId, type, 0L, relevanceValue));
+            permissions.add(newPermission(roleId, type.getCode(), 0L, relevanceValue));
         }
+        insertPermissions(permissions);
+    }
+
+    private void insertPermissions(List<RolePermissionRelevance> permissions) {
         for (List<RolePermissionRelevance> batch : CollUtil.split(permissions, SuperMapper.DEFAULT_BATCH_SIZE)) {
             AssertUtil.isTrue(rolePermissionRelevanceMapper.insertBatchSomeColumn(batch) == batch.size(), "保存角色授权失败");
         }
@@ -300,31 +435,27 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
 
     private Role lockRole(Long id) {
         AssertUtil.isTrue(id != null && id > 0, "角色ID必须为正数");
-        Role role = baseMapper.selectOne(Wrappers.<Role>lambdaQuery()
-                .eq(Role::getId, id)
-                .last("FOR UPDATE"));
+        Role role = selectRoleForUpdate(id);
         AssertUtil.notNull(role, "角色不存在或已删除");
         return role;
     }
 
-    private void validatePermissionIds(RolePermissionTypeEnum type, Set<Long> ids) {
-        for (List<Long> batch : CollUtil.split(new ArrayList<>(ids), SuperMapper.DEFAULT_BATCH_SIZE)) {
-            if (type == RolePermissionTypeEnum.MENU) {
-                long count = menuMapper.selectCount(Wrappers.<Menu>lambdaQuery().in(Menu::getId, batch));
-                AssertUtil.isTrue(count == batch.size(), "菜单不存在");
-            } else if (type == RolePermissionTypeEnum.DATA_USER) {
-                long count = userMapper.selectCount(Wrappers.<User>lambdaQuery().in(User::getId, batch));
-                AssertUtil.isTrue(count == batch.size(), "用户不存在或已删除");
-            }
-        }
+    private Role selectRoleForUpdate(Long id) {
+        return baseMapper.selectOne(Wrappers.<Role>lambdaQuery().eq(Role::getId, id).last("FOR UPDATE"));
     }
 
-    private RolePermissionRelevance newPermission(Long roleId, RolePermissionTypeEnum type,
+    private Role getRoleForUpdateAssertExist(Long id) {
+        Role role = id == null ? null : selectRoleForUpdate(id);
+        AssertUtil.notNull(role, () -> I18nUtil.message("data.not.exist"));
+        return role;
+    }
+
+    private RolePermissionRelevance newPermission(Long roleId, String type,
                                                   Long relevanceId, String relevanceValue) {
         RolePermissionRelevance permission = new RolePermissionRelevance();
         permission.setId(IdWorker.getId());
         permission.setRoleId(roleId);
-        permission.setType(type.getCode());
+        permission.setType(type);
         permission.setRelevanceId(relevanceId);
         permission.setRelevanceValue(relevanceValue);
         return permission;
@@ -335,24 +466,46 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     public long addRole(RoleAddDTO roleAddParam) {
         log.info("新增角色,参数:{}", JSON.toJSONString(roleAddParam));
 
+        Role role = insertRole(roleAddParam, null);
+        addRoleLog(role.getId(), "新增", "新增角色：" + role.getCode() + " / " + role.getName());
+        clearPermissionCacheAfterCommit();
+        return role.getId();
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public long copyRole(RoleCopyDTO roleCopyParam) {
+        Role source = lockRole(roleCopyParam.getRoleId());
+        Role role = insertRole(roleCopyParam, source.getPermissionFlag());
+        List<RolePermissionRelevance> permissions = rolePermissionRelevanceMapper.selectList(
+                        Wrappers.<RolePermissionRelevance>lambdaQuery()
+                                .eq(RolePermissionRelevance::getRoleId, source.getId()))
+                .stream()
+                .map(permission -> newPermission(role.getId(), permission.getType(),
+                        permission.getRelevanceId(), permission.getRelevanceValue()))
+                .toList();
+        insertPermissions(permissions);
+
+        addRoleLog(role.getId(), "复制", "从角色 %s（%s）复制".formatted(source.getName(), source.getCode()));
+        clearPermissionCacheAfterCommit();
+        return role.getId();
+    }
+
+    private Role insertRole(RoleAddDTO roleAddParam, List<String> permissionFlag) {
         checkUnique(roleAddParam.getCode(), roleAddParam.getName(), null);
 
         Role role = new Role();
-
         role.setId(IdWorker.getId());
         role.setCode(roleAddParam.getCode());
         role.setName(roleAddParam.getName());
         role.setStatus(RoleStatusEnum.ENABLED.getCode());
         role.setType(RoleTypeEnum.NORMAL.getCode());
         role.setRemark(Optional.ofNullable(roleAddParam.getRemark()).orElse(""));
-        role.setPermissionFlag(null);
+        role.setPermissionFlag(permissionFlag);
         role.setDeleteFlag(CommonConstant.NOT_DELETE_FLAG);
 
         AssertUtil.isTrue(baseMapper.insert(role) > 0, "新增角色失败");
-
-        clearPermissionCacheAfterCommit();
-
-        return role.getId();
+        return role;
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -360,14 +513,21 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     public boolean updateRole(RoleUpdateDTO roleUpdateParam) {
         log.info("更新角色,参数:{}", JSON.toJSONString(roleUpdateParam));
 
-        Role role = getRoleByIdAssertExist(roleUpdateParam.getId());
+        Role role = getRoleForUpdateAssertExist(roleUpdateParam.getId());
         checkUnique(roleUpdateParam.getCode(), roleUpdateParam.getName(), role.getId());
+        String remark = Optional.ofNullable(roleUpdateParam.getRemark()).orElse("");
+
+        String compareLog = ObjectCompareUtil.compareLog(role, roleUpdateParam);
 
         baseMapper.update(Wrappers.<Role>lambdaUpdate()
                 .set(Role::getCode, roleUpdateParam.getCode())
                 .set(Role::getName, roleUpdateParam.getName())
-                .set(Role::getRemark, Optional.ofNullable(roleUpdateParam.getRemark()).orElse(""))
+                .set(Role::getRemark, remark)
                 .eq(Role::getId, role.getId()));
+
+        if (StringUtils.isNotBlank(compareLog)) {
+            addRoleLog(role.getId(), "编辑", compareLog);
+        }
 
         clearPermissionCacheAfterCommit();
 
@@ -379,7 +539,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     public boolean updateStatus(RoleUpdateStatusDTO updateStatusDTO) {
         log.info("更新角色状态,参数:{}", JSON.toJSONString(updateStatusDTO));
 
-        Role role = getRoleByIdAssertExist(updateStatusDTO.getId());
+        Role role = getRoleForUpdateAssertExist(updateStatusDTO.getId());
         String status = updateStatusDTO.getStatus();
         if (Objects.equals(role.getStatus(), status)) {
             return true;
@@ -389,8 +549,12 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
                 .set(Role::getStatus, status)
                 .eq(Role::getId, role.getId())) > 0;
         if (success) {
-            clearPermissionCacheAfterCommit();
+            String oldStatus = CodeDescEnumUtil.getDescByCode(RoleStatusEnum.class, role.getStatus());
+            String newStatus = CodeDescEnumUtil.getDescByCode(RoleStatusEnum.class, status);
+            addRoleLog(role.getId(), "编辑", "角色状态：[%s]变更为[%s]".formatted(oldStatus, newStatus));
         }
+
+        clearPermissionCacheAfterCommit();
         return success;
     }
 
@@ -401,14 +565,15 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         Long id = idParam.getId();
 
         // 判断数据是否存在
-        Role role = getRoleByIdAssertExist(id);
+        Role role = getRoleForUpdateAssertExist(id);
 
         // 逻辑删除使用角色ID作为删除标记，允许重新使用已删除角色的编码和名称。
         boolean success = baseMapper.deleteById(role) > 0;
         if (success) {
-            clearPermissionCacheAfterCommit();
+            addRoleLog(role.getId(), "删除", "删除角色：" + role.getCode() + " / " + role.getName());
         }
 
+        clearPermissionCacheAfterCommit();
         return success;
     }
 
@@ -437,6 +602,16 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
                 .eq(Role::getName, name)
                 .ne(excludeId != null, Role::getId, excludeId));
         AssertUtil.isTrue(nameCount == 0, "角色名称已存在");
+    }
+
+    private void addRoleLog(Long roleId, String operationType, String content) {
+        CommonLogAddDTO entry = CommonLogAddDTO.builder()
+                .businessType(CommonLogBusinessTypeEnum.ROLE.getCode())
+                .businessKey(String.valueOf(roleId))
+                .operationType(operationType)
+                .content(content)
+                .build();
+        AssertUtil.isTrue(commonLogService.addLog(entry), "写入角色操作日志失败");
     }
 
     private void clearPermissionCache() {

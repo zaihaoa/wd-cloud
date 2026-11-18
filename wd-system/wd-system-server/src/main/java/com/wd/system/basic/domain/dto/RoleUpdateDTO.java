@@ -1,6 +1,7 @@
 package com.wd.system.basic.domain.dto;
 
 import com.wd.common.core.annotions.EnumCodeExist;
+import com.wd.common.core.objectcompare.ObjectCompare;
 import com.wd.system.basic.domain.enums.RolePermissionFlagEnum;
 import com.wd.system.basic.domain.enums.RoleStatusEnum;
 import com.wd.system.basic.domain.enums.RoleTypeEnum;
@@ -33,14 +34,17 @@ public class RoleUpdateDTO {
     @Schema(description = "角色编码")
     @NotBlank(message = "角色编码不能为空")
     @Size(max = 100, message = "角色编码长度不能超过100")
+    @ObjectCompare("角色编码")
     private String code;
 
     @Schema(description = "角色名称")
     @NotBlank(message = "角色名称不能为空")
     @Size(max = 100, message = "角色名称长度不能超过100")
+    @ObjectCompare("角色名称")
     private String name;
 
     @Schema(description = "备注")
     @Size(max = 1000, message = "备注长度不能超过1000")
+    @ObjectCompare("备注")
     private String remark;
 }

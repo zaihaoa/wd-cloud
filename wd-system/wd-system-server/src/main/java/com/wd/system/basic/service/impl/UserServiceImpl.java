@@ -203,6 +203,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     vo.setUpdateUserName(userIdNameMap.get(vo.getUpdateUserId()));
                     vo.setRoles(userRoleMap.getOrDefault(vo.getId(), List.of()));
 
+                    vo.setAdminUser(Objects.equals(vo.getId(), CommonConstant.ADMIN_USER_ID));
                     return vo;
                 })
                 .toList();
@@ -443,7 +444,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 用户ID和姓名
         Map<Long, String> userIdNameMap = baseMapper
                 .selectList(Wrappers.<User>lambdaQuery()
-                        .eq(User::getDeleteFlag, CommonConstant.NOT_DELETE_FLAG)
                         .select(User::getId, User::getName))
                 .stream()
                 .collect(Collectors.toMap(User::getId, User::getName));
@@ -667,6 +667,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         vo.setUpdateUserName(userIdNameMap.get(vo.getUpdateUserId()));
         vo.setRoles(getUserRoleMap(List.of(vo.getId())).getOrDefault(vo.getId(), List.of()));
 
+        vo.setAdminUser(Objects.equals(vo.getId(), CommonConstant.ADMIN_USER_ID));
         return vo;
     }
 

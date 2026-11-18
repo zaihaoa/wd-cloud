@@ -41,9 +41,6 @@ public class RolePageDTO {
     @Schema(description = "权限标记")
     private List<String> permissionFlag;
 
-    @Schema(description = "删除标记，等于0表示没有删除，否则为删除")
-    private Long deleteFlag;
-
     @Schema(description = "创建人用户ID")
     private Long createUserId;
 

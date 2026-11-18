@@ -1,9 +1,6 @@
 package com.wd.system.basic.domain.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import com.wd.common.core.model.BaseUserTimeEntity;
 import java.io.Serializable;
 
@@ -57,5 +54,6 @@ public class GlobalConfig extends BaseUserTimeEntity implements Serializable {
 
     @Schema(description = "删除标记，等于0表示没有删除，否则为删除")
     @TableField("delete_flag")
+    @TableLogic
     private Long deleteFlag;
 }

@@ -57,6 +57,6 @@ public class User extends BaseUserTimeEntity implements Serializable {
 
     @Schema(description = "删除标记，等于0表示没有删除，否则为删除")
     @TableField("delete_flag")
-    @TableLogic(value = "0")
+    @TableLogic
     private Long deleteFlag;
 }
