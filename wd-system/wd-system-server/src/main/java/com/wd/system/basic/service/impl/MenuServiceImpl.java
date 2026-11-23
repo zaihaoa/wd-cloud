@@ -78,7 +78,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         log.info("添加菜单,参数:{}", JSON.toJSONString(menuAddDTO));
 
         Long parentId = menuAddDTO.getParentId();
-        Menu parent = getParentMenu(parentId, StringUtils.isNotBlank(menuAddDTO.getMenuGroupName()));
+        Menu parent = getParentMenu(parentId);
         String menuGroupName = normalizeMenuGroupName(menuAddDTO.getMenuGroupName(), parent);
 
         String routePath = Optional.ofNullable(menuAddDTO.getRoutePath()).orElse("");
@@ -140,12 +140,12 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         log.info("更新菜单,参数:{}", JSON.toJSONString(menuUpdateDTO));
 
         Long menuId = menuUpdateDTO.getId();
-        Menu menu = getMenuForUpdate(menuId);
+        Menu menu = getMenuById(menuId);
         AssertUtil.notNull(menu, "菜单不存在");
 
         Long parentId = Optional.ofNullable(menuUpdateDTO.getParentId()).orElse(CommonConstant.ZERO_LONG);
         String requestedGroup = menuUpdateDTO.getMenuGroupName();
-        Menu parent = getParentMenu(parentId, StringUtils.isNotBlank(requestedGroup));
+        Menu parent = getParentMenu(parentId);
         String menuGroupName = normalizeMenuGroupName(requestedGroup, parent);
         if (!CommonConstant.ZERO_LONG.equals(parentId)
                 || !MenuTypeEnum.DIRECTORY.getCode().equals(menuUpdateDTO.getMenuType())) {
@@ -232,15 +232,11 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         return success;
     }
 
-    private Menu getMenuForUpdate(Long menuId) {
-        return baseMapper.selectOne(Wrappers.<Menu>lambdaQuery().eq(Menu::getId, menuId).last("FOR UPDATE"));
-    }
-
-    private Menu getParentMenu(Long parentId, boolean lockParent) {
+    private Menu getParentMenu(Long parentId) {
         if (parentId == null || CommonConstant.ZERO_LONG.equals(parentId)) {
             return null;
         }
-        Menu parent = lockParent ? getMenuForUpdate(parentId) : baseMapper.selectById(parentId);
+        Menu parent = baseMapper.selectById(parentId);
         AssertUtil.notNull(parent, "父级菜单不存在");
         return parent;
     }
@@ -268,7 +264,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         boolean hasGroupedChildren = !baseMapper.selectList(Wrappers.<Menu>lambdaQuery()
                 .eq(Menu::getParentId, menu.getId())
                 .isNotNull(Menu::getMenuGroupName)
-                .last("LIMIT 1 FOR UPDATE")).isEmpty();
+                .last("LIMIT 1")).isEmpty();
         AssertUtil.isTrue(!hasGroupedChildren, "请先清空子菜单的所属分类");
     }
 
@@ -278,7 +274,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         log.info("删除菜单,参数:{}", JSON.toJSONString(idParam));
 
         Long id = idParam.getId();
-        Menu menu = getMenuForUpdate(id);
+        Menu menu = getMenuById(id);
         AssertUtil.notNull(menu, "菜单不存在");
         assertNoGroupedChildren(menu);
 
@@ -334,7 +330,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         List<MenuTreeVO> menuTreeList = menusList
                 .stream()
                 .map(menu -> {
-                    MenuTreeVO vo = menuConverter.convertMenuTreeVO(menu);
+                    MenuTreeVO vo = menuConverter.toMenuTreeVO(menu);
                     vo.setMenuTypeDesc(menyTypeMap.get(vo.getMenuType()));
                     return vo;
                 })
@@ -422,7 +418,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             return null;
         }
 
-        MenuDetailVO vo = menuConverter.convertMenuDetailVO(menu);
+        MenuDetailVO vo = menuConverter.toMenuDetailVO(menu);
         vo.setMenuTypeDesc(CodeDescEnumUtil.getDescByCode(MenuTypeEnum.class, vo.getMenuType()));
 
         Map<Long, String> userIdNameMap = userService.getUserIdNameMap();

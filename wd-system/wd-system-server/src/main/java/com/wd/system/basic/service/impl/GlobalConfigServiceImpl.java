@@ -77,7 +77,7 @@ public class GlobalConfigServiceImpl extends ServiceImpl<GlobalConfigMapper, Glo
         return dbRecords
                 .stream()
                 .map(dbRecord -> {
-                    GlobalConfigPageVO vo = globalConfigConverter.convertGlobalConfigPageVO(dbRecord);
+                    GlobalConfigPageVO vo = globalConfigConverter.toGlobalConfigPageVO(dbRecord);
                     vo.setTypeDesc(CodeDescEnumUtil.getDescByCode(GlobalConfigTypeEnum.class, dbRecord.getType()));
 
                     return vo;
@@ -120,7 +120,7 @@ public class GlobalConfigServiceImpl extends ServiceImpl<GlobalConfigMapper, Glo
         log.info("修改全局配置,参数:{}", JSON.toJSONString(globalConfigUpdateParam));
 
         Long id = globalConfigUpdateParam.getId();
-        GlobalConfig record = getGlobalConfigForUpdate(id);
+        GlobalConfig record = getGlobalConfigByIdAssertExist(id);
 
         String compareLog = ObjectCompareUtil.compareLog(record, globalConfigUpdateParam);
 
@@ -147,7 +147,7 @@ public class GlobalConfigServiceImpl extends ServiceImpl<GlobalConfigMapper, Glo
             return null;
         }
 
-        GlobalConfigDetailVO vo = globalConfigConverter.convertGlobalConfigDetailVO(record);
+        GlobalConfigDetailVO vo = globalConfigConverter.toGlobalConfigDetailVO(record);
         vo.setTypeDesc(CodeDescEnumUtil.getDescByCode(GlobalConfigTypeEnum.class, record.getType()));
 
         return vo;
@@ -159,7 +159,7 @@ public class GlobalConfigServiceImpl extends ServiceImpl<GlobalConfigMapper, Glo
         log.info("删除全局配置,参数:{}", JSON.toJSONString(idParam));
 
         Long id = idParam.getId();
-        GlobalConfig record = getGlobalConfigForUpdate(id);
+        GlobalConfig record = getGlobalConfigByIdAssertExist(id);
         AssertUtil.isTrue(!GlobalConfigTypeEnum.SYSTEM.getCode().equals(record.getType()), () -> I18nUtil.message("glocal-config.type.not.delete"));
 
         boolean success = baseMapper.update(Wrappers.<GlobalConfig>lambdaUpdate()
@@ -205,11 +205,8 @@ public class GlobalConfigServiceImpl extends ServiceImpl<GlobalConfigMapper, Glo
         return value;
     }
 
-    private GlobalConfig getGlobalConfigForUpdate(Long id) {
-        AssertUtil.notNull(id, () -> I18nUtil.message("data.not.exist"));
-        GlobalConfig record = baseMapper.selectOne(Wrappers.<GlobalConfig>lambdaQuery()
-                .eq(GlobalConfig::getId, id)
-                .last("FOR UPDATE"));
+    private GlobalConfig getGlobalConfigByIdAssertExist(Long id) {
+        GlobalConfig record = getGlobalConfigById(id);
         AssertUtil.notNull(record, () -> I18nUtil.message("data.not.exist"));
         return record;
     }

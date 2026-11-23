@@ -69,7 +69,7 @@ class RoleAuthorizationTest {
         ReflectionTestUtils.setField(service, "commonLogService", commonLogs);
         var role = new Role();
         role.setId(2L);
-        when(roles.selectOne(any())).thenReturn(role);
+        when(roles.selectById(2L)).thenReturn(role);
         when(commonLogs.addLog(any())).thenReturn(true);
         when(menus.selectList(any())).thenReturn(List.of(menu(8L, "订单管理", "orders:edit")));
         when(users.selectCount(any())).thenReturn(1L);
@@ -86,7 +86,7 @@ class RoleAuthorizationTest {
         source.setStatus("DISABLED");
         source.setType("BUILT_IN");
         source.setPermissionFlag(List.of("ALL_MENU_PERMISSION", "ALL_DATA_USER_PERMISSION"));
-        when(roles.selectOne(any())).thenReturn(source);
+        when(roles.selectById(2L)).thenReturn(source);
         when(roles.insert(any(Role.class))).thenReturn(1);
 
         var grants = List.of(permission(8L, ""), permission(0L, "orders:edit"),
@@ -234,7 +234,7 @@ class RoleAuthorizationTest {
         var grantedRole = new Role();
         grantedRole.setId(2L);
         grantedRole.setPermissionFlag(List.of("ALL_MENU_PERMISSION"));
-        when(roles.selectOne(any())).thenReturn(originalRole, grantedRole, grantedRole);
+        when(roles.selectById(2L)).thenReturn(originalRole, grantedRole, grantedRole);
         when(roles.updateById(any(Role.class))).thenReturn(1);
 
         assertTrue(service.authorizeAll(dto));
@@ -452,7 +452,7 @@ class RoleAuthorizationTest {
         when(userRoles.selectList(any())).thenReturn(List.of(firstAssignment, secondAssignment));
         when(roles.selectList(any())).thenReturn(List.of(firstRole, secondRole));
         when(menus.selectList(any())).thenReturn(List.of(menu));
-        when(converter.convertUserPermissionDTO(user)).thenAnswer(invocation -> new UserPermissionDTO());
+        when(converter.toUserPermissionDTO(user)).thenAnswer(invocation -> new UserPermissionDTO());
 
         var menuGrant = new RolePermissionRelevance();
         menuGrant.setRoleId(2L);

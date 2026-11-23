@@ -19,19 +19,19 @@ import com.wd.system.basic.domain.vo.UserPageVO;
 public interface UserConverter {
 
     @Mapping(target = "roles", ignore = true)
-    UserPageVO convertUserPageVO(UserPageDTO dbRecord);
+    UserPageVO toUserPageVO(UserPageDTO dbRecord);
 
-    UserAuthorizePageVO convertUserAuthorizePageVO(UserAuthorizePageDTO dbRecord);
+    UserAuthorizePageVO toUserAuthorizePageVO(UserAuthorizePageDTO dbRecord);
 
     @Mapping(target = "roles", ignore = true)
-    UserDetailVO convertUserDetailVO(User user);
+    UserDetailVO toUserDetailVO(User user);
 
-    UserInfoVO convertUserInfoVO(UserPermissionDTO userPermission);
+    UserInfoVO toUserInfoVO(UserPermissionDTO userPermission);
 
     @Mapping(target = "ruleId", source = "id")
     @Mapping(target = "ruleCode", source = "code")
     @Mapping(target = "ruleName", source = "name")
-    UserRoleVO convertUserRoleVO(Role role);
+    UserRoleVO toUserRoleVO(Role role);
 
     @Mapping(target = "userId", source = "id")
     @Mapping(target = "adminUser", ignore = true)
@@ -41,7 +41,7 @@ public interface UserConverter {
     @Mapping(target = "authMenuPermissionList", ignore = true)
     @Mapping(target = "authFieldPermissionList", ignore = true)
     @Mapping(target = "authUserIds", ignore = true)
-    UserPermissionDTO convertUserPermissionDTO(User user);
+    UserPermissionDTO toUserPermissionDTO(User user);
 
-    UserExportDTO convertUserExportDTO(UserPageDTO record);
+    UserExportDTO toUserExportDTO(UserPageDTO record);
 }

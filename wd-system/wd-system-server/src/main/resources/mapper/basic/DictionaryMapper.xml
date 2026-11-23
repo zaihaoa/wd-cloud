@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wd.system.basic.mapper.DictionaryMapper">
+
+    <select id="pageCount" resultType="int">
+        SELECT COUNT(*)
+        FROM sys_dictionary
+        <include refid="PageCondition"/>
+    </select>
+
+    <select id="pageList" resultType="com.wd.system.basic.domain.dto.DictionaryPageDTO">
+        SELECT `id`,
+               `code`,
+               `desc`,
+               `status`,
+               `remark`,
+               `create_user_id` AS "createUserId",
+               `update_user_id` AS "updateUserId",
+               `create_time` AS "createTime",
+               `update_time` AS "updateTime"
+        FROM sys_dictionary
+        <include refid="PageCondition"/>
+
+        ORDER BY
+        <choose>
+            <when test="param.sort == 'code'">`code`</when>
+            <when test="param.sort == 'desc'">`desc`</when>
+            <when test="param.sort == 'status'">`status`</when>
+            <when test="param.sort == 'remark'">`remark`</when>
+            <when test="param.sort == 'createUserId'">`create_user_id`</when>
+            <when test="param.sort == 'updateUserId'">`update_user_id`</when>
+            <when test="param.sort == 'createTime'">`create_time`</when>
+            <when test="param.sort == 'updateTime'">`update_time`</when>
+            <otherwise>`id`</otherwise>
+        </choose>
+        <choose>
+            <when test="param.order != null and param.order.equalsIgnoreCase('DESC')">DESC</when>
+            <otherwise>ASC</otherwise>
+        </choose>
+        , `id` ASC
+        <bind name="limitStart" value="(param.current lte 1) ? 0 : ((param.current - 1) * param.size)"/>
+        LIMIT #{limitStart}, #{param.size}
+    </select>
+
+    <sql id="PageCondition">
+        <where>
+            <if test="param.code != null and param.code != ''">
+                AND `code` LIKE concat('%',#{param.code}, '%')
+            </if>
+            <if test="param.desc != null and param.desc != ''">
+                AND `desc` LIKE concat('%',#{param.desc}, '%')
+            </if>
+            <if test="param.remark != null and param.remark != ''">
+                AND `remark` LIKE concat('%',#{param.remark}, '%')
+            </if>
+            <if test="param.status != null and param.status != ''">
+                AND `status` = #{param.status}
+            </if>
+            and `delete_flag` = 0
+        </where>
+    </sql>
+</mapper>

@@ -69,10 +69,10 @@ public class PermissionServiceImpl implements PermissionService {
         AssertUtil.isTrue(UserStatusEnum.ENABLED.getCode().equals(user.getStatus()), "用户已被禁用");
 
         List<Role> roles = effectiveRoles(userId);
-        UserPermissionDTO result = userConverter.convertUserPermissionDTO(user);
+        UserPermissionDTO result = userConverter.toUserPermissionDTO(user);
         result.setAdminUser(Objects.equals(userId, CommonConstant.ADMIN_USER_ID));
         result.setAdminRole(roles.stream().anyMatch(role -> RoleBuiltInCodeEnum.ADMIN.getCode().equals(role.getCode())));
-        result.setRoleList(roles.stream().map(userConverter::convertUserRoleVO).toList());
+        result.setRoleList(roles.stream().map(userConverter::toUserRoleVO).toList());
 
         Set<String> flags = roles.stream()
                 .map(Role::getPermissionFlag)

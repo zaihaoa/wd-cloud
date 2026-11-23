@@ -151,7 +151,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         List<UserAuthorizePageVO> records = baseMapper.authorizePageList(pageParam, allUserPermission)
                 .stream()
                 .map(record -> {
-                    UserAuthorizePageVO vo = userConverter.convertUserAuthorizePageVO(record);
+                    UserAuthorizePageVO vo = userConverter.toUserAuthorizePageVO(record);
                     vo.setStatusDesc(CodeDescEnumUtil.getDescByCode(UserStatusEnum.class, vo.getStatus()));
                     return vo;
                 })
@@ -169,7 +169,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return records
                 .stream()
                 .map(record -> {
-                    UserExportDTO vo = userConverter.convertUserExportDTO(record);
+                    UserExportDTO vo = userConverter.toUserExportDTO(record);
                     vo.setStatusDesc(CodeDescEnumUtil.getDescByCode(UserStatusEnum.class, record.getStatus()));
                     vo.setTypeDesc(CodeDescEnumUtil.getDescByCode(UserTypeEnum.class, record.getType()));
 
@@ -195,7 +195,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return dbRecords
                 .stream()
                 .map(dbRecord -> {
-                    UserPageVO vo = userConverter.convertUserPageVO(dbRecord);
+                    UserPageVO vo = userConverter.toUserPageVO(dbRecord);
                     vo.setStatusDesc(CodeDescEnumUtil.getDescByCode(UserStatusEnum.class, vo.getStatus()));
                     vo.setTypeDesc(CodeDescEnumUtil.getDescByCode(UserTypeEnum.class, vo.getType()));
 
@@ -274,11 +274,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String phone = userUpdateParam.getPhone();
         String email = userUpdateParam.getEmail();
 
-        // 用户行锁串行化同一用户的资料和角色覆盖保存。
-        User user = baseMapper.selectOne(Wrappers.<User>lambdaQuery()
-                .eq(User::getId, id)
-                .last("FOR UPDATE"));
-        AssertUtil.notNull(user, () -> I18nUtil.message("data.not.exist"));
+        User user = getUserByIdAssertExist(id);
 
         Long usernameCount = baseMapper.selectCount(Wrappers.<User>lambdaQuery().eq(User::getUsername, username).ne(User::getId, id));
         Assert.isTrue(usernameCount <= 0, "用户名已存在");
@@ -295,7 +291,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             Assert.isTrue(emailCount <= 0, "邮箱已存在");
         }
 
-        // 锁定读避免角色差集基于前置校验建立的事务快照计算。
         List<Long> existRoleIds = userRoleRelevanceMapper
                 .selectList(Wrappers.<UserRoleRelevance>lambdaQuery()
                         .eq(UserRoleRelevance::getUserId, id)
@@ -432,7 +427,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public Map<Long, String> getUserIdNameMap() {
 
-        String key = RedisHelper.joinKey(RedisKey.USER_ID_NAME_MAP);
+        String key = RedisKey.USER_ID_NAME_MAP;
 
         Map<Long, String> cache = redisHelper.get(CacheRegion.USER, key, new TypeReference<>() {
         });
@@ -550,7 +545,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         for (Role role : roleMapper.selectList(Wrappers.<Role>lambdaQuery()
                 .in(Role::getId, roleIds)
                 .select(Role::getId, Role::getCode, Role::getName))) {
-            roles.put(role.getId(), userConverter.convertUserRoleVO(role));
+            roles.put(role.getId(), userConverter.toUserRoleVO(role));
         }
         Map<Long, LinkedHashSet<Long>> groupedRoleIds = new HashMap<>();
         for (UserRoleRelevance link : links) {
@@ -657,7 +652,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             return null;
         }
 
-        UserDetailVO vo = userConverter.convertUserDetailVO(user);
+        UserDetailVO vo = userConverter.toUserDetailVO(user);
         vo.setStatusDesc(CodeDescEnumUtil.getDescByCode(UserStatusEnum.class, vo.getStatus()));
         vo.setTypeDesc(CodeDescEnumUtil.getDescByCode(UserTypeEnum.class, vo.getType()));
 
@@ -675,7 +670,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public UserInfoVO currentUserInfo() {
         UserPermissionDTO userPermission = permissionService.getCurrentUserPermission();
 
-        UserInfoVO vo = userConverter.convertUserInfoVO(userPermission);
+        UserInfoVO vo = userConverter.toUserInfoVO(userPermission);
         vo.setStatusDesc(CodeDescEnumUtil.getDescByCode(UserStatusEnum.class, vo.getStatus()));
         vo.setTypeDesc(CodeDescEnumUtil.getDescByCode(UserTypeEnum.class, vo.getType()));
 

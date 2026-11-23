@@ -87,13 +87,12 @@ class GlobalConfigServiceTest {
         config.setRemark("old-remark");
         config.setSortNumber(7);
         config.setType("SYSTEM");
-        when(mapper.selectOne(any())).thenReturn(config);
+        when(mapper.selectById(42L)).thenReturn(config);
         when(mapper.updateById(any(GlobalConfig.class))).thenReturn(1);
         when(commonLog.addLog(any())).thenReturn(true);
 
         var request = new GlobalConfigUpdateDTO();
         request.setId(42L);
-        request.setCode("feature");
         request.setValue("new-value");
         request.setRemark("");
 

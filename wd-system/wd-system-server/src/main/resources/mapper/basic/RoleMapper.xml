@@ -45,16 +45,17 @@
             <when test="param.sort == 'status'">`status`</when>
             <when test="param.sort == 'type'">`type`</when>
             <when test="param.sort == 'remark'">`remark`</when>
-            <when test="param.sort == 'create_user_id' or param.sort == 'createUserId'">`create_user_id`</when>
-            <when test="param.sort == 'update_user_id' or param.sort == 'updateUserId'">`update_user_id`</when>
-            <when test="param.sort == 'create_time' or param.sort == 'createTime'">`create_time`</when>
-            <when test="param.sort == 'update_time' or param.sort == 'updateTime'">`update_time`</when>
+            <when test="param.sort == 'createUserId'">`create_user_id`</when>
+            <when test="param.sort == 'updateUserId'">`update_user_id`</when>
+            <when test="param.sort == 'createTime'">`create_time`</when>
+            <when test="param.sort == 'updateTime'">`update_time`</when>
             <otherwise>`id`</otherwise>
         </choose>
         <choose>
             <when test="param.order != null and param.order.equalsIgnoreCase('DESC')">DESC</when>
             <otherwise>ASC</otherwise>
         </choose>
+        , `id` ASC
         <bind name="limitStart" value="(param.current lte 1) ? 0 : ((param.current - 1) * param.size)"/>
         LIMIT #{limitStart}, #{param.size}
     </select>

@@ -42,4 +42,12 @@ public class PermissionConstant {
     public static final String GLOBAL_CONFIG_UPDATE = "global-config:update";
     public static final String GLOBAL_CONFIG_DELETE = "global-config:delete";
 
+    /**
+     * 字典
+     */
+    public static final String DICTIONARY_LIST = "dictionary:list";
+    public static final String DICTIONARY_ADD = "dictionary:add";
+    public static final String DICTIONARY_UPDATE = "dictionary:update";
+    public static final String DICTIONARY_DELETE = "dictionary:delete";
+
 }

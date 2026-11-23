@@ -100,7 +100,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         return dbRecords
                 .stream()
                 .map(record -> {
-                    RolePageVO vo = roleConverter.convertRolePageVO(record);
+                    RolePageVO vo = roleConverter.toRolePageVO(record);
 
                     vo.setTypeDesc(CodeDescEnumUtil.getDescByCode(RoleTypeEnum.class, vo.getType()));
                     vo.setStatusDesc(CodeDescEnumUtil.getDescByCode(RoleStatusEnum.class, vo.getStatus()));
@@ -119,7 +119,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         if (Objects.isNull(role)) {
             return null;
         }
-        RoleDetailVO vo = roleConverter.convertRoleDetailVO(role);
+        RoleDetailVO vo = roleConverter.toRoleDetailVO(role);
 
         vo.setTypeDesc(CodeDescEnumUtil.getDescByCode(RoleTypeEnum.class, vo.getType()));
         vo.setStatusDesc(CodeDescEnumUtil.getDescByCode(RoleStatusEnum.class, vo.getStatus()));
@@ -165,7 +165,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         AssertUtil.notNull(dto.getAuthorized(), "授权操作不能为空");
         AssertUtil.isTrue(CodeDescEnumUtil.isExist(RolePermissionFlagEnum.class, dto.getPermissionFlag()), "权限标记不正确");
 
-        Role role = lockRole(dto.getRoleId());
+        Role role = requireExistingRole(dto.getRoleId());
         Set<String> flags = new LinkedHashSet<>(Optional.ofNullable(role.getPermissionFlag()).orElse(List.of()));
         boolean grant = dto.getAuthorized();
         String flag = dto.getPermissionFlag();
@@ -197,7 +197,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         RolePermissionTypeEnum menuType = RolePermissionTypeEnum.MENU;
         RolePermissionTypeEnum buttonType = RolePermissionTypeEnum.BUTTON;
 
-        lockRole(roleId);
+        requireExistingRole(roleId);
         Map<Long, Menu> menus = loadMenus(menuIds);
         AssertUtil.isTrue(menus.size() == menuIds.size(), "菜单不存在");
         validateButtonCodes(menus.values(), buttonCodes);
@@ -225,7 +225,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         Set<String> fieldCodes = new LinkedHashSet<>(dto.getFieldCodes());
         RolePermissionTypeEnum type = RolePermissionTypeEnum.FIELD;
 
-        lockRole(roleId);
+        requireExistingRole(roleId);
         for (String code : fieldCodes) {
             AssertUtil.isTrue(StringUtils.isNotBlank(code)
                     && CodeDescEnumUtil.isExist(FieldPermissionEnum.class, code), "字段权限编码不存在");
@@ -247,7 +247,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         AssertUtil.notNull(operation, "用户数据授权操作不能为空");
         Set<Long> userIds = new LinkedHashSet<>(dto.getUserIds());
 
-        lockRole(roleId);
+        requireExistingRole(roleId);
         boolean grant = operation == RoleAuthorizeOperationEnum.GRANT;
         Set<Long> changedIds = updateUserPermissions(roleId, userIds, grant);
 
@@ -424,20 +424,10 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         }
     }
 
-    private Role lockRole(Long id) {
+    private Role requireExistingRole(Long id) {
         AssertUtil.isTrue(id != null && id > 0, "角色ID必须为正数");
-        Role role = selectRoleForUpdate(id);
+        Role role = getRoleById(id);
         AssertUtil.notNull(role, "角色不存在或已删除");
-        return role;
-    }
-
-    private Role selectRoleForUpdate(Long id) {
-        return baseMapper.selectOne(Wrappers.<Role>lambdaQuery().eq(Role::getId, id).last("FOR UPDATE"));
-    }
-
-    private Role getRoleForUpdateAssertExist(Long id) {
-        Role role = id == null ? null : selectRoleForUpdate(id);
-        AssertUtil.notNull(role, () -> I18nUtil.message("data.not.exist"));
         return role;
     }
 
@@ -466,7 +456,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     @Transactional(rollbackFor = Exception.class)
     @Override
     public long copyRole(RoleCopyDTO roleCopyParam) {
-        Role source = lockRole(roleCopyParam.getRoleId());
+        Role source = requireExistingRole(roleCopyParam.getRoleId());
         Role role = insertRole(roleCopyParam, source.getPermissionFlag());
         List<RolePermissionRelevance> permissions = rolePermissionRelevanceMapper.selectList(
                         Wrappers.<RolePermissionRelevance>lambdaQuery()
@@ -504,7 +494,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     public boolean updateRole(RoleUpdateDTO roleUpdateParam) {
         log.info("更新角色,参数:{}", JSON.toJSONString(roleUpdateParam));
 
-        Role role = getRoleForUpdateAssertExist(roleUpdateParam.getId());
+        Role role = getRoleByIdAssertExist(roleUpdateParam.getId());
         checkUnique(roleUpdateParam.getCode(), roleUpdateParam.getName(), role.getId());
         String remark = Optional.ofNullable(roleUpdateParam.getRemark()).orElse("");
 
@@ -530,7 +520,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     public boolean updateStatus(RoleUpdateStatusDTO updateStatusDTO) {
         log.info("更新角色状态,参数:{}", JSON.toJSONString(updateStatusDTO));
 
-        Role role = getRoleForUpdateAssertExist(updateStatusDTO.getId());
+        Role role = getRoleByIdAssertExist(updateStatusDTO.getId());
         String status = updateStatusDTO.getStatus();
         if (Objects.equals(role.getStatus(), status)) {
             return true;
@@ -556,7 +546,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         Long id = idParam.getId();
 
         // 判断数据是否存在
-        Role role = getRoleForUpdateAssertExist(id);
+        Role role = getRoleByIdAssertExist(id);
 
         // 逻辑删除使用角色ID作为删除标记，允许重新使用已删除角色的编码和名称。
         boolean success = baseMapper.deleteById(role) > 0;

@@ -132,8 +132,8 @@ CREATE TABLE `sys_common_log` (
 drop table if exists `sys_dictionary`;
 CREATE TABLE `sys_dictionary` (
                                   `id` bigint unsigned NOT NULL COMMENT '主键ID',
-                                  `code` varchar(100) NOT NULL DEFAULT '' COMMENT '编码',
-                                  `desc` varchar(2000) NOT NULL DEFAULT '' COMMENT '描述',
+                                  `code` varchar(200) NOT NULL DEFAULT '' COMMENT '字典编码',
+                                  `desc` varchar(2000) NOT NULL DEFAULT '' COMMENT '字典描述',
                                   `status` varchar(100) NOT NULL DEFAULT '' COMMENT '状态(ENABLED:启用,DISABLED:禁用)',
                                   `remark` varchar(2000) NOT NULL DEFAULT '' COMMENT '备注',
                                   `delete_flag` bigint NOT NULL DEFAULT '0' COMMENT '删除标记，等于0表示没有删除，否则为删除',
@@ -149,9 +149,9 @@ CREATE TABLE `sys_dictionary` (
 drop table if exists `sys_dictionary_item`;
 CREATE TABLE `sys_dictionary_item` (
                                        `id` bigint unsigned NOT NULL COMMENT '主键ID',
-                                       `dictionary_code` varchar(100) NOT NULL DEFAULT '' COMMENT '字典编码',
-                                       `item_code` varchar(100) NOT NULL DEFAULT '' COMMENT '明细编码',
-                                       `item_desc` varchar(2000) NOT NULL DEFAULT '' COMMENT '明细描述',
+                                       `dictionary_code` varchar(200) NOT NULL DEFAULT '' COMMENT '字典编码',
+                                       `item_code` varchar(200) NOT NULL DEFAULT '' COMMENT '字典明细编码',
+                                       `item_desc` varchar(2000) NOT NULL DEFAULT '' COMMENT '字典明细描述',
                                        `sort_number` int NOT NULL DEFAULT '0' COMMENT '显示顺序，越小越优先',
                                        `status` varchar(100) NOT NULL DEFAULT '' COMMENT '状态(ENABLED:启用,DISABLED:禁用)',
                                        `remark` varchar(2000) NOT NULL DEFAULT '' COMMENT '备注',
@@ -168,7 +168,7 @@ CREATE TABLE `sys_dictionary_item` (
 drop table if exists `sys_global_config`;
 CREATE TABLE `sys_global_config` (
                                      `id` bigint unsigned NOT NULL COMMENT '主键ID',
-                                     `code` varchar(100) NOT NULL DEFAULT '' COMMENT '编码',
+                                     `code` varchar(200) NOT NULL DEFAULT '' COMMENT '编码',
                                      `value` varchar(2000) NOT NULL DEFAULT '' COMMENT '值',
                                      `remark` varchar(2000) NOT NULL DEFAULT '' COMMENT '备注',
                                      `type` varchar(100) NOT NULL DEFAULT '' COMMENT '类型(SYSTEM:系统内置,NORMAL:普通)',

@@ -13,9 +13,9 @@ public interface MenuConverter {
     @Mapping(target = "menuTypeDesc", ignore = true)
     @Mapping(target = "createUserName", ignore = true)
     @Mapping(target = "updateUserName", ignore = true)
-    MenuDetailVO convertMenuDetailVO(Menu menu);
+    MenuDetailVO toMenuDetailVO(Menu menu);
 
     @Mapping(target = "menuTypeDesc", ignore = true)
     @Mapping(target = "children", ignore = true)
-    MenuTreeVO convertMenuTreeVO(Menu menu);
+    MenuTreeVO toMenuTreeVO(Menu menu);
 }

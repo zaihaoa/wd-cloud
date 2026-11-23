@@ -10,8 +10,8 @@ import com.wd.system.basic.domain.entity.GlobalConfig;
 @Mapper(componentModel = "spring")
 public interface GlobalConfigConverter {
 
-    GlobalConfigPageVO convertGlobalConfigPageVO(GlobalConfigPageDTO dbRecord);
+    GlobalConfigPageVO toGlobalConfigPageVO(GlobalConfigPageDTO dbRecord);
 
-    GlobalConfigDetailVO convertGlobalConfigDetailVO(GlobalConfig record);
+    GlobalConfigDetailVO toGlobalConfigDetailVO(GlobalConfig record);
 
 }

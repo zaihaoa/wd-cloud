@@ -41,14 +41,13 @@ class MenuGroupNameTest {
         parent.setId(20L);
         parent.setParentId(0L);
         parent.setMenuType("DIRECTORY");
-        when(mapper.selectOne(any())).thenReturn(menu, parent);
+        when(mapper.selectById(42L)).thenReturn(menu);
         when(mapper.selectById(20L)).thenReturn(parent);
         when(mapper.alwaysUpdateSomeColumnById(menu)).thenReturn(1);
     }
 
     @Test
     void trimsGroupNameOnCreate() {
-        when(mapper.selectOne(any())).thenReturn(parent);
         var request = json.readValue("""
                 {"parentId":20,"menuGroupName":"  基础  "}
                 """, MenuAddDTO.class);
@@ -94,7 +93,6 @@ class MenuGroupNameTest {
 
     @Test
     void rejectsConvertingDirectoryWithGroupedChildren() {
-        when(mapper.selectOne(any())).thenReturn(parent);
         when(mapper.selectList(any())).thenReturn(List.of(menu));
         var request = json.readValue("""
                 {"id":20,"parentId":0,"menuType":"MENU"}

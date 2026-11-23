@@ -25,7 +25,7 @@ public class GlobalConfigUpdateDTO {
     private Long id;
 
     @Schema(description = "值")
-    @ObjectCompare("值")
+    @ObjectCompare("参数值")
     private String value;
 
     @Schema(description = "备注")

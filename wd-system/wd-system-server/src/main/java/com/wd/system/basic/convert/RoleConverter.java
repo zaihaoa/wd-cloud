@@ -11,12 +11,12 @@ import com.wd.system.basic.domain.vo.RolePageVO;
 @Mapper(componentModel = "spring")
 public interface RoleConverter {
 
-    RolePageVO convertRolePageVO(RolePageDTO dbRecord);
+    RolePageVO toRolePageVO(RolePageDTO dbRecord);
 
     @Mapping(target = "menuIds", ignore = true)
     @Mapping(target = "buttonCodes", ignore = true)
     @Mapping(target = "fieldCodes", ignore = true)
     @Mapping(target = "dataUserIds", ignore = true)
-    RoleDetailVO convertRoleDetailVO(Role role);
+    RoleDetailVO toRoleDetailVO(Role role);
 
 }
