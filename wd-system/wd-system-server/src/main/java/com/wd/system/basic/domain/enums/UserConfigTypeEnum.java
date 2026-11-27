@@ -13,6 +13,7 @@ import lombok.Getter;
 public enum UserConfigTypeEnum implements CodeDescEnum {
     CUSTOM_COLUMN("CUSTOM_COLUMN", "自定义列"),
     QUERY("QUERY", "查询条件"),
+    PERSONAL_SETTING("PERSONAL_SETTING", "个人设置"),
     ;
 
     private final String code;

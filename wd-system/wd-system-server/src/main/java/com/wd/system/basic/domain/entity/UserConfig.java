@@ -34,7 +34,7 @@ public class UserConfig extends BaseUserTimeEntity {
     private Long userId;
 
     @TableField("type")
-    @Schema(description = "类型(CUSTOM_COLUMN:自定义列,QUERY:查询条件)")
+    @Schema(description = "类型(CUSTOM_COLUMN:自定义列,QUERY:查询条件,PERSONAL_SETTING:个人设置)")
     private String type;
 
     @TableField("code")

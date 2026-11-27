@@ -8,7 +8,7 @@
 | 应用与服务治理 | Spring Boot 4、Spring Cloud、Spring Cloud Alibaba、Nacos |
 | 网关与服务调用 | Spring Cloud Gateway（WebFlux）、Spring Cloud OpenFeign |
 | 登录与鉴权 | Sa-Token |
-| 持久化与缓存 | MySQL、MyBatis-Plus、Druid、Redis、Redisson |
+| 持久化与缓存 | MySQL、MyBatis-Plus、Redis、Redisson |
 | 模型转换与接口文档 | Lombok、MapStruct、springdoc-openapi |
 | 任务调度 | XXL-JOB |
 

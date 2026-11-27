@@ -36,6 +36,3 @@ spring:
     import:
       - nacos:system-server
       - optional:nacos:common?group=common&refreshEnabled=true
-      - optional:nacos:redis?group=common&refreshEnabled=true
-      - optional:nacos:sa-token?group=common&refreshEnabled=false
-      - optional:nacos:job?group=common&refreshEnabled=false

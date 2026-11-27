@@ -65,6 +65,14 @@ public interface UserService extends SuperService<User> {
     boolean updateUser(UserUpdateDTO userUpdateParam);
 
     /**
+     * 修改当前登录用户的信息
+     *
+     * @param updateParam 要修改的字段及其值
+     * @return 修改结果
+     */
+    Boolean updateCurrentUser(UserUpdateCurrentDTO updateParam);
+
+    /**
      * 删除
      *
      * @param id 数据ID

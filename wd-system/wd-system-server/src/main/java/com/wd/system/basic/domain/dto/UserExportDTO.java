@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
-@HeadRowHeight(40)
+@HeadRowHeight(30)
 @ContentRowHeight(20)
 @HeadStyle(fillPatternType = FillPatternTypeEnum.SOLID_FOREGROUND, fillForegroundColor = 30)
 @HeadFontStyle(fontHeightInPoints = 12, fontName = "微软雅黑", bold = BooleanEnum.FALSE, color = 1)
@@ -31,24 +31,20 @@ public class UserExportDTO {
     private String name;
 
     @ExcelProperty("状态")
-    @ColumnWidth(20)
+    @ColumnWidth(15)
     private String statusDesc;
 
-    @ExcelProperty("类型")
-    @ColumnWidth(20)
-    private String typeDesc;
-
-    @ExcelProperty("手机号码")
-    @ColumnWidth(20)
+    @ExcelProperty("手机号")
+    @ColumnWidth(25)
     @FieldPermission(FieldPermissionConstant.USER_PHONE)
     private String phone;
 
     @ExcelProperty("邮箱")
-    @ColumnWidth(20)
+    @ColumnWidth(35)
     private String email;
 
     @ExcelProperty("角色")
-    @ColumnWidth(20)
+    @ColumnWidth(30)
     private String roleNameJoin;
 
     @ExcelProperty("创建人")
@@ -60,11 +56,11 @@ public class UserExportDTO {
     private String updateUserName;
 
     @ExcelProperty("创建时间")
-    @ColumnWidth(20)
+    @ColumnWidth(25)
     private LocalDateTime createTime;
 
     @ExcelProperty("更新时间")
-    @ColumnWidth(20)
+    @ColumnWidth(25)
     private LocalDateTime updateTime;
 
 }

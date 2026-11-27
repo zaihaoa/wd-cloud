@@ -5,12 +5,12 @@ import cn.hutool.core.collection.CollUtil;
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.wd.common.core.constants.CommonConstant;
 import com.wd.common.core.context.SystemContext;
-import com.wd.common.core.exception.PromptException;
 import com.wd.common.core.model.ExportResult;
 import com.wd.common.core.model.IdDTO;
 import com.wd.common.core.model.PageInfo;
@@ -32,10 +32,7 @@ import com.wd.system.basic.domain.dto.*;
 import com.wd.system.basic.domain.entity.Role;
 import com.wd.system.basic.domain.entity.User;
 import com.wd.system.basic.domain.entity.UserRoleRelevance;
-import com.wd.system.basic.domain.enums.CommonLogBusinessTypeEnum;
-import com.wd.system.basic.domain.enums.RolePermissionFlagEnum;
-import com.wd.system.basic.domain.enums.UserStatusEnum;
-import com.wd.system.basic.domain.enums.UserTypeEnum;
+import com.wd.system.basic.domain.enums.*;
 import com.wd.system.basic.domain.vo.UserAuthorizePageVO;
 import com.wd.system.basic.domain.vo.UserDetailVO;
 import com.wd.system.basic.domain.vo.UserInfoVO;
@@ -63,6 +60,7 @@ import tools.jackson.core.type.TypeReference;
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -76,6 +74,11 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
+
+    private static final Pattern PROFILE_PHONE_PATTERN =
+            Pattern.compile("1(?:3[0-9]|4[01456789]|5[012356789]|6[2567]|7[0-8]|8[0-9]|9[012356789])[0-9]{8}");
+    private static final Pattern PROFILE_EMAIL_PATTERN =
+            Pattern.compile("\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*");
 
     @Resource
     private UserConverter userConverter;
@@ -171,7 +174,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .map(record -> {
                     UserExportDTO vo = userConverter.toUserExportDTO(record);
                     vo.setStatusDesc(CodeDescEnumUtil.getDescByCode(UserStatusEnum.class, record.getStatus()));
-                    vo.setTypeDesc(CodeDescEnumUtil.getDescByCode(UserTypeEnum.class, record.getType()));
 
                     vo.setCreateUserName(userIdNameMap.get(record.getCreateUserId()));
                     vo.setUpdateUserName(userIdNameMap.get(record.getUpdateUserId()));
@@ -327,6 +329,64 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return true;
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public Boolean updateCurrentUser(UserUpdateCurrentDTO updateParam) {
+        log.info("更新当前用户信息,参数:{}", JSON.toJSONString(updateParam));
+
+        Long userId = SystemContext.getUserIdAssertExist();
+        UserUpdateCurrentTypeEnum updateType = CodeDescEnumUtil.getEnumByCode(UserUpdateCurrentTypeEnum.class, updateParam.getUpdateType());
+        AssertUtil.notNull(updateType, "修改类型不正确");
+
+        String value = normalizeCurrentUserValue(updateType, updateParam);
+
+        SFunction<User, String> column = switch (updateType) {
+            case NAME -> User::getName;
+            case PHONE -> User::getPhone;
+            case EMAIL -> User::getEmail;
+        };
+
+        getUserByIdAssertExist(userId);
+
+        baseMapper.update(new User(), Wrappers.<User>lambdaUpdate()
+                .set(column, value)
+                .eq(User::getId, userId));
+
+        if (StringUtils.isNotBlank(value)) {
+            addLog(userId, "编辑", "修改" + updateType.getDesc() + ":" + value);
+        } else {
+            addLog(userId, "编辑", "修改" + updateType.getDesc() + "为空");
+        }
+
+        // 清除缓存
+        clearUserCacheAfterCommit();
+
+        return true;
+    }
+
+    private String normalizeCurrentUserValue(UserUpdateCurrentTypeEnum updateType, UserUpdateCurrentDTO updateParam) {
+        return switch (updateType) {
+            case NAME -> {
+                String name = StringUtils.stripToNull(updateParam.getName());
+                AssertUtil.notNull(name, "姓名不能为空");
+                AssertUtil.isTrue(name.length() <= 100, "姓名长度不能超过100");
+                AssertUtil.isTrue(!Objects.equals(name, CommonConstant.SYSTEM_USER_NAME), "姓名不能使用" + CommonConstant.SYSTEM_USER_NAME);
+                yield name;
+            }
+            case PHONE -> {
+                String phone = StringUtils.stripToNull(updateParam.getPhone());
+                AssertUtil.isTrue(phone == null || PROFILE_PHONE_PATTERN.matcher(phone).matches(), "手机号格式不正确");
+                yield phone;
+            }
+            case EMAIL -> {
+                String email = StringUtils.stripToNull(updateParam.getEmail());
+                AssertUtil.isTrue(email == null || email.length() <= 200 && PROFILE_EMAIL_PATTERN.matcher(email).matches(),
+                        "邮箱格式不正确");
+                yield email;
+            }
+        };
+    }
+
     private Map<Long, String> getRoleIdNameMap(List<Long> roleIds, List<Long> existRoleIds) {
         List<Long> allRoleIds = Lists.newArrayList();
         if (CollUtil.isNotEmpty(roleIds)) {
@@ -368,9 +428,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         // 判断数据是否存在
         User user = getUserByIdAssertExist(id);
-        if (UserTypeEnum.SYSTEM.getCode().equals(user.getType())) {
-            throw new PromptException("系统用户不能删除");
-        }
+        AssertUtil.isTrue(UserTypeEnum.NORMAL.getCode().equals(user.getType()), "系统用户不能删除");
 
         boolean success = baseMapper.update(Wrappers.<User>lambdaUpdate()
                 .set(User::getDeleteFlag, id)
@@ -468,11 +526,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         commonLogService.addLog(commonLog);
     }
 
-    private void clearUserCache() {
-        redisHelper.deleteByCacheRegion(CacheRegion.USER);
-        redisHelper.deleteByCacheRegion(CacheRegion.PERMISSION);
-    }
-
     private void clearUserCacheAfterCommit() {
         if (!TransactionSynchronizationManager.isSynchronizationActive()) {
             clearUserCache();
@@ -484,6 +537,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 clearUserCache();
             }
         });
+    }
+
+    private void clearUserCache() {
+        redisHelper.deleteByCacheRegion(CacheRegion.USER);
+        redisHelper.deleteByCacheRegion(CacheRegion.PERMISSION);
     }
 
     private List<Long> validateRoleIds(List<Long> roleIds) {
@@ -557,6 +615,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return result;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean updateStatus(UserUpdateStatusDTO updateStatusDTO) {
         log.info("更新状态,参数:{}", JSON.toJSONString(updateStatusDTO));
@@ -584,11 +643,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         // 清除缓存
-        clearUserCache();
+        clearUserCacheAfterCommit();
 
         return success;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean updatePassword(UserUpdatePasswordDTO userUpdatePasswordDTO) {
         Long userId = SystemContext.getUserIdAssertExist();
@@ -614,11 +674,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         StpUtil.logout(userId);
 
         // 清除缓存
-        clearUserCache();
+        clearUserCacheAfterCommit();
 
         return true;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean resetPassword(UserResetPasswordDTO userResetPasswordDTO) {
         Long userId = userResetPasswordDTO.getId();
@@ -640,7 +701,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         StpUtil.logout(userId);
 
         // 清除缓存
-        clearUserCache();
+        clearUserCacheAfterCommit();
 
         return true;
     }

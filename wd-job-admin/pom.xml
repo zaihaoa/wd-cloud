@@ -59,13 +59,6 @@
             <artifactId>xxl-sso-core</artifactId>
         </dependency>
 
-        <!-- wd-common-job-core -->
-        <dependency>
-            <groupId>com.wd</groupId>
-            <artifactId>wd-common-job-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
         <!-- nacos注册中心 -->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
@@ -75,6 +68,13 @@
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+        </dependency>
+
+        <!-- wd-common-job-core -->
+        <dependency>
+            <groupId>com.wd</groupId>
+            <artifactId>wd-common-job-core</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <!-- wd-common-log -->

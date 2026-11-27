@@ -12,6 +12,7 @@ public class PermissionConstant {
      * 用户
      */
     public static final String USER_LIST = "user:list";
+    public static final String USER_EXPORT = "user:export";
     public static final String USER_ADD = "user:add";
     public static final String USER_UPDATE = "user:update";
     public static final String USER_DELETE = "user:delete";

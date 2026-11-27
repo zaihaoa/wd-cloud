@@ -27,7 +27,7 @@ public class UserPageParamDTO extends BaseExportQuery<Long> {
     @Schema(description = "状态(ENABLED:启用,DISABLED:禁用)")
     private String status;
 
-    @Schema(description = "类型(BUILT_IN:内置用户,NORMAL:普通用户)")
+    @Schema(description = "类型(BUILT_IN:系统用户,NORMAL:普通用户)")
     private String type;
 
     @Schema(description = "手机号码")

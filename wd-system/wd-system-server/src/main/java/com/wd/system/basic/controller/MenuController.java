@@ -42,14 +42,14 @@ public class MenuController {
 
     @Operation(summary = "更新菜单")
     @SaCheckPermission(PermissionConstant.MENU_UPDATE)
-    @PutMapping("/update")
+    @PostMapping("/update")
     public R<Boolean> updateMenu(@RequestBody @Valid MenuUpdateDTO menuUpdateDTO) {
         return R.success(menuService.updateMenu(menuUpdateDTO));
     }
 
     @Operation(summary = "删除菜单")
     @SaCheckPermission(PermissionConstant.MENU_DELETE)
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     public R<Boolean> deleteMenuById(@RequestBody @Valid IdDTO idParam) {
         return R.success(menuService.deleteMenuById(idParam));
     }

@@ -42,7 +42,7 @@ public class UserController {
     }
 
     @Operation(summary = "列表导出")
-    @SaCheckPermission(PermissionConstant.USER_LIST)
+    @SaCheckPermission(PermissionConstant.USER_EXPORT)
     @PostMapping("/export-page")
     public R<ExportResult> exportPageList(@RequestBody @Valid UserPageParamDTO pageParam) {
         return R.success(userService.exportPageList(pageParam));
@@ -64,14 +64,20 @@ public class UserController {
 
     @Operation(summary = "更新用户")
     @SaCheckPermission(PermissionConstant.USER_UPDATE)
-    @PutMapping("/update")
+    @PostMapping("/update")
     public R<Boolean> updateUser(@RequestBody @Valid UserUpdateDTO userUpdateParam) {
         return R.success(userService.updateUser(userUpdateParam));
     }
 
+    @Operation(summary = "修改当前用户信息")
+    @PostMapping("/update-current-user")
+    public R<Boolean> updateCurrentUser(@RequestBody @Valid UserUpdateCurrentDTO updateParam) {
+        return R.success(userService.updateCurrentUser(updateParam));
+    }
+
     @Operation(summary = "删除用户")
     @SaCheckPermission(PermissionConstant.USER_DELETE)
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     public R<Boolean> deleteUserById(@RequestBody @Valid IdDTO id) {
         return R.success(userService.deleteUserById(id));
     }

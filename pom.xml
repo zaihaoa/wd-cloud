@@ -32,9 +32,9 @@
         <maven.test.skip>true</maven.test.skip>
 
         <!-- spring-boot -->
-        <spring-boot.version>4.1.2</spring-boot.version>
+        <spring-boot.version>4.2.0</spring-boot.version>
         <!-- spring-cloud -->
-        <spring-cloud.version>2025.1.4</spring-cloud.version>
+        <spring-cloud.version>2026.0.0</spring-cloud.version>
         <!-- spring-cloud-alibaba -->
         <spring-cloud-alibaba.version>2025.1.0.0</spring-cloud-alibaba.version>
         <!-- maven-plugin -->
@@ -68,11 +68,13 @@
         <!-- groovy -->
         <groovy.version>6.0.0</groovy.version>
         <!-- druid-spring-boot-starter -->
-        <druid-spring-boot-starter.version>1.2.28</druid-spring-boot-starter.version>
+<!--        <druid-spring-boot-starter.version>1.2.28</druid-spring-boot-starter.version>-->
 
         <!-- 腾讯云日志 -->
         <!-- tencentcloud-cls-logback-appender -->
         <tencentcloud-cls-logback-appender.version>1.0.8</tencentcloud-cls-logback-appender.version>
+        <!-- janino -->
+        <janino.version>3.1.12</janino.version>
 
 
         <!-- 腾讯云cos文件存储 -->
@@ -307,17 +309,22 @@
             </dependency>
 
             <!-- druid -->
-            <dependency>
-                <groupId>com.alibaba</groupId>
-                <artifactId>druid-spring-boot-4-starter</artifactId>
-                <version>${druid-spring-boot-starter.version}</version>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>com.alibaba</groupId>-->
+<!--                <artifactId>druid-spring-boot-4-starter</artifactId>-->
+<!--                <version>${druid-spring-boot-starter.version}</version>-->
+<!--            </dependency>-->
 
             <!-- tencentcloud-cls-logback-appender -->
             <dependency>
                 <groupId>com.tencentcloudapi.cls</groupId>
                 <artifactId>tencentcloud-cls-logback-appender</artifactId>
                 <version>${tencentcloud-cls-logback-appender.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.janino</groupId>
+                <artifactId>janino</artifactId>
+                <version>${janino.version}</version>
             </dependency>
 
             <!-- 腾讯云cos -->

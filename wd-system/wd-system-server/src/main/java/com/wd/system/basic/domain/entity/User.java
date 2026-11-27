@@ -43,7 +43,7 @@ public class User extends BaseUserTimeEntity implements Serializable {
     @TableField("status")
     private String status;
 
-    @Schema(description = "类型(BUILT_IN:内置用户,NORMAL:普通用户)")
+    @Schema(description = "类型(BUILT_IN:系统用户,NORMAL:普通用户)")
     @TableField("type")
     private String type;
 

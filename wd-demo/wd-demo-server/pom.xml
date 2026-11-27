@@ -27,10 +27,10 @@
         </dependency>
 
         <!-- druid -->
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>druid-spring-boot-4-starter</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.alibaba</groupId>-->
+<!--            <artifactId>druid-spring-boot-4-starter</artifactId>-->
+<!--        </dependency>-->
 
         <!-- mysql-connector-j -->
         <dependency>

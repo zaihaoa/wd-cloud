@@ -5,6 +5,7 @@ import com.wd.common.core.constants.CommonConstant;
 import com.wd.common.core.context.SystemContext;
 import com.wd.common.core.enums.FieldPermissionEnum;
 import com.wd.common.core.util.AssertUtil;
+import com.wd.common.core.util.CodeDescEnumUtil;
 import com.wd.common.redis.CacheRegion;
 import com.wd.common.redis.RedisKey;
 import com.wd.common.redis.util.RedisHelper;
@@ -60,7 +61,7 @@ public class PermissionServiceImpl implements PermissionService {
         String key = RedisHelper.joinKey(RedisKey.USER_PERMISSION, userId);
         UserPermissionDTO cached = redisHelper.get(CacheRegion.PERMISSION, key, new TypeReference<>() {
         });
-        if (cached != null) {
+        if (cached != null && CodeDescEnumUtil.isExist(UserTypeEnum.class, cached.getType())) {
             return cached;
         }
 

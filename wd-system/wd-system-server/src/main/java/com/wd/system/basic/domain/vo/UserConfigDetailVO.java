@@ -22,10 +22,10 @@ public class UserConfigDetailVO {
     @Schema(description = "用户ID")
     private Long userId;
 
-    @Schema(description = "类型(CUSTOM_COLUMN:自定义列,QUERY:查询条件)")
+    @Schema(description = "类型(CUSTOM_COLUMN:自定义列,QUERY:查询条件,PERSONAL_SETTING:个人设置)")
     private String type;
 
-    @Schema(description = "类型描述(CUSTOM_COLUMN:自定义列,QUERY:查询条件)")
+    @Schema(description = "类型描述(CUSTOM_COLUMN:自定义列,QUERY:查询条件,PERSONAL_SETTING:个人设置)")
     private String typeDesc;
 
     @Schema(description = "编码")

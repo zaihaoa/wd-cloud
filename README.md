@@ -12,7 +12,7 @@ wd-cloud 是一个基于 Spring Boot 和 Spring Cloud Alibaba 的 Java 微服务
 | API 网关 | Spring Cloud Gateway（WebFlux） |
 | 服务间调用 | Spring Cloud OpenFeign |
 | 登录与鉴权 | Sa-Token 1.46.0 |
-| 数据访问 | MySQL、MyBatis-Plus 3.5.18.1、Druid 1.2.28 |
+| 数据访问 | MySQL、MyBatis-Plus 3.5.18.1 |
 | 缓存 | Redis、Spring Data Redis、Redisson 4.8.0 |
 | API 文档 | springdoc-openapi 3.2.0（OpenAPI 3 和 Swagger UI） |
 | 任务调度 | XXL-JOB 3.5.0（调度中心和执行器核心随仓库提供） |

@@ -24,6 +24,6 @@ public abstract class BaseExportQuery<T> extends BaseQuery {
     /**
      * {@link ExportTypeEnum}
      */
-    @Schema(description = "导出方式(SELECTED:导出勾选项,CURRENT_PAGE:导出当前页,QUERY_RESULT:导出查询结果)", example = "QUERY_RESULT", allowableValues = {"SELECTED", "CURRENT_PAGE", "QUERY_RESULT"})
+    @Schema(description = "导出方式(SELECTED:导出勾选项,QUERY_RESULT:导出查询结果)", example = "QUERY_RESULT", allowableValues = {"SELECTED", "QUERY_RESULT"})
     protected String exportType;
 }

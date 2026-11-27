@@ -350,7 +350,7 @@ public class ExcelHelper {
             String fileName = generateFileName(fileNamePrefix);
             String filePath = ossClientService.uploadTemporary(new ByteArrayInputStream(out.toByteArray()), generateOssPath(fileName));
 
-            OssFileLinkVO fileLinkVO = ossClientService.getSignUrl(filePath, 600);
+            OssFileLinkVO fileLinkVO = ossClientService.getSignUrl(filePath, 600, fileName);
 
             log.info("生成文件成功,总记录数:{},fileName:{},filePath:{}", totalRecords, fileName, filePath);
             return new ExportResult(fileName, fileLinkVO.getFileLink());

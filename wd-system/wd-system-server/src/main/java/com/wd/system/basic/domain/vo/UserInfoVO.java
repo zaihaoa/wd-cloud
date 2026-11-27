@@ -36,10 +36,10 @@ public class UserInfoVO {
     @Schema(description = "状态描述(ENABLED:启用,DISABLED:禁用)")
     private String statusDesc;
 
-    @Schema(description = "类型(BUILT_IN:内置用户,NORMAL:普通用户)")
+    @Schema(description = "类型(BUILT_IN:系统用户,NORMAL:普通用户)")
     private String type;
 
-    @Schema(description = "类型描述(BUILT_IN:内置用户,NORMAL:普通用户)")
+    @Schema(description = "类型描述(BUILT_IN:系统用户,NORMAL:普通用户)")
     private String typeDesc;
 
     @Schema(description = "手机号码")

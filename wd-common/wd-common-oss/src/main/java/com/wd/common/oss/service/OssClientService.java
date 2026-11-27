@@ -25,6 +25,11 @@ public interface OssClientService {
     OssFileLinkVO getSignUrl(String filePath, Integer expirationSeconds);
 
     /**
+     * 生成带指定下载文件名的签名URL
+     */
+    OssFileLinkVO getSignUrl(String filePath, Integer expirationSeconds, String downloadFileName);
+
+    /**
      * 文件上传
      * @param inputStream 输入流
      * @param key 文件key

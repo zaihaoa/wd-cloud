@@ -3,19 +3,23 @@ package com.wd.common.oss.service.impl;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
 import com.qcloud.cos.COSClient;
+import com.qcloud.cos.http.HttpMethodName;
 import com.qcloud.cos.model.CannedAccessControlList;
 import com.qcloud.cos.model.GetObjectRequest;
+import com.qcloud.cos.model.ResponseHeaderOverrides;
 import com.tencent.cloud.CosStsClient;
 import com.tencent.cloud.Response;
 import com.wd.common.oss.properties.TencentOssProperties;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ContentDisposition;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.InputStream;
-import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.Map;
 import java.util.TreeMap;
 
 @Slf4j
@@ -72,10 +76,19 @@ public class TencentOssClient {
      * @param bucket 桶
      * @param key           下载的文件名称（上传返回的key）
      * @param expirationDate 签名过期时间 默认1小时
+     * @param downloadFileName 浏览器保存的文件名，可为空
      */
-    public String getSignUrl(String bucket, String key, Date expirationDate) {
-        URL url = cosClient.generatePresignedUrl(bucket, key, expirationDate);
-        return url.toString();
+    public String getSignUrl(String bucket, String key, Date expirationDate, String downloadFileName) {
+        if (downloadFileName == null) {
+            return cosClient.generatePresignedUrl(bucket, key, expirationDate).toString();
+        }
+
+        String contentDisposition = ContentDisposition.attachment()
+                .filename(downloadFileName, StandardCharsets.UTF_8)
+                .build()
+                .toString();
+        return cosClient.generatePresignedUrl(bucket, key, expirationDate, HttpMethodName.GET, Map.of(),
+                Map.of(ResponseHeaderOverrides.RESPONSE_HEADER_CONTENT_DISPOSITION, contentDisposition)).toString();
     }
 
     /**

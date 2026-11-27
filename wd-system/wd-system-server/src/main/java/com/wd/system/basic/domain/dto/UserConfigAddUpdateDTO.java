@@ -16,7 +16,7 @@ import lombok.Setter;
 @Setter
 public class UserConfigAddUpdateDTO {
 
-    @Schema(description = "类型(CUSTOM_COLUMN:自定义列,QUERY:查询条件)")
+    @Schema(description = "类型(CUSTOM_COLUMN:自定义列,QUERY:查询条件,PERSONAL_SETTING:个人设置)")
     @NotBlank(message = "类型不能为空")
     @Size(max = 100, message = "类型长度不能超过100")
     private String type;

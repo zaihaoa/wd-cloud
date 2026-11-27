@@ -12,7 +12,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ExportTypeEnum implements CodeDescEnum {
     SELECTED("SELECTED", "导出勾选项"),
-    CURRENT_PAGE("CURRENT_PAGE", "导出当前页"),
     QUERY_RESULT("QUERY_RESULT", "导出查询结果");
 
     private final String code;

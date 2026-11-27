@@ -38,7 +38,7 @@ public class UserConfigController {
     }
 
     @Operation(summary = "删除")
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     public R<Boolean> delete(@RequestBody @Valid UserConfigQueryDTO query) {
         return R.success(userConfigService.delete(query));
     }

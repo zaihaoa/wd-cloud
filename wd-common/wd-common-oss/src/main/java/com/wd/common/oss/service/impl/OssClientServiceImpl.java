@@ -54,6 +54,11 @@ public class OssClientServiceImpl implements OssClientService {
 
     @Override
     public OssFileLinkVO getSignUrl(String url, Integer expirationSeconds) {
+        return getSignUrl(url, expirationSeconds, null);
+    }
+
+    @Override
+    public OssFileLinkVO getSignUrl(String url, Integer expirationSeconds, String downloadFileName) {
         AssertUtil.hasText(url, "文件路径不能为空");
 
         if (Objects.isNull(expirationSeconds)) {
@@ -62,7 +67,10 @@ public class OssClientServiceImpl implements OssClientService {
         Date  expirationDate =  Date.from(LocalDateTime.now().plusSeconds(expirationSeconds).atZone(ZoneId.systemDefault()).toInstant());
 
         String decodedUrl = UriUtils.decode(url, StandardCharsets.UTF_8);
-        String fileLink = tencentOssClient.getSignUrl(tencentOssConfig.getBucket(), decodedUrl, expirationDate);
+        String fileLink = tencentOssClient.getSignUrl(tencentOssConfig.getBucket(), decodedUrl, expirationDate, downloadFileName);
+        if (downloadFileName != null) {
+            return new OssFileLinkVO(downloadFileName, fileLink);
+        }
         String fileName = StringUtils.substringBefore(fileLink, "?");
         fileName = UriUtils.decode(StringUtils.substringAfterLast(fileName, "/"), StandardCharsets.UTF_8);
         return new OssFileLinkVO(fileName, fileLink);

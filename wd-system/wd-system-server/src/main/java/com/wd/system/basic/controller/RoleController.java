@@ -70,7 +70,7 @@ public class RoleController {
 
     @Operation(summary = "更新角色")
     @SaCheckPermission(PermissionConstant.ROLE_UPDATE)
-    @PutMapping("/update")
+    @PostMapping("/update")
     public R<Boolean> updateRole(@RequestBody @Valid RoleUpdateDTO roleUpdateParam) {
         return R.success(roleService.updateRole(roleUpdateParam));
     }
@@ -84,7 +84,7 @@ public class RoleController {
 
     @Operation(summary = "删除角色")
     @SaCheckPermission(PermissionConstant.ROLE_DELETE)
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     public R<Boolean> deleteRoleById(@RequestBody @Valid IdDTO id) {
         return R.success(roleService.deleteRoleById(id));
     }
@@ -98,7 +98,7 @@ public class RoleController {
 
     @Operation(summary = "授权或取消角色全部权限标记")
     @SaCheckPermission(PermissionConstant.ROLE_AUTH)
-    @PutMapping("/authorize-all")
+    @PostMapping("/authorize-all")
     public R<Boolean> authorizeAll(@RequestBody @Valid RoleAuthorizeAllDTO dto) {
         return R.success(roleService.authorizeAll(dto));
     }

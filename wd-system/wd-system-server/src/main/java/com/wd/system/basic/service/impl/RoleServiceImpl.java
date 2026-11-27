@@ -227,8 +227,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
 
         requireExistingRole(roleId);
         for (String code : fieldCodes) {
-            AssertUtil.isTrue(StringUtils.isNotBlank(code)
-                    && CodeDescEnumUtil.isExist(FieldPermissionEnum.class, code), "字段权限编码不存在");
+            AssertUtil.isTrue(StringUtils.isNotBlank(code) && CodeDescEnumUtil.isExist(FieldPermissionEnum.class, code), "字段权限编码不存在");
         }
         Set<String> oldCodes = savedPermissions(roleId, type, RolePermissionRelevance::getRelevanceValue);
         Function<String, String> names = code -> CodeDescEnumUtil.getDescByCode(FieldPermissionEnum.class, code);

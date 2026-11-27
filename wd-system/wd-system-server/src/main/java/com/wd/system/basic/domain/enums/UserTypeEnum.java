@@ -11,7 +11,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum UserTypeEnum implements CodeDescEnum {
-    SYSTEM("SYSTEM", "系统用户"),
+    BUILT_IN("BUILT_IN", "系统用户"),
     NORMAL("NORMAL", "普通用户"),
     ;
 

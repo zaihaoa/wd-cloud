@@ -7,7 +7,7 @@ CREATE TABLE `sys_user` (
                             `name` varchar(100) NOT NULL DEFAULT '' COMMENT '姓名',
                             `password` varchar(200) NOT NULL DEFAULT '' COMMENT '用户密码',
                             `status` varchar(100) NOT NULL COMMENT '状态(ENABLED:启用,DISABLED:禁用)',
-                            `type` varchar(100) NOT NULL DEFAULT '' COMMENT '类型(BUILT_IN:内置用户,NORMAL:普通用户)',
+                            `type` varchar(100) NOT NULL DEFAULT '' COMMENT '类型(BUILT_IN:系统用户,NORMAL:普通用户)',
                             `phone` varchar(100) DEFAULT NULL COMMENT '手机号码',
                             `email` varchar(200) DEFAULT NULL COMMENT '邮箱',
                             `delete_flag` bigint NOT NULL DEFAULT '0' COMMENT '删除标记，等于0表示没有删除，否则为删除',
@@ -187,7 +187,7 @@ drop table if exists `sys_user_config`;
 CREATE TABLE `sys_user_config` (
                                    `id` bigint unsigned NOT NULL COMMENT '主键ID',
                                    `user_id` bigint NOT NULL COMMENT '用户ID',
-                                   `type` varchar(100) NOT NULL DEFAULT '' COMMENT '类型(CUSTOM_COLUMN:自定义列,QUERY:查询条件)',
+                                   `type` varchar(100) NOT NULL DEFAULT '' COMMENT '类型(CUSTOM_COLUMN:自定义列,QUERY:查询条件,PERSONAL_SETTING:个人设置)',
                                    `code` varchar(500) NOT NULL DEFAULT '' COMMENT '编码',
                                    `content` text COMMENT '内容',
                                    `create_user_id` bigint NOT NULL COMMENT '创建人用户ID',
